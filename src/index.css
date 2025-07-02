@@ -1,0 +1,35 @@
+/* Use preflight instead of base */
+/*@import "tailwindcss/preflight";*/
+
+/* Only utilities now */
+/*@tailwind utilities;*/
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+/*@layer base, components, utilities;*/
+
+/* Optional: Custom font-face, fix filename and path */
+@font-face {
+    font-family: 'Against';
+    font-style: italic;
+    src: url('../fonts/against regular.ttf') format('truetype');
+}
+
+
+/* Global resets and styles */
+html, body {
+    margin: 0;
+    padding: 0;
+    scroll-behavior: smooth;
+    height: 100%;
+}
+
+#root {
+    height: 100%;
+}
+button{
+    cursor: pointer;
+    border: 1px solid black;
+    border-radius: 5px;
+    padding: 8px;
+}

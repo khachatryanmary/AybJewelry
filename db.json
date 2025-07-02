@@ -1,0 +1,189 @@
+{
+  "necklaces": [
+    {
+      "id": 1,
+      "name": "CHOKER",
+      "price": "20000",
+      "image": "/images/necklaces/necklace1.jpg",
+      "alt": "choker",
+      "description": "Choker with a radiant red moonstone set in high-quality 925 sterling silver. Timeless and mystical, it adds a touch of sophistication and charm to any outfit.",
+      "details": [
+        {
+          "material": "925 Sterling Silver" ,
+          "stone": "Natural Red Moonstone" ,
+          "finish": "High polish" ,
+           "design": "Original" ,
+           "fit": "Adjustable choker length for comfort and versatility"
+        }
+      ],
+      "images": [
+        "/images/necklaces/necklaceDetail1.jpg"]
+    },
+    {
+
+      "id": 2,
+      "name": "PEARL STRAND",
+      "price": "25000",
+      "image": "/images/necklaces/necklace2.jpg",
+      "alt": "necklace2",
+      "description": "Strand of luminous pearls adorned with a delicate rose — a romantic blend of grace, purity, and timeless charm.",
+      "details": [
+        {
+          "material": "925 Sterling Silver" ,
+          "stone": "Pearl" ,
+          "finish": "High polish" ,
+          "design": "Original" ,
+          "fit": "Adjustable necklace length for comfort and versatility"
+        }
+      ],
+      "images": [
+        "/images/necklaces/necklaceDetail1.jpg"]
+    },
+    {
+      "id": 3,
+      "name": "ROSE",
+      "price": "25000",
+      "image": "/images/necklaces/necklace3.jpg",
+      "alt": "rose",
+      "description": "Necklace featuring a delicate rose and a luminous pearl. Romantic and graceful, it embodies timeless beauty with a soft, feminine touch.",
+      "details": [
+        {
+          "material": "925 Sterling Silver" ,
+          "stone": "Pearl" ,
+          "finish": "High polish" ,
+          "design": "Original" ,
+          "fit": "Adjustable necklace length for comfort and versatility"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "NARCISSUS",
+      "price": "35000",
+      "image": "/images/necklaces/necklace16.jpg",
+      "alt": "narcissus",
+      "description": "Necklace featuring a blooming narcissus and a radiant pearl. Elegant and poetic, it captures the essence of purity, renewal, and refined femininity.",
+      "details": [
+        {
+          "material": "925 Sterling Silver" ,
+          "stone": "Pearl" ,
+          "finish": "High polish" ,
+          "design": "Original" ,
+          "fit": "Adjustable necklace length for comfort and versatility"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "SNOWDROP",
+      "price": "17000",
+      "image": "/images/necklaces/necklace17.jpg",
+      "alt": "snowdrop",
+      "description": "Necklace featuring a graceful snowdrop and a shimmering wish pearl. Symbolizing hope and new beginnings, it brings a gentle elegance and a whisper of magic to any look.",
+      "details": [
+        {
+          "material": "925 Sterling Silver" ,
+          "stone": "Pearl" ,
+          "finish": "High polish" ,
+          "design": "Original" ,
+          "fit": "Adjustable necklace length for comfort and versatility"
+        }
+      ]
+
+    },
+    {
+      "id": 6,
+      "name": "CHGITEM",
+      "price": "20000",
+      "image": "/images/necklaces/necklace4.jpg",
+      "alt": "necklace4",
+      "description": "",
+      "details": [
+        {
+          "material": "925 Sterling Silver" ,
+          "stone": "Pearl" ,
+          "finish": "High polish" ,
+          "design": "Original" ,
+          "fit": "Adjustable necklace length for comfort and versatility"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "name": "CHOKER BLOOM",
+      "price": "20000",
+      "image": "/images/necklaces/necklace5.jpg",
+      "alt": "necklace5"
+    },
+    {
+      "id": 8,
+      "name": "MOONSTONE",
+      "price": "48000",
+      "image": "/images/necklaces/necklace6.jpg",
+      "alt": "moonstone"
+    },
+    {
+      "id": 9,
+      "name": "HEART",
+      "price": "40000",
+      "image": "/images/necklaces/necklace7.jpg",
+      "alt": "heart"
+    },
+    {
+      "id": 10,
+      "name": "SHELL",
+      "price": "25000",
+      "image": "/images/necklaces/necklace8.jpg",
+      "alt": "shell"
+    },
+    {
+      "id": 11,
+      "name": "RABBIT",
+      "price": "40000",
+      "image": "/images/necklaces/necklace15.jpg",
+      "alt": "rabbit"
+    },
+    {
+      "id": 12,
+      "name": "GRAPE",
+      "price": "20000",
+      "image": "/images/necklaces/necklace10.jpg",
+      "alt": "grape"
+    },
+    {
+      "id": 13,
+      "name": "A DROP",
+      "price": "10000",
+      "image": "/images/necklaces/necklace11.jpg",
+      "alt": "a drop"
+    },
+    {
+      "id": 14,
+      "name": "KRASIVO",
+      "price": "10000",
+      "image": "/images/necklaces/necklace12.jpeg",
+      "alt": "necklace12"
+    },
+    {
+      "id": 15,
+      "name": "PAPAPPAPA",
+      "price": "15000",
+      "image": "/images/necklaces/necklace13.jpeg",
+      "alt": "necklace13"
+    },
+    {
+      "id": 16,
+      "name": "CHOKER ESIM",
+      "price": "26000",
+      "image": "/images/necklaces/necklace18.jpg",
+      "alt": "necklace18"
+    },
+    {
+      "id": 17,
+      "name": "PEARLS",
+      "price": "25000",
+      "image": "/images/necklaces/necklace19.jpg",
+      "alt": "necklace19"
+    }
+  ]
+}
