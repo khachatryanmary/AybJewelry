@@ -1,0 +1,156 @@
+{
+  "wishlist": "WISHLIST",
+  "clearWishlist": "Clear Wishlist",
+  "wishListMessage": "Your wishlist is empty.",
+  "clickToAdd": "Click the heart icon to add items here.",
+  "addToWishlist": "Add to Wishlist",
+  "returnToShop": "Return to shop",
+  "cartTitle": "Cart",
+  "cartEmpty": "Your cart is currently empty",
+  "contactTitle": "CONTACT US",
+  "contact": {
+    "address": "Address",
+    "addressText": "Vernissage, Yerevan",
+    "phone": "Phone",
+    "email": "Email",
+    "hours": "Working Hours",
+    "hoursText": "Mon-Sun: 09:00 - 18:00",
+    "follow": "Follow Us",
+    "formTitle": "Send Your Question",
+    "namePlaceholder": "Your name",
+    "emailPlaceholder": "Your email",
+    "messagePlaceholder": "Your message",
+    "button": "Contact Us",
+    "sortBy": "SORT BY",
+    "popularity": "Popularity",
+    "type": "Type",
+    "price": "Price",
+    "minPricePlaceholder": "Minimum price",
+    "maxPricePlaceholder": "Maximum price",
+    "apply": "Apply"
+  },
+  "nav": {
+    "home": "HOME",
+    "about": "ABOUT",
+    "newReleases": "NEW RELEASES",
+    "contact": "CONTACT"
+  },
+  "login": {
+    "myAccount": "MY ACCOUNT",
+    "login": "LOGIN",
+    "usernameOrEmail": "Username or email address",
+    "password": "Password",
+    "rememberMe": "Remember Me",
+    "lostPassword": "Lost Your Password?",
+    "logIn": "LOG IN",
+    "notMember": "Not A Member?",
+    "register": "Register",
+    "loginSuccess": "Logged in successfully!"
+  },
+  "register": {
+    "title": "Create Account",
+    "register": "REGISTER",
+    "username": "Username",
+    "email": "Email",
+    "password": "Password",
+    "haveAccount": "Already have an account?",
+    "login": "Log in",
+    "success": "Registration successful! You can login now."
+  },
+  "profile": {
+    "title": "My Profile",
+    "username": "Username",
+    "email": "Email",
+    "logout": "Log Out",
+    "notLoggedIn": "You are not logged in."
+  },
+  "necklaceDetail": {
+    "backToSelection": "BACK TO SELECTION",
+    "add": "ADD",
+    "details": "DETAILS"
+  },
+  "necklaceGallery": {
+    "title": "NECKLACES"
+  },
+  "search": {
+    "title": "WHAT ARE YOU LOOKING FOR?",
+    "placeholder": "Type here...",
+    "loading": "Loading...",
+    "noResults": "No results found."
+  },
+  "aboutUs": {
+    "title": "About Us",
+    "paragraph1": "At the heart of our brand lies a deep love for beauty, craftsmanship, and meaningful expression. We are a silver jewelry house dedicated to creating timeless pieces from the finest 925 sterling silver — each one designed to become a cherished part of your story.",
+    "paragraph2": "Our commitment to excellence begins with our materials. We use only high-quality 925 silver, known for its purity, durability, and luminous finish. This foundation ensures that every piece not only looks stunning, but lasts a lifetime and beyond.",
+    "paragraph3": "Behind every design is the hand and heart of our lead designer — an artist with a passion for detail and emotion. Drawing inspiration from nature, love, and the quiet poetry of everyday moments, they create pieces that speak softly yet powerfully. Each curve, sparkle, and silhouette is thoughtfully crafted to highlight your individuality and grace.",
+    "paragraph4": "We believe that jewelry should not only adorn but also connect — to memories, to feelings, and to your truest self.",
+    "paragraph5": "Welcome to a world where elegance meets meaning, and where every piece tells a story — yours.",
+    "imageAlt": "About Us Cover"
+  },
+  "sectionGallery": {
+    "title": "Introducing our new collection of elegance",
+    "paragraph1": "Introducing our new Collection – a celebration of renewal and romance captured in gleaming 925 sterling silver. Each piece tells a story of springtime awakening, delicately crafted by our master artisans to embody both timeless sophistication and contemporary design.",
+    "paragraph2": "Like the first bloom after a long winter, these creations whisper of new beginnings and the quiet beauty of love.",
+    "paragraph3": "Our designer has translated these fleeting moments into wearable treasures – poetry in silver – that will adorn you with subtle radiance and speak to the heart.",
+    "paragraph4": "Let every curve, every shimmer, remind you of your own grace, your strength, and the infinite tenderness that lives within.",
+    "button": "Explore the Collection"
+  },
+  "sectionNav": {
+    "heading": "What will you fall in love with today?",
+    "necklaces": "NECKLACES",
+    "necklacesAlt": "Necklaces",
+    "rings": "RINGS",
+    "ringsAlt": "Rings",
+    "earrings": "EARRINGS",
+    "earringsAlt": "Earrings",
+    "bracelets": "BRACELETS",
+    "braceletsAlt": "Bracelets",
+    "brooches": "BROOCHES",
+    "broochesAlt": "Brooches"
+  },
+  "cart": {
+    "clearCart": "Clear Cart",
+    "cartTitle": "Your Cart",
+    "cartEmpty": "Your cart is empty",
+    "returnToShop": "Return to Shop",
+    "removeCart": "Remove"
+  },
+  "ringGallery": {
+    "title": "RINGS"
+  },
+  "ringDetail": {
+    "backToSelection": "Back to selection",
+    "add": "Add to Cart",
+    "details": "Details"
+  },
+  "earringsGallery": {
+    "title": "EARRINGS"
+  },
+  "earringsDetail": {
+    "backToSelection": "Back to Selection"
+  },
+  "earringDetail": {
+    "add": "Add to Cart",
+    "details": "Details"
+  },
+  "braceletsDetail": {
+    "backToSelection": "Back to Selection"
+  },
+  "braceletDetail": {
+    "add": "Add to Cart",
+    "details": "Details"
+  },
+  "braceletsGallery": {
+    "title": "BRACELETS "
+  },
+  "broochesDetail": {
+    "backToSelection": "Back to Selection"
+  },
+  "broochDetail": {
+    "add": "Add to Cart",
+    "details": "Details"
+  },
+  "broochesGallery": {
+    "title": "BROOCHES"
+  }
+}
