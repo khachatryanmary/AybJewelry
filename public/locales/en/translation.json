@@ -20,7 +20,9 @@
     "namePlaceholder": "Your name",
     "emailPlaceholder": "Your email",
     "messagePlaceholder": "Your message",
-    "button": "Contact Us",
+    "button": "Contact Us"
+  },
+  "sort": {
     "sortBy": "SORT BY",
     "popularity": "Popularity",
     "type": "Type",

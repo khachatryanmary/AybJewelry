@@ -22,13 +22,15 @@
     "messagePlaceholder": "Ваше сообщение",
     "button": "Связаться с нами"
   },
-  "sortBy": "Сортировать по",
-  "popularity": "Популярность",
-  "type": "Тип",
-  "price": "Цена",
-  "minPricePlaceholder": "Минимальная цена",
-  "maxPricePlaceholder": "Максимальная цена",
-  "apply": "Применить",
+ "sort": {
+   "sortBy": "Сортировать по",
+   "popularity": "Популярность",
+   "type": "Тип",
+   "price": "Цена",
+   "minPricePlaceholder": "Минимальная цена",
+   "maxPricePlaceholder": "Максимальная цена",
+   "apply": "Применить"
+ },
   "nav": {
     "home": "ГЛАВНАЯ",
     "about": "О НАС",

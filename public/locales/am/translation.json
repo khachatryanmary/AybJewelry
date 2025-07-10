@@ -22,13 +22,15 @@
     "messagePlaceholder": "Ձեր հաղորդագրությունը",
     "button": "Կապ մեզ հետ"
   },
-  "sortBy": "Տեսակավորել ըստ",
-  "popularity": "Հայտնիություն",
-  "type": "Տեսակ",
-  "price": "Գին",
-  "minPricePlaceholder": "Նվազագույն գին",
-  "maxPricePlaceholder": "Առավելագույն գին",
-  "apply": "Հաստատել",
+ "sort": {
+   "sortBy": "Տեսակավորել ըստ",
+   "popularity": "Հայտնիություն",
+   "type": "Տեսակ",
+   "price": "Գին",
+   "minPricePlaceholder": "Նվազագույն գին",
+   "maxPricePlaceholder": "Առավելագույն գին",
+   "apply": "Հաստատել"
+ },
   "nav": {
     "home": "ԳԼԽԱՎՈՐ",
     "about": "ՄԵՐ ՄԱՍԻՆ",

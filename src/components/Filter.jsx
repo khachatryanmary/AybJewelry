@@ -25,24 +25,24 @@ const Filter = () => {
     return (
         <div className="text-black flex w-full justify-center items-center gap-[100px] border-b border-gray-400 mb-[20px] pb-[20px]">
             <p className="font-semibold text-[black] text-[20px]">
-                {t('sortBy')}
+                {t('sort.sortBy')}
             </p>            <ul className="flex gap-[20px] font-bold justify-around items-center ">
-                <li className="cursor-pointer hover:text-[gray] text-[20px] transition">{t('popularity')}</li>
-                <li className="cursor-pointer hover:text-[gray] text-[20px] transition">{t('type')}</li>
-                <li className="cursor-pointer hover:text-[gray] text-[20px] transition  " onClick={openPrice}>{t('price')}</li>
+                <li className="cursor-pointer hover:text-[gray] text-[20px] transition">{t('sort.popularity')}</li>
+                <li className="cursor-pointer hover:text-[gray] text-[20px] transition">{t('sort.type')}</li>
+                <li className="cursor-pointer hover:text-[gray] text-[20px] transition  " onClick={openPrice}>{t('sort.price')}</li>
                 {showPriceInputs && (
                     <div>
                         <div className="flex gap-[5px]">
                             <input
                                 type="number"
-                                placeholder={t('minPricePlaceholder')}
+                                placeholder={t('sort.minPricePlaceholder')}
                                 value={minPrice}
                                 onChange={(e) => setMinPrice(e.target.value)}
                                 className="p-[10px] rounded-[20px] border border-[gray] w-[200px] h-[30px]"
                             />
                             <input
                                 type="number"
-                                placeholder={t('maxPricePlaceholder')}
+                                placeholder={t('sort.maxPricePlaceholder')}
                                 value={maxPrice}
                                 onChange={(e) => setMaxPrice(e.target.value)}
                                 className="p-[10px] rounded-[20px] border border-[gray] w-[200px] h-[30px]"
@@ -52,7 +52,7 @@ const Filter = () => {
                             onClick={() => filterPrice(minPrice, maxPrice)}
                             className="flex justify-center items-center w-[100%] h-[30px] transition duration-500 text-[gray] hover:text-[white] hover:bg-[#0a0a39] border rounded-[20px] mt-[5px]"
                         >
-                            {t('apply')}
+                            {t('sort.apply')}
                         </button>
                     </div>
                 )}

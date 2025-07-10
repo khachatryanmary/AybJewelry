@@ -1,10 +1,10 @@
-/* Use preflight instead of base */
+@import 'swiper/css';
+@import 'swiper/css/navigation';
+@import 'swiper/css/pagination';
 @import "tailwindcss/preflight";
 
-/* Only utilities now */
 @tailwind utilities;
 
-/* Optional: Custom font-face, fix filename and path */
 @font-face {
     font-family: 'Against';
     font-style: italic;
@@ -12,7 +12,6 @@
 }
 
 
-/* Global resets and styles */
 html, body {
     margin: 0;
     padding: 0;
@@ -22,4 +21,9 @@ html, body {
 
 #root {
     height: 100%;
+}
+.swiper-button-prev,
+.swiper-button-next {
+    color: white !important;
+    z-index: 10;
 }
