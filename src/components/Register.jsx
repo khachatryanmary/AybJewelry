@@ -1,30 +1,32 @@
-import React, { useState } from "react";
-import { useAuth } from "../Providers/AuthContext.jsx";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { registerUser } from "../Toolkit/slices/authSlice.js";
 import { useTranslation } from "react-i18next";
-import {useNavigate, useParams} from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 const Register = () => {
-    const {lng} = useParams();
-    const { register } = useAuth();
+    const { lng } = useParams();
     const { t } = useTranslation();
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
+    const { user, error, loading } = useSelector((state) => state.auth);
     const [form, setForm] = useState({ username: "", email: "", password: "" });
-    const [error, setError] = useState(null);
 
     const handleChange = (e) =>
         setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        const result = register(form);
-        if (result.success) {
-            alert(t("register.success") || "Registration successful! You can login now.");
-            navigate("/login");
-        } else {
-            setError(result.message);
-        }
+        dispatch(registerUser(form));
     };
+
+    useEffect(() => {
+        if (user) {
+            alert(t("register.success") || "Registration successful! You can login now.");
+            navigate(`/${lng}/login`);
+        }
+    }, [user]);
 
     return (
         <div className="w-[90%] mx-auto flex flex-col items-center justify-center min-h-[80vh]">
@@ -68,6 +70,7 @@ const Register = () => {
                     />
 
                     {error && <p className="text-red-600">{error}</p>}
+                    {loading && <p className="text-blue-500">Loading...</p>}
 
                     <button
                         type="submit"

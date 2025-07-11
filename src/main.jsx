@@ -7,13 +7,17 @@ import './index.css';
 import {AuthProvider} from "./Providers/AuthContext.jsx";
 import {CartProvider} from "./Providers/CartProvider.jsx";
 import {WishlistProvider} from "./Providers/WishlistProvider.jsx";
+import {store} from "./Toolkit/store.js";
+import {Provider} from "react-redux";
 
 ReactDOM.createRoot(document.getElementById('root')).render(
     <BrowserRouter>
             <CartProvider>
                 <WishlistProvider>
                     <AuthProvider>
-                        <App />
+                        <Provider store={store}>
+                            <App />
+                        </Provider>
                     </AuthProvider>
                 </WishlistProvider>
             </CartProvider>

@@ -1,4 +1,13 @@
 {
+  "users": [
+    {
+      "id": "249a",
+      "username": "aaa",
+      "email": "aaa@mail.ru",
+      "password": "aaa"
+    }
+  ],
+  "loggedIn": [],
   "necklaces": [
     {
       "id": 1,

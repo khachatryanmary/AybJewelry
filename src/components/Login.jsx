@@ -1,35 +1,41 @@
-import React, { useState } from "react";
-import { useAuth } from "../Providers/AuthContext.jsx";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { loginUser } from "../Toolkit/slices/authSlice.js"; // ուղին ըստ քո նախագծի
+import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import {useNavigate, useParams} from "react-router-dom";
+import {toast} from "react-toastify";
 
 const Login = () => {
     const { lng } = useParams();
-    const { login } = useAuth();
     const { t } = useTranslation();
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     const [form, setForm] = useState({ usernameOrEmail: "", password: "" });
-    const [error, setError] = useState(null);
+    const { user, error, loading } = useSelector((state) => state.auth);
 
     const handleChange = (e) =>
         setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        const result = login(form.usernameOrEmail, form.password);
-        if (result.success) {
-            alert(t("login.loginSuccess") || "Logged in successfully!");
-            navigate("/");
-        } else {
-            setError(result.message);
-        }
+        dispatch(loginUser(form));
     };
+
+    useEffect(() => {
+        if (user) {
+            // alert(t("login.loginSuccess") || "Logged in successfully!");
+            toast.success( "Logged in successfully!");
+            navigate("/");
+        }
+    }, [user]);
 
     return (
         <div className="w-[90%] mx-auto flex flex-col items-center justify-center min-h-[80vh]">
             <div className="text-center w-full">
-                <h2 className="font-[Against] text-[30px] p-[20px]">{t("login.myAccount")}</h2>
+                <h2 className="font-[Against] text-[30px] p-[20px]">
+                    {t("login.myAccount")}
+                </h2>
             </div>
 
             <div className="bg-[#efeeee] p-[50px] m-[30px] w-[35%] h-[400px] flex items-center justify-center">
@@ -69,6 +75,7 @@ const Login = () => {
                     </div>
 
                     {error && <p className="text-red-600">{error}</p>}
+                    {loading && <p className="text-blue-600">{t("loading") || "Loading..."}</p>}
 
                     <button
                         type="submit"
@@ -83,13 +90,14 @@ const Login = () => {
                             className="text-[#df7a7a] cursor-pointer hover:text-black"
                             onClick={() => navigate(`/${lng}/register`)}
                         >
-              {t("login.register")}
-            </span>
+            {t("login.register")}
+          </span>
                     </p>
                 </form>
             </div>
         </div>
     );
+
 };
 
 export default Login;

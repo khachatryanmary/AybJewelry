@@ -55,6 +55,7 @@ const NecklaceDetail = () => {
           <Swiper
             modules={[Navigation]}
             navigation
+
             spaceBetween={10}
             slidesPerView={1}
           >

@@ -94,7 +94,8 @@ const BroochesDetail = () => {
 
                     <div className="flex items-center gap-3 mt-3">
                         <button
-                            onClick={() => setQuantity(q => (q > 1 ? q - 1 : 1))}
+                            onClick={() =>
+                                setQuantity(q => (q > 1 ? q - 1 : 1))}
                             className="w-[30px] h-[20px] py-1 border rounded flex items-center justify-center bg-[#f7f7f7] text-black hover:bg-[#0a0a39] hover:text-white transition"
                         >
                             -

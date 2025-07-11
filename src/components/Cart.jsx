@@ -47,7 +47,8 @@ const Cart = () => {
                             <li key={i} className="flex justify-between items-center border border-[gray] rounded p-[10px]">
                                 <img src={item.image} alt={item.name} className="w-[200px] h-auto object-cover" />
                                 <span className="text-[20px]" >{item.name}</span>
-                                <span className="text-[20px]">{item.price} AMD</span>
+                                <span>{item.quantity}</span>
+                                <span className="text-[20px]">{item.price * item.quantity } AMD</span>
                                 <button
                                     onClick={() => removeFromCart(item.id)}
                                     className="text-[black]  hover:text-[white] w-[150px] h-[40px] rounded-[10px] bg-[#efeeee]  hover:bg-[#0a0a39] transition">

@@ -1,13 +1,25 @@
-// src/components/Profile.jsx
-import React from "react";
-import { useAuth } from "../Providers/AuthContext.jsx";
+import React, { useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { logout } from "../Toolkit/slices/authSlice.js";
 import { useTranslation } from "react-i18next";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const Profile = () => {
-    const { user, logout } = useAuth();
     const { t } = useTranslation();
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const location = useLocation();
 
-    if (!user) return <p>{t("profile.notLoggedIn")}</p>;
+    const user = useSelector((state) => state.auth.user);
+    const lng = location.pathname.split("/")[1]; // վերցնում ենք լեզուն /en/profile → en
+
+    useEffect(() => {
+        if (!user) {
+            navigate(`/${lng}/`);
+        }
+    }, [user, navigate, lng]);
+
+    if (!user) return null;
 
     return (
         <div className="w-[90%] mx-auto h-[400px] flex flex-col items-center justify-center">
@@ -22,7 +34,7 @@ const Profile = () => {
                 </p>
 
                 <button
-                    onClick={logout}
+                    onClick={() => dispatch(logout())}
                     className="w-[90%] h-[40px] rounded-[10px] bg-[white] text-[#0a0a39] hover:bg-[#0a0a39] hover:text-[white] transition duration-300"
                 >
                     {t("profile.logout")}
