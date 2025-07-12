@@ -35,7 +35,12 @@
     "home": "ԳԼԽԱՎՈՐ",
     "about": "ՄԵՐ ՄԱՍԻՆ",
     "newReleases": "ՆՈՐ ՏԵՍԱԿԱՆԻ",
-    "contact": "ԿԱՊ"
+    "contact": "ԿԱՊ",
+    "shop":"ԽԱՆՈԻԹ"
+  },
+  "allProductsGallery": {
+    "title": "ԲՈԼՈՐ ԶԱՐԴԵՐԸ",
+    "loadMore" : "Տեսնել ավելին"
   },
   "login": {
     "myAccount": "ԻՄ ՀԱՇԻՎԸ",

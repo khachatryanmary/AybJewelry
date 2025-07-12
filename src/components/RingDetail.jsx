@@ -5,6 +5,8 @@ import axios from "axios";
 import { useTranslation } from "react-i18next";
 import { useCart } from "../Providers/CartProvider.jsx";
 import { useWishlist } from "../Providers/WishlistProvider.jsx";
+import {Swiper, SwiperSlide} from "swiper/react";
+import {Navigation} from "swiper/modules";
 
 const RingDetail = () => {
     const { addToCart } = useCart();
@@ -41,15 +43,29 @@ const RingDetail = () => {
         setIsWished(!isWished);
     };
 
+    const images = ring.image
+        ? [ring.image, ...(ring.images || [])]
+        : ring.images || [];
+
     return (
         <div className="flex w-[90%] mx-auto pt-[40px] mt-[20px] h-[700px] bg-[#efeeee] justify-center items-start gap-[40px]">
-            <div className="flex items-start justify-start">
-                <img
-                    id="detailImage"
-                    src={ring.image}
-                    alt={ring.name || 'image'}
-                    className="w-[450px] h-auto rounded-[8px] object-cover shadow-md"
-                />
+            <div className="relative w-[400px] rounded-[8px] shadow-md overflow-hidden">
+                <Swiper
+                    modules={[Navigation]}
+                    navigation
+                    spaceBetween={10}
+                    slidesPerView={1}
+                >
+                    {images.map((img, index) => (
+                        <SwiperSlide key={index}>
+                            <img
+                                src={img}
+                                alt={`ring image ${index}`}
+                                className="w-[400px] h-auto object-cover"
+                            />
+                        </SwiperSlide>
+                    ))}
+                </Swiper>
             </div>
 
             <div className="flex flex-col justify-center items-start gap-[40px] w-[50%]">

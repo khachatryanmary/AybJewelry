@@ -191,7 +191,7 @@
       "id": 1,
       "name": "CHOKER",
       "price": "20000",
-      "image": "/images/rings/ring1.jpg",
+      "image": "/images/rings/ring7.jpg",
       "alt": "ring1",
       "description": "Choker style ring with elegant design.",
       "details": [
@@ -208,7 +208,7 @@
       "id": 2,
       "name": "PEARL STRAND",
       "price": "25000",
-      "image": "/images/rings/ring2.jpg",
+      "image": "/images/rings/ring9.jpg",
       "alt": "ring2",
       "description": "Pearl strand inspired ring, graceful and elegant.",
       "details": [
@@ -242,7 +242,7 @@
       "id": 4,
       "name": "NARCISSUS",
       "price": "35000",
-      "image": "/images/rings/ring4.jpg",
+      "image": "/images/rings/ring1.jpg",
       "alt": "ring4",
       "description": "Blooming narcissus inspired ring.",
       "details": [
@@ -259,7 +259,7 @@
       "id": 5,
       "name": "SNOWDROP",
       "price": "17000",
-      "image": "/images/rings/ring5.png",
+      "image": "/images/rings/ring10.jpg",
       "alt": "ring5",
       "description": "Graceful snowdrop ring with shimmering pearl.",
       "details": [
@@ -276,7 +276,7 @@
       "id": 6,
       "name": "CHGITEM",
       "price": "20000",
-      "image": "/images/rings/ring6.jpg",
+      "image": "/images/rings/ring14.jpg",
       "alt": "ring6",
       "description": "Elegant chgitem style ring.",
       "details": [
@@ -293,7 +293,7 @@
       "id": 7,
       "name": "CHOKER BLOOM",
       "price": "20000",
-      "image": "/images/rings/ring7.jpg",
+      "image": "/images/rings/ring4.jpg",
       "alt": "ring7",
       "description": "Choker bloom ring with stylish design."
     },
@@ -309,28 +309,20 @@
       "id": 9,
       "name": "HEART",
       "price": "40000",
-      "image": "/images/rings/ring9.jpg",
+      "image": "/images/rings/ring2.jpg",
       "alt": "ring9",
       "description": "Heart shaped ring symbolizing love."
     },
     {
       "id": 10,
-      "name": "SHELL",
-      "price": "25000",
-      "image": "/images/rings/ring10.jpg",
-      "alt": "ring10",
-      "description": "Shell inspired ring with ocean vibes."
-    },
-    {
-      "id": 11,
       "name": "RABBIT",
       "price": "40000",
-      "image": "/images/rings/ring11.jpg",
+      "image": "/images/rings/ring5.png",
       "alt": "ring11",
       "description": "Rabbit themed ring, playful and cute."
     },
     {
-      "id": 12,
+      "id": 11,
       "name": "GRAPE",
       "price": "20000",
       "image": "/images/rings/ring12.jpg",
@@ -338,7 +330,7 @@
       "description": "Grape inspired ring with rich details."
     },
     {
-      "id": 13,
+      "id": 12,
       "name": "A DROP",
       "price": "10000",
       "image": "/images/rings/ring13.jpg",
@@ -346,15 +338,15 @@
       "description": "Simple and elegant drop style ring."
     },
     {
-      "id": 14,
+      "id": 13,
       "name": "KRASIVO",
       "price": "10000",
-      "image": "/images/rings/ring14.jpg",
+      "image": "/images/rings/ring6.jpg",
       "alt": "ring14",
       "description": "Krasivo ring with unique charm."
     },
     {
-      "id": 15,
+      "id": 14,
       "name": "PAPAPPAPA",
       "price": "15000",
       "image": "/images/rings/ring15.jpg",
@@ -362,7 +354,7 @@
       "description": "Papappapa style ring, trendy and bold."
     },
     {
-      "id": 16,
+      "id": 15,
       "name": "PEARLS",
       "price": "25000",
       "image": "/images/rings/ring16.jpg",
@@ -375,7 +367,7 @@
       "id": 1,
       "name": "CHOKER",
       "price": "20000",
-      "image": "/images/earrings/earring1.jpg",
+      "image": "/images/earrings/earring13.jpg",
       "alt": "earring1",
       "description": "Choker style ring with elegant design.",
       "details": [
@@ -392,7 +384,7 @@
       "id": 2,
       "name": "PEARL STRAND",
       "price": "25000",
-      "image": "/images/earrings/earring2.jpg",
+      "image": "/images/earrings/earring14.jpg",
       "alt": "earring2",
       "description": "Pearl strand inspired ring, graceful and elegant.",
       "details": [
@@ -409,7 +401,7 @@
       "id": 3,
       "name": "ROSE",
       "price": "25000",
-      "image": "/images/earrings/earring3.jpg",
+      "image": "/images/earrings/earring12.jpg",
       "alt": "earring3",
       "description": "Ring with delicate rose design.",
       "details": [
@@ -426,7 +418,7 @@
       "id": 4,
       "name": "NARCISSUS",
       "price": "35000",
-      "image": "/images/earrings/earring4.jpg",
+      "image": "/images/earrings/earring3.jpg",
       "alt": "earring4",
       "description": "Blooming narcissus inspired ring.",
       "details": [
@@ -443,7 +435,7 @@
       "id": 5,
       "name": "SNOWDROP",
       "price": "17000",
-      "image": "/images/earrings/earring5.jpg",
+      "image": "/images/earrings/earring7.jpg",
       "alt": "earring5",
       "description": "Graceful snowdrop ring with shimmering pearl.",
       "details": [
@@ -460,7 +452,7 @@
       "id": 6,
       "name": "CHGITEM",
       "price": "20000",
-      "image": "/images/earrings/earring6.jpg",
+      "image": "/images/earrings/earring9.jpg",
       "alt": "earring6",
       "description": "Elegant chgitem style ring.",
       "details": [
@@ -477,7 +469,7 @@
       "id": 7,
       "name": "CHOKER BLOOM",
       "price": "20000",
-      "image": "/images/earrings/earring7.jpg",
+      "image": "/images/earrings/earring8.jpg",
       "alt": "earring7",
       "description": "Choker bloom ring with stylish design."
     },
@@ -485,7 +477,7 @@
       "id": 8,
       "name": "MOONSTONE",
       "price": "48000",
-      "image": "/images/earrings/earring8.jpg",
+      "image": "/images/earrings/earring11.jpg",
       "alt": "earring8",
       "description": "Moonstone inspired ring with radiant beauty."
     },
@@ -493,7 +485,7 @@
       "id": 9,
       "name": "HEART",
       "price": "40000",
-      "image": "/images/earrings/earring9.jpg",
+      "image": "/images/earrings/earring1.jpg",
       "alt": "earring9",
       "description": "Heart shaped ring symbolizing love."
     },
@@ -509,7 +501,7 @@
       "id": 11,
       "name": "RABBIT",
       "price": "40000",
-      "image": "/images/earrings/earring11.jpg",
+      "image": "/images/earrings/earring6.jpg",
       "alt": "earring11",
       "description": "Rabbit themed ring, playful and cute."
     },
@@ -517,7 +509,7 @@
       "id": 12,
       "name": "GRAPE",
       "price": "20000",
-      "image": "/images/earrings/earring12.jpg",
+      "image": "/images/earrings/earring4.jpg",
       "alt": "earring12",
       "description": "Grape inspired ring with rich details."
     },
@@ -525,7 +517,7 @@
       "id": 13,
       "name": "A DROP",
       "price": "10000",
-      "image": "/images/earrings/earring13.jpg",
+      "image": "/images/earrings/earring2.jpg",
       "alt": "earring13",
       "description": "Simple and elegant drop style ring."
     },
@@ -533,7 +525,7 @@
       "id": 14,
       "name": "KRASIVO",
       "price": "10000",
-      "image": "/images/earrings/earring14.jpg",
+      "image": "/images/earrings/earring5.jpg",
       "alt": "earring14",
       "description": "Krasivo ring with unique charm."
     }
@@ -543,7 +535,7 @@
       "id": 1,
       "name": "CHOKER",
       "price": "20000",
-      "image": "/images/bracelets/bracelet1.jpg",
+      "image": "/images/bracelets/bracelet6.jpg",
       "alt": "bracelet1",
       "description": "Choker style ring with elegant design.",
       "details": [
@@ -560,7 +552,7 @@
       "id": 2,
       "name": "PEARL STRAND",
       "price": "25000",
-      "image": "/images/bracelets/bracelet2.jpg",
+      "image": "/images/bracelets/bracelet9.jpg",
       "alt": "bracelet2",
       "description": "Pearl strand inspired ring, graceful and elegant.",
       "details": [
@@ -577,7 +569,7 @@
       "id": 3,
       "name": "ROSE",
       "price": "25000",
-      "image": "/images/bracelets/bracelet3.jpg",
+      "image": "/images/bracelets/bracelet5.jpg",
       "alt": "bracelet3",
       "description": "Ring with delicate rose design.",
       "details": [
@@ -594,7 +586,7 @@
       "id": 4,
       "name": "NARCISSUS",
       "price": "35000",
-      "image": "/images/bracelets/bracelet4.jpg",
+      "image": "/images/bracelets/bracelet7.jpg",
       "alt": "bracelet4",
       "description": "Blooming narcissus inspired ring.",
       "details": [
@@ -611,7 +603,7 @@
       "id": 5,
       "name": "SNOWDROP",
       "price": "17000",
-      "image": "/images/bracelets/bracelet5.jpg",
+      "image": "/images/bracelets/bracelet2.jpg",
       "alt": "bracelet5",
       "description": "Graceful snowdrop ring with shimmering pearl.",
       "details": [
@@ -628,7 +620,7 @@
       "id": 6,
       "name": "CHGITEM",
       "price": "20000",
-      "image": "/images/bracelets/bracelet6.jpg",
+      "image": "/images/bracelets/bracelet1.jpg",
       "alt": "bracelet6",
       "description": "Elegant chgitem style ring.",
       "details": [
@@ -645,7 +637,7 @@
       "id": 7,
       "name": "CHOKER BLOOM",
       "price": "20000",
-      "image": "/images/bracelets/bracelet7.jpg",
+      "image": "/images/bracelets/bracelet4.jpg",
       "alt": "bracelet7",
       "description": "Choker bloom ring with stylish design."
     },
@@ -661,7 +653,7 @@
       "id": 9,
       "name": "HEART",
       "price": "40000",
-      "image": "/images/bracelets/bracelet9.jpg",
+      "image": "/images/bracelets/bracelet3.jpg",
       "alt": "bracelet9",
       "description": "Heart shaped ring symbolizing love."
     },
@@ -687,7 +679,7 @@
       "id": 2,
       "name": "MOONSTONE",
       "price": "48000",
-      "image": "/images/brooches/brooch2.jpg",
+      "image": "/images/brooches/brooch4.jpg",
       "alt": "brooch2",
       "description": "Moonstone inspired ring with radiant beauty."
     },
@@ -703,7 +695,7 @@
       "id": 4,
       "name": "SHELL",
       "price": "25000",
-      "image": "/images/brooches/brooch4.jpg",
+      "image": "/images/brooches/brooch2.jpg",
       "alt": "brooch4",
       "description": "Shell inspired ring with ocean vibes."
     },

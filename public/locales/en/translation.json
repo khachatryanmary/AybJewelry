@@ -35,7 +35,13 @@
     "home": "HOME",
     "about": "ABOUT",
     "newReleases": "NEW RELEASES",
-    "contact": "CONTACT"
+    "contact": "CONTACT",
+    "shop":"SHOP"
+  },
+  "allProductsGallery": {
+    "title": "ALL PRODUCTS",
+    "loadMore" : "Load More"
+
   },
   "login": {
     "myAccount": "MY ACCOUNT",

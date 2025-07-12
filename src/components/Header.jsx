@@ -6,6 +6,7 @@ import { useAuth } from "../Providers/AuthContext.jsx";
 
 function Header({ setSearchActive }) {
     const location = useLocation();
+    const currentPath = location.pathname;
     const lng = location.pathname.split("/")[1];
     const { t } = useTranslation();
     const { user } = useAuth();
@@ -25,6 +26,14 @@ function Header({ setSearchActive }) {
                 <div className="flex items-center justify-between">
                     <nav>
                         <ul className="flex items-center justify-around gap-[30px] ">
+                            <li>
+                                <Link
+                                    to={`/${lng}/all-products`}
+                                    className="text-[#0e0e53] text-[18px] font-[Against] hover:text-[white] transition"
+                                >
+                                    {t('nav.shop')}
+                                </Link>
+                            </li>
                             <li>
                                 <Link
                                     to={`/${lng}`}
@@ -84,6 +93,7 @@ function Header({ setSearchActive }) {
                         <li>
                             <Link
                                 to={`/${lng}/cart`}
+                                state={{ from: currentPath}}
                                 className="bi bi-handbag text-[20px] text-[#0e0e53] hover:text-[white] transition"
                             />
                         </li>

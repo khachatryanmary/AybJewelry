@@ -68,7 +68,7 @@ const NecklaceDetail = () => {
               </SwiperSlide>
             ))}
           </Swiper>
-</div>
+      </div>
 
 
       <div className="flex flex-col justify-center items-start gap-[40px] w-[50%]">

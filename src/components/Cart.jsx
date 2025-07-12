@@ -7,6 +7,7 @@ import { useLocation, Link } from "react-router-dom";
 const Cart = () => {
     const location = useLocation();
     const lng = location.pathname.split("/")[1];
+    const fromPath = location.state?.from || `/${lng}/all-products`;
     const { cart, removeFromCart, clearCart } = useCart();
     const { t } = useTranslation();
 
@@ -21,7 +22,7 @@ const Cart = () => {
                     <div className="h-[400px] flex flex-col items-center justify-center gap-[20px]">
                         <i className="bi bi-handbag text-[70px] text-center" />
                         <p className="text-[25px] text-black font-light">{t('cart.cartEmpty')}</p>
-                        <Link to={`/${lng}/necklaces`}>
+                        <Link to={fromPath}>
                             <button className="w-[200px] h-[40px] mt-[10px] bg-[#efeeee] border-none rounded-[10px] transition duration-500 hover:text-[white] hover:bg-[#0a0a39]">
                                 {t('returnToShop')}
                             </button>

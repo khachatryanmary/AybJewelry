@@ -7,7 +7,7 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                Against: ['"Against"', 'cursive'], // now you can use className="font-Against"
+                Against: ['"Against"', 'cursive'],
             },
         },
     },

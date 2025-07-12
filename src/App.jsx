@@ -1,5 +1,6 @@
 import './i18n';
 import './index.css';
+import 'react-toastify/dist/ReactToastify.css';
 
 import React, { useState, useEffect } from 'react';
 import { Navigate, useRoutes, useLocation } from 'react-router-dom';
@@ -28,6 +29,8 @@ import RingDetail from "./components/RingDetail.jsx";
 import EarringsDetail from "./components/EarringsDetail.jsx";
 import BraceletsDetail from "./components/BraceletsDetail.jsx";
 import BroochesDetail from "./components/BroochesDetail.jsx";
+import AllProducts from "./components/AllProducts.jsx";
+import {ToastContainer} from "react-toastify";
 
 function App() {
     const [searchActive, setSearchActive] = useState(false);
@@ -88,6 +91,7 @@ function App() {
                     ]
                 },
 
+                { path: "all-products", element: <AllProducts /> },
                 { path: "earrings", element: <EarringsGallery /> },
                 { path: "bracelets", element: <BraceletsGallery /> },
                 { path: "brooches", element: <BroochesGallery /> },
@@ -111,6 +115,17 @@ function App() {
             <Search searchActive={searchActive} setSearchActive={setSearchActive} lng={lng} />
             {router}
             <Footer />
+            <ToastContainer
+                position="top-right"
+                autoClose={3000}
+                hideProgressBar={false}
+                newestOnTop
+                closeOnClick
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="colored"
+            />
         </div>
     );
 }

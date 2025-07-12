@@ -4,6 +4,8 @@ import axios from "axios";
 import { useTranslation } from "react-i18next";
 import { useCart } from "../Providers/CartProvider.jsx";
 import { useWishlist } from "../Providers/WishlistProvider.jsx";
+import {Swiper, SwiperSlide} from "swiper/react";
+import {Navigation} from "swiper/modules";
 
 const BraceletsDetail = () => {
     const { addToCart } = useCart();
@@ -40,19 +42,33 @@ const BraceletsDetail = () => {
         setIsWished(!isWished);
     };
 
+    const images = bracelet.image
+        ? [bracelet.image, ...(bracelet.images || [])]
+        : bracelet.images || [];
+
     return (
         <div className="flex w-[90%] mx-auto pt-[40px] mt-[20px] h-[700px] bg-[#efeeee] justify-center items-start gap-[40px]">
-            <div className="flex items-start justify-start">
-                <img
-                    id="detailImage"
-                    src={bracelet.image}
-                    alt={bracelet.name || 'image'}
-                    className="w-[450px] h-auto rounded-[8px] object-cover shadow-md"
-                />
+            <div className="relative w-[400px] rounded-[8px] shadow-md overflow-hidden">
+                <Swiper
+                    modules={[Navigation]}
+                    navigation
+                    spaceBetween={10}
+                    slidesPerView={1}
+                >
+                    {images.map((img, index) => (
+                        <SwiperSlide key={index}>
+                            <img
+                                src={img}
+                                alt={`bracelet image ${index}`}
+                                className="w-[400px] h-auto object-cover"
+                            />
+                        </SwiperSlide>
+                    ))}
+                </Swiper>
             </div>
 
             <div className="flex flex-col justify-center items-start gap-[40px] w-[50%]">
-                <Link to={`/${lng}/brooches/`}>
+                <Link to={`/${lng}/bracelets/`}>
                     <button className="bg-[#f7f7f7] text-[#0a0a39] transition duration-500 border-none cursor-pointer py-[10px] px-[18px] font-semibold rounded-[6px] hover:bg-[#0a0a39] hover:text-[white]">
                         {t('braceletsDetail.backToSelection')}
                     </button>

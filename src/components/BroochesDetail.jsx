@@ -4,6 +4,8 @@ import axios from "axios";
 import { useTranslation } from "react-i18next";
 import { useCart } from "../Providers/CartProvider.jsx";
 import { useWishlist } from "../Providers/WishlistProvider.jsx";
+import {Swiper, SwiperSlide} from "swiper/react";
+import {Navigation} from "swiper/modules";
 
 const BroochesDetail = () => {
     const { addToCart } = useCart();
@@ -16,6 +18,7 @@ const BroochesDetail = () => {
     const [brooch, setBrooch] = useState({});
     const [openDetails, setOpenDetails] = useState(false);
     const [isWished, setIsWished] = useState(false);
+    const [quantity, setQuantity] = useState(1);
 
     useEffect(() => {
         const fetchBroochesDetail = async () => {
@@ -40,17 +43,30 @@ const BroochesDetail = () => {
         setIsWished(!isWished);
     };
 
+    const images = brooch.image
+        ? [brooch.image, ...(brooch.images || [])]
+        : brooch.images || [];
+
     return (
         <div className="flex w-[90%] mx-auto pt-[40px] mt-[20px] h-[700px] bg-[#efeeee] justify-center items-start gap-[40px]">
-            <div className="flex items-start justify-start">
-                <img
-                    id="detailImage"
-                    src={brooch.image}
-                    alt={brooch.name || 'image'}
-                    className="w-[450px] h-auto rounded-[8px] object-cover shadow-md"
-                />
+            <div className="relative w-[400px] rounded-[8px] shadow-md overflow-hidden">
+                <Swiper
+                    modules={[Navigation]}
+                    navigation
+                    spaceBetween={10}
+                    slidesPerView={1}
+                >
+                    {images.map((img, index) => (
+                        <SwiperSlide key={index}>
+                            <img
+                                src={img}
+                                alt={`brooch image ${index}`}
+                                className="w-[400px] h-auto object-cover"
+                            />
+                        </SwiperSlide>
+                    ))}
+                </Swiper>
             </div>
-
             <div className="flex flex-col justify-center items-start gap-[40px] w-[50%]">
                 <Link to={`/${lng}/brooches/`}>
                     <button className="bg-[#f7f7f7] text-[#0a0a39] transition duration-500 border-none cursor-pointer py-[10px] px-[18px] font-semibold rounded-[6px] hover:bg-[#0a0a39] hover:text-[white]">
@@ -73,18 +89,45 @@ const BroochesDetail = () => {
                     </div>
 
                     <span className="text-[20px] text-[#666] font-semibold my-[10px] mb-[20px]">
-                        {brooch.price} AMD
-                    </span>
+  {brooch.price * quantity} AMD
+</span>
+
+                    <div className="flex items-center gap-3 mt-3">
+                        <button
+                            onClick={() => setQuantity(q => (q > 1 ? q - 1 : 1))}
+                            className="w-[30px] h-[20px] py-1 border rounded flex items-center justify-center bg-[#f7f7f7] text-black hover:bg-[#0a0a39] hover:text-white transition"
+                        >
+                            -
+                        </button>
+                        <input
+                            type="number"
+                            min="1"
+                            value={quantity}
+                            onChange={e => {
+                                const val = Math.max(1, Number(e.target.value));
+                                setQuantity(val);
+                            }}
+                            className="w-[50px] h-[20px] text-center border rounded bg-[#f7f7f7]"
+                        />
+                        <button
+                            onClick={() => setQuantity(q => q + 1)}
+                            className="w-[30px] h-[20px] py-1 border rounded flex items-center justify-center bg-[#f7f7f7] text-black hover:bg-[#0a0a39] hover:text-white transition"
+                        >
+                            +
+                        </button>
+                    </div>
+
 
                     <p className="text-[16px] leading-[1.5] text-[#444] mb-[20px]">{brooch.description}</p>
 
                     <button
                         id="addBtn"
-                        onClick={() => addToCart(brooch)}
+                        onClick={() => addToCart({ ...brooch, quantity, totalPrice: brooch.price * quantity })}
                         className="transition duration-500 border-none cursor-pointer py-[10px] px-[18px] font-semibold rounded-[6px] bg-[#f7f7f7] text-[#0a0a39] hover:bg-[#0a0a39] hover:text-[white]"
                     >
                         {t('broochDetail.add')}
                     </button>
+
 
                     <div className="mt-[20px] w-full bg-[white] rounded-[8px] shadow-md overflow-hidden">
                         <div

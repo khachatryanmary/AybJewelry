@@ -9,6 +9,8 @@ const BroochesGallery = () => {
     const { t } = useTranslation();
     const { setProduct, filteredProduct } = useFilteredProduct();
 
+
+
     useEffect(() => {
         const getBrooches = async () => {
             try {
