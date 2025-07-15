@@ -7,6 +7,19 @@ import { useTranslation } from "react-i18next";
 import { useLocation } from 'react-router-dom';
 
 
+function interleaveById(dataByCategory) {
+    const result = [];
+    let maxLength = Math.max(...dataByCategory.map(arr => arr.length));
+
+    for (let i = 0; i < maxLength; i++) {
+        for (let category of dataByCategory) {
+            if (category[i]) result.push(category[i]);
+        }
+    }
+
+    return result;
+}
+
 function shuffleArray(array) {
     return array.sort(() => Math.random() - 0.5);
 }
@@ -17,7 +30,7 @@ const AllProductsGallery = () => {
     const { t } = useTranslation();
     const { setProduct, filteredProduct } = useFilteredProduct();
 
-    const [visibleCount, setVisibleCount] = useState(8); // Start by showing 8 items
+    const [visibleCount, setVisibleCount] = useState(9); // Start by showing 8 items
 
     useEffect(() => {
         const getAllProducts = async () => {
@@ -30,14 +43,16 @@ const AllProductsGallery = () => {
                     "http://localhost:4000/brooches"
                 ];
 
+                const categories = ['necklace', 'ring', 'bracelet', 'earring', 'brooch'];
+
                 const responses = await Promise.all(endpoints.map(url => axios.get(url)));
 
-                const categories = ['necklace', 'ring', 'bracelet', 'earring', 'brooch'];
-                const allItems = responses.flatMap((res, index) =>
+                const grouped = responses.map((res, index) =>
                     res.data.map(item => ({ ...item, category: categories[index] }))
                 );
 
-                setProduct(shuffleArray(allItems));
+                const interleaved = interleaveById(grouped);
+                setProduct(interleaved);
             } catch (error) {
                 console.log("Error fetching products:", error.message);
             }
@@ -46,10 +61,11 @@ const AllProductsGallery = () => {
         getAllProducts();
     }, [setProduct]);
 
+
     const visibleProducts = filteredProduct?.slice(0, visibleCount);
 
     const handleLoadMore = () => {
-        setVisibleCount(prev => prev + 8);
+        setVisibleCount(prev => prev + 9);
     };
 
     return (

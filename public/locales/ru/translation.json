@@ -120,7 +120,8 @@
     "cartEmpty": "Ваша корзина пуста",
     "returnToShop": "Вернуться в магазин",
     "clearCart": "Очистить корзину",
-    "removeCart": "Удалить"
+    "removeCart": "Удалить",
+    "total": "Общий"
   },
   "ringGallery": {
     "title": "КОЛЬЦА"

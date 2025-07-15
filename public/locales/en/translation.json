@@ -121,7 +121,8 @@
     "cartTitle": "Your Cart",
     "cartEmpty": "Your cart is empty",
     "returnToShop": "Return to Shop",
-    "removeCart": "Remove"
+    "removeCart": "Remove",
+    "total": "Total"
   },
   "ringGallery": {
     "title": "RINGS"

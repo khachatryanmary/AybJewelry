@@ -5,12 +5,18 @@
       "username": "aaa",
       "email": "aaa@mail.ru",
       "password": "aaa"
+    },
+    {
+      "id": "210b",
+      "username": "Mary",
+      "email": "abc@gmail.com",
+      "password": "123"
     }
   ],
   "loggedIn": [],
   "necklaces": [
     {
-      "id": 1,
+      "id": "1",
       "name": "CHOKER",
       "price": "20000",
       "image": "/images/necklaces/necklace1.jpg",
@@ -30,7 +36,7 @@
       ]
     },
     {
-      "id": 2,
+      "id": "2",
       "name": "PEARL STRAND",
       "price": "25000",
       "image": "/images/necklaces/necklace2.jpg",
@@ -50,7 +56,7 @@
       ]
     },
     {
-      "id": 3,
+      "id": "3",
       "name": "ROSE",
       "price": "25000",
       "image": "/images/necklaces/necklace3.jpg",
@@ -67,7 +73,7 @@
       ]
     },
     {
-      "id": 4,
+      "id": "4",
       "name": "NARCISSUS",
       "price": "35000",
       "image": "/images/necklaces/necklace16.jpg",
@@ -84,7 +90,7 @@
       ]
     },
     {
-      "id": 5,
+      "id": "5",
       "name": "SNOWDROP",
       "price": "17000",
       "image": "/images/necklaces/necklace17.jpg",
@@ -101,7 +107,7 @@
       ]
     },
     {
-      "id": 6,
+      "id": "6",
       "name": "CHGITEM",
       "price": "20000",
       "image": "/images/necklaces/necklace4.jpg",
@@ -118,77 +124,77 @@
       ]
     },
     {
-      "id": 7,
+      "id": "7",
       "name": "CHOKER BLOOM",
       "price": "20000",
       "image": "/images/necklaces/necklace5.jpg",
       "alt": "necklace7"
     },
     {
-      "id": 8,
+      "id": "8",
       "name": "MOONSTONE",
       "price": "48000",
       "image": "/images/necklaces/necklace6.jpg",
       "alt": "necklace8"
     },
     {
-      "id": 9,
+      "id": "9",
       "name": "HEART",
       "price": "40000",
       "image": "/images/necklaces/necklace7.jpg",
       "alt": "necklace9"
     },
     {
-      "id": 10,
+      "id": "10",
       "name": "SHELL",
       "price": "25000",
       "image": "/images/necklaces/necklace8.jpg",
       "alt": "necklace10"
     },
     {
-      "id": 11,
+      "id": "11",
       "name": "RABBIT",
       "price": "40000",
       "image": "/images/necklaces/necklace15.jpg",
       "alt": "necklace11"
     },
     {
-      "id": 12,
+      "id": "12",
       "name": "GRAPE",
       "price": "20000",
       "image": "/images/necklaces/necklace10.jpg",
       "alt": "necklace12"
     },
     {
-      "id": 13,
+      "id": "13",
       "name": "A DROP",
       "price": "10000",
       "image": "/images/necklaces/necklace11.jpg",
       "alt": "necklace13"
     },
     {
-      "id": 14,
+      "id": "14",
       "name": "KRASIVO",
       "price": "10000",
       "image": "/images/necklaces/necklace12.jpeg",
       "alt": "necklace14"
     },
     {
-      "id": 15,
+      "id": "15",
       "name": "PAPAPPAPA",
       "price": "15000",
       "image": "/images/necklaces/necklace13.jpeg",
       "alt": "necklace15"
     },
     {
-      "id": 16,
+      "id": "16",
       "name": "CHOKER ESIM",
       "price": "26000",
       "image": "/images/necklaces/necklace18.jpg",
       "alt": "necklace16"
     },
     {
-      "id": 17,
+      "id": "17",
       "name": "PEARLS",
       "price": "25000",
       "image": "/images/necklaces/necklace19.jpg",
@@ -197,7 +203,7 @@
   ],
   "rings": [
     {
-      "id": 1,
+      "id": "1",
       "name": "CHOKER",
       "price": "20000",
       "image": "/images/rings/ring7.jpg",
@@ -214,7 +220,7 @@
       ]
     },
     {
-      "id": 2,
+      "id": "2",
       "name": "PEARL STRAND",
       "price": "25000",
       "image": "/images/rings/ring9.jpg",
@@ -231,7 +237,7 @@
       ]
     },
     {
-      "id": 3,
+      "id": "3",
       "name": "ROSE",
       "price": "25000",
       "image": "/images/rings/ring3.jpg",
@@ -248,7 +254,7 @@
       ]
     },
     {
-      "id": 4,
+      "id": "4",
       "name": "NARCISSUS",
       "price": "35000",
       "image": "/images/rings/ring1.jpg",
@@ -265,7 +271,7 @@
       ]
     },
     {
-      "id": 5,
+      "id": "5",
       "name": "SNOWDROP",
       "price": "17000",
       "image": "/images/rings/ring10.jpg",
@@ -282,7 +288,7 @@
       ]
     },
     {
-      "id": 6,
+      "id": "6",
       "name": "CHGITEM",
       "price": "20000",
       "image": "/images/rings/ring14.jpg",
@@ -299,7 +305,7 @@
       ]
     },
     {
-      "id": 7,
+      "id": "7",
       "name": "CHOKER BLOOM",
       "price": "20000",
       "image": "/images/rings/ring4.jpg",
@@ -307,7 +313,7 @@
       "description": "Choker bloom ring with stylish design."
     },
     {
-      "id": 8,
+      "id": "8",
       "name": "MOONSTONE",
       "price": "48000",
       "image": "/images/rings/ring8.jpg",
@@ -315,7 +321,7 @@
       "description": "Moonstone inspired ring with radiant beauty."
     },
     {
-      "id": 9,
+      "id": "9",
       "name": "HEART",
       "price": "40000",
       "image": "/images/rings/ring2.jpg",
@@ -323,7 +329,7 @@
       "description": "Heart shaped ring symbolizing love."
     },
     {
-      "id": 10,
+      "id": "10",
       "name": "RABBIT",
       "price": "40000",
       "image": "/images/rings/ring5.png",
@@ -331,7 +337,7 @@
       "description": "Rabbit themed ring, playful and cute."
     },
     {
-      "id": 11,
+      "id": "11",
       "name": "GRAPE",
       "price": "20000",
       "image": "/images/rings/ring12.jpg",
@@ -339,7 +345,7 @@
       "description": "Grape inspired ring with rich details."
     },
     {
-      "id": 12,
+      "id": "12",
       "name": "A DROP",
       "price": "10000",
       "image": "/images/rings/ring13.jpg",
@@ -347,7 +353,7 @@
       "description": "Simple and elegant drop style ring."
     },
     {
-      "id": 13,
+      "id": "13",
       "name": "KRASIVO",
       "price": "10000",
       "image": "/images/rings/ring6.jpg",
@@ -355,7 +361,7 @@
       "description": "Krasivo ring with unique charm."
     },
     {
-      "id": 14,
+      "id": "14",
       "name": "PAPAPPAPA",
       "price": "15000",
       "image": "/images/rings/ring15.jpg",
@@ -363,7 +369,7 @@
       "description": "Papappapa style ring, trendy and bold."
     },
     {
-      "id": 15,
+      "id": "15",
       "name": "PEARLS",
       "price": "25000",
       "image": "/images/rings/ring16.jpg",
@@ -373,7 +379,7 @@
   ],
   "earrings": [
     {
-      "id": 1,
+      "id": "1",
       "name": "CHOKER",
       "price": "20000",
       "image": "/images/earrings/earring13.jpg",
@@ -390,7 +396,7 @@
       ]
     },
     {
-      "id": 2,
+      "id": "2",
       "name": "PEARL STRAND",
       "price": "25000",
       "image": "/images/earrings/earring14.jpg",
@@ -407,7 +413,7 @@
       ]
     },
     {
-      "id": 3,
+      "id": "3",
       "name": "ROSE",
       "price": "25000",
       "image": "/images/earrings/earring12.jpg",
@@ -424,7 +430,7 @@
       ]
     },
     {
-      "id": 4,
+      "id": "4",
       "name": "NARCISSUS",
       "price": "35000",
       "image": "/images/earrings/earring3.jpg",
@@ -441,7 +447,7 @@
       ]
     },
     {
-      "id": 5,
+      "id": "5",
       "name": "SNOWDROP",
       "price": "17000",
       "image": "/images/earrings/earring7.jpg",
@@ -458,7 +464,7 @@
       ]
     },
     {
-      "id": 6,
+      "id": "6",
       "name": "CHGITEM",
       "price": "20000",
       "image": "/images/earrings/earring9.jpg",
@@ -475,7 +481,7 @@
       ]
     },
     {
-      "id": 7,
+      "id": "7",
       "name": "CHOKER BLOOM",
       "price": "20000",
       "image": "/images/earrings/earring8.jpg",
@@ -483,7 +489,7 @@
       "description": "Choker bloom ring with stylish design."
     },
     {
-      "id": 8,
+      "id": "8",
       "name": "MOONSTONE",
       "price": "48000",
       "image": "/images/earrings/earring11.jpg",
@@ -491,7 +497,7 @@
       "description": "Moonstone inspired ring with radiant beauty."
     },
     {
-      "id": 9,
+      "id": "9",
       "name": "HEART",
       "price": "40000",
       "image": "/images/earrings/earring1.jpg",
@@ -499,7 +505,7 @@
       "description": "Heart shaped ring symbolizing love."
     },
     {
-      "id": 10,
+      "id": "10",
       "name": "SHELL",
       "price": "25000",
       "image": "/images/earrings/earring10.jpg",
@@ -507,7 +513,7 @@
       "description": "Shell inspired ring with ocean vibes."
     },
     {
-      "id": 11,
+      "id": "11",
       "name": "RABBIT",
       "price": "40000",
       "image": "/images/earrings/earring6.jpg",
@@ -515,7 +521,7 @@
       "description": "Rabbit themed ring, playful and cute."
     },
     {
-      "id": 12,
+      "id": "12",
       "name": "GRAPE",
       "price": "20000",
       "image": "/images/earrings/earring4.jpg",
@@ -523,7 +529,7 @@
       "description": "Grape inspired ring with rich details."
     },
     {
-      "id": 13,
+      "id": "13",
       "name": "A DROP",
       "price": "10000",
       "image": "/images/earrings/earring2.jpg",
@@ -531,7 +537,7 @@
       "description": "Simple and elegant drop style ring."
     },
     {
-      "id": 14,
+      "id": "14",
       "name": "KRASIVO",
       "price": "10000",
       "image": "/images/earrings/earring5.jpg",
@@ -541,7 +547,7 @@
   ],
   "bracelets": [
     {
-      "id": 1,
+      "id": "1",
       "name": "CHOKER",
       "price": "20000",
       "image": "/images/bracelets/bracelet6.jpg",
@@ -558,7 +564,7 @@
       ]
     },
     {
-      "id": 2,
+      "id": "2",
       "name": "PEARL STRAND",
       "price": "25000",
       "image": "/images/bracelets/bracelet9.jpg",
@@ -575,7 +581,7 @@
       ]
     },
     {
-      "id": 3,
+      "id": "3",
       "name": "ROSE",
       "price": "25000",
       "image": "/images/bracelets/bracelet5.jpg",
@@ -592,7 +598,7 @@
       ]
     },
     {
-      "id": 4,
+      "id": "4",
       "name": "NARCISSUS",
       "price": "35000",
       "image": "/images/bracelets/bracelet7.jpg",
@@ -609,7 +615,7 @@
       ]
     },
     {
-      "id": 5,
+      "id": "5",
       "name": "SNOWDROP",
       "price": "17000",
       "image": "/images/bracelets/bracelet2.jpg",
@@ -626,7 +632,7 @@
       ]
     },
     {
-      "id": 6,
+      "id": "6",
       "name": "CHGITEM",
       "price": "20000",
       "image": "/images/bracelets/bracelet1.jpg",
@@ -643,7 +649,7 @@
       ]
     },
     {
-      "id": 7,
+      "id": "7",
       "name": "CHOKER BLOOM",
       "price": "20000",
       "image": "/images/bracelets/bracelet4.jpg",
@@ -651,7 +657,7 @@
       "description": "Choker bloom ring with stylish design."
     },
     {
-      "id": 8,
+      "id": "8",
       "name": "MOONSTONE",
       "price": "48000",
       "image": "/images/bracelets/bracelet8.jpg",
@@ -659,7 +665,7 @@
       "description": "Moonstone inspired ring with radiant beauty."
     },
     {
-      "id": 9,
+      "id": "9",
       "name": "HEART",
       "price": "40000",
       "image": "/images/bracelets/bracelet3.jpg",
@@ -667,7 +673,7 @@
       "description": "Heart shaped ring symbolizing love."
     },
     {
-      "id": 10,
+      "id": "10",
       "name": "SHELL",
       "price": "25000",
       "image": "/images/bracelets/bracelet1.jpg",
@@ -677,7 +683,7 @@
   ],
   "brooches": [
     {
-      "id": 1,
+      "id": "1",
       "name": "CHOKER BLOOM",
       "price": "20000",
       "image": "/images/brooches/brooch1.jpg",
@@ -685,7 +691,7 @@
       "description": "Choker bloom ring with stylish design."
     },
     {
-      "id": 2,
+      "id": "2",
       "name": "MOONSTONE",
       "price": "48000",
       "image": "/images/brooches/brooch4.jpg",
@@ -693,7 +699,7 @@
       "description": "Moonstone inspired ring with radiant beauty."
     },
     {
-      "id": 3,
+      "id": "3",
       "name": "HEART",
       "price": "40000",
       "image": "/images/brooches/brooch3.jpg",
@@ -701,7 +707,7 @@
       "description": "Heart shaped ring symbolizing love."
     },
     {
-      "id": 4,
+      "id": "4",
       "name": "SHELL",
       "price": "25000",
       "image": "/images/brooches/brooch2.jpg",
@@ -709,7 +715,7 @@
       "description": "Shell inspired ring with ocean vibes."
     },
     {
-      "id": 5,
+      "id": "5",
       "name": "SHELL",
       "price": "25000",
       "image": "/images/brooches/brooch5.jpg",

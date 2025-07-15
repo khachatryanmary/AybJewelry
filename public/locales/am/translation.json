@@ -120,7 +120,9 @@
     "cartEmpty": "Ձեր զամբյուղը դատարկ է",
     "returnToShop": "Վերադառնալ խանութ",
     "clearCart": "Մաքրել զամբյուղը",
-    "removeCart": "Հեռացնել"
+    "removeCart": "Հեռացնել",
+    "total": "Ընդհանուր"
+
   },
 
   "ringGallery": {

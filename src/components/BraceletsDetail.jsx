@@ -2,19 +2,22 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams, useLocation } from "react-router-dom";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
-import { useCart } from "../Providers/CartProvider.jsx";
 import { useWishlist } from "../Providers/WishlistProvider.jsx";
 import {Swiper, SwiperSlide} from "swiper/react";
 import {Navigation} from "swiper/modules";
+import {useDispatch} from "react-redux";
+import {addToCart} from "../Toolkit/slices/cartSlice.js";
+import 'swiper/css';
+import 'swiper/css/navigation';
 
 const BraceletsDetail = () => {
-    const { addToCart } = useCart();
+    const dispatch = useDispatch();
     const { wishlist, addToWishlist, removeFromWishlist } = useWishlist();
     const { t } = useTranslation();
     const { id } = useParams();
     const location = useLocation();
     const lng = location.pathname.split("/")[1];
-
+    const [quantity, setQuantity] = useState(1);
     const [bracelet, setBracelet] = useState({});
     const [openDetails, setOpenDetails] = useState(false);
     const [isWished, setIsWished] = useState(false);
@@ -89,14 +92,43 @@ const BraceletsDetail = () => {
                     </div>
 
                     <span className="text-[20px] text-[#666] font-semibold my-[10px] mb-[20px]">
-                        {bracelet.price} AMD
+                  {bracelet.price * quantity} AMD
                     </span>
+
+                    <div className="flex items-center gap-3 mt-3">
+                        <button
+                            onClick={() =>
+                                setQuantity(q => (q > 1 ? q - 1 : 1))}
+                            className="w-[30px] h-[30px] flex items-center justify-center bg-[#f7f7f7] rounded hover:bg-[#0a0a39] hover:text-white transition"
+                        >
+                            -
+                        </button>
+                        <input
+                            type="number"
+                            min="1"
+                            value={quantity}
+                            onChange={e => {
+                                const val = Math.max(1, Number(e.target.value));
+                                setQuantity(val);
+                            }}
+                            className="w-[50px] h-[30px] text-center border rounded bg-[#f7f7f7]"
+                        />
+                        <button
+                            onClick={() => setQuantity(q => q + 1)}
+                            className="w-[30px] h-[30px] flex items-center justify-center bg-[#f7f7f7] rounded hover:bg-[#0a0a39] hover:text-white transition"
+                        >
+                            +
+                        </button>
+                    </div>
+
 
                     <p className="text-[16px] leading-[1.5] text-[#444] mb-[20px]">{bracelet.description}</p>
 
                     <button
                         id="addBtn"
-                        onClick={() => addToCart(bracelet)}
+                        onClick={() =>
+                            dispatch(addToCart({ ...bracelet, quantity }))
+                        }
                         className="transition duration-500 border-none cursor-pointer py-[10px] px-[18px] font-semibold rounded-[6px] bg-[#f7f7f7] text-[#0a0a39] hover:bg-[#0a0a39] hover:text-[white]"
                     >
                         {t('braceletDetail.add')}

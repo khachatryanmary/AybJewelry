@@ -1,14 +1,24 @@
 import React from 'react';
 import { useTranslation } from "react-i18next";
-import { useCart } from "../Providers/CartProvider";
+import { useSelector, useDispatch } from "react-redux";
 import { useLocation, Link } from "react-router-dom";
+import {
+    removeFromCart,
+    clearCart,
+    increaseQuantity,
+    decreaseQuantity,
+    selectCartTotal
+} from "../Toolkit/slices/cartSlice.js";
 
 
 const Cart = () => {
+    const total = useSelector(selectCartTotal);
     const location = useLocation();
     const lng = location.pathname.split("/")[1];
     const fromPath = location.state?.from || `/${lng}/all-products`;
-    const { cart, removeFromCart, clearCart } = useCart();
+
+    const { cart } = useSelector((state) => state.cart);
+    const dispatch = useDispatch();
     const { t } = useTranslation();
 
     return (
@@ -27,7 +37,6 @@ const Cart = () => {
                                 {t('returnToShop')}
                             </button>
                         </Link>
-
                     </div>
                 </>
             ) : (
@@ -35,7 +44,7 @@ const Cart = () => {
                     <div className="w-full flex justify-between items-center border-b pb-[10px]">
                         <h2 className="font-[Against] text-[30px] p-[20px]">{t('cart.cartTitle')}</h2>
                         <button
-                            onClick={clearCart}
+                            onClick={() => dispatch(clearCart())}
                             className="hover:text-[white] w-[200px] h-[40px] rounded-[10px] bg-[#efeeee] text-[#0a0a39] hover:bg-[#0a0a39] transition"
                         >
                             {t('cart.clearCart')}
@@ -46,17 +55,40 @@ const Cart = () => {
                         {cart.map((item, i) => (
                             <li key={i} className="flex justify-between items-center border border-[gray] rounded p-[10px]">
                                 <img src={item.image} alt={item.name} className="w-[200px] h-auto object-cover" />
-                                <span className="text-[20px]" >{item.name}</span>
-                                <span>{item.quantity}</span>
-                                <span className="text-[20px]">{item.price * item.quantity } AMD</span>
+                                <span className="text-[20px]">{item.name}</span>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => dispatch(decreaseQuantity(item.id))}
+                                        className="w-[30px] h-[30px] flex items-center justify-center bg-[#f7f7f7] rounded hover:bg-[#0a0a39] hover:text-white transition"
+                                    >
+                                        -
+                                    </button>
+                                    <input
+                                        type="number"
+                                        value={item.quantity}
+                                        readOnly
+                                        className="w-[50px] h-[30px] text-center border rounded bg-[#f7f7f7]"
+                                    />
+                                    <button
+                                        onClick={() => dispatch(increaseQuantity(item.id))}
+                                        className="w-[30px] h-[30px] flex items-center justify-center bg-[#f7f7f7] rounded hover:bg-[#0a0a39] hover:text-white transition"
+                                    >
+                                        +
+                                    </button>
+                                </div>
+                                <span className="text-[20px]">{item.price * item.quantity} AMD</span>
                                 <button
-                                    onClick={() => removeFromCart(item.id)}
-                                    className="text-[black]  hover:text-[white] w-[150px] h-[40px] rounded-[10px] bg-[#efeeee]  hover:bg-[#0a0a39] transition">
+                                    onClick={() => dispatch(removeFromCart(item.id))}
+                                    className="text-[black] hover:text-[white] w-[150px] h-[40px] rounded-[10px] bg-[#efeeee] hover:bg-[#0a0a39] transition"
+                                >
                                     {t('cart.removeCart')}
                                 </button>
                             </li>
                         ))}
                     </ul>
+                    <div className="w-full text-right mt-[30px]">
+                        <h3 className="text-[22px] font-bold">{t('cart.total')}: {total} AMD</h3>
+                    </div>
                 </>
             )}
         </div>

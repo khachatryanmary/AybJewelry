@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-// ✅ Register user
 export const registerUser = createAsyncThunk(
     "auth/registerUser",
     async ({ username, email, password }, thunkAPI) => {
@@ -25,7 +24,6 @@ export const registerUser = createAsyncThunk(
     }
 );
 
-// ✅ Login user
 export const loginUser = createAsyncThunk(
     "auth/loginUser",
     async ({ usernameOrEmail, password }, thunkAPI) => {
@@ -42,7 +40,6 @@ export const loginUser = createAsyncThunk(
                 return thunkAPI.rejectWithValue("Invalid credentials");
             }
 
-            // ✅ Հաջող login → պահենք loggedIn
             await axios.post("http://localhost:4000/loggedIn", found);
 
             localStorage.setItem("loggedInUser", JSON.stringify(found));
@@ -65,7 +62,6 @@ const authSlice = createSlice({
         logout: (state) => {
             const user = state.user;
 
-            // 🔴 ջնջենք loggedIn-ից
             if (user && user.id) {
                 axios.delete(`http://localhost:4000/loggedIn/${user.id}`);
             }
