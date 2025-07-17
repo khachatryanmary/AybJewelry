@@ -92,9 +92,6 @@ function App() {
                 },
 
                 { path: "all-products", element: <AllProducts /> },
-                { path: "earrings", element: <EarringsGallery /> },
-                { path: "bracelets", element: <BraceletsGallery /> },
-                { path: "brooches", element: <BroochesGallery /> },
                 { path: "contact", element: <Contact /> },
                 { path: "login", element: <Login /> },
                 { path: "cart", element: <Cart /> },

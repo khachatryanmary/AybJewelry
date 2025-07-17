@@ -2,18 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams, useLocation } from "react-router-dom";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
-import { useWishlist } from "../Providers/WishlistProvider.jsx";
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import {useDispatch} from "react-redux";
 import { addToCart } from "../Toolkit/slices/cartSlice.js";
+import { toast } from "react-toastify";
+
 
 
 const NecklaceDetail = () => {
   const dispatch = useDispatch();
-  const { wishlist, addToWishlist, removeFromWishlist } = useWishlist();
   const { t } = useTranslation();
   const { id } = useParams();
   const location = useLocation();
@@ -50,6 +50,12 @@ const NecklaceDetail = () => {
   const images = necklace.image
     ? [necklace.image, ...(necklace.images || [])]
     : necklace.images || [];
+
+  const handleAddToCart = () => {
+    dispatch(addToCart({ ...necklace, quantity }));
+    const message = t("toast.addedToCart") || "🛒 Added to cart!";
+    toast.success(`${necklace.name} ${message}`);
+  };
 
   return (
     <div className="flex w-[90%] mx-[0auto] pt-[40px] mt-[20px] h-[700px] bg-[#efeeee] justify-center items-start gap-[40px]">
@@ -129,9 +135,7 @@ const NecklaceDetail = () => {
 
           <button
             id="addBtn"
-            onClick={() =>
-                dispatch(addToCart({ ...necklace, quantity }))
-            }
+            onClick={handleAddToCart}
             className="transition duration-500 border-none cursor-pointer py-[10px] px-[18px] font-semibold rounded-[6px] bg-[#f7f7f7] text-[#0a0a39] hover:bg-[#0a0a39] hover:text-[white]"
           >
             {t('necklaceDetail.add')}

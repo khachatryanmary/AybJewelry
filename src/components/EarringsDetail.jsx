@@ -2,16 +2,17 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams, useLocation } from "react-router-dom";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
-import { useWishlist } from "../Providers/WishlistProvider.jsx";
-import {Swiper, SwiperSlide} from "swiper/react";
-import {Navigation} from "swiper/modules";
-import {addToCart} from "../Toolkit/slices/cartSlice.js";
-import { useDispatch } from "react-redux";
-
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation } from "swiper/modules";
+import { useDispatch, useSelector } from "react-redux";
+import { addToCart } from "../Toolkit/slices/cartSlice.js";
+import { addToWishlist, removeFromWishlist } from "../Toolkit/slices/wishlistSlice.js";
+import { toast } from "react-toastify";
+import 'swiper/css';
+import 'swiper/css/navigation';
 
 const EarringsDetail = () => {
     const dispatch = useDispatch();
-    const { wishlist, addToWishlist, removeFromWishlist } = useWishlist();
     const { t } = useTranslation();
     const { id } = useParams();
     const location = useLocation();
@@ -19,30 +20,38 @@ const EarringsDetail = () => {
 
     const [earring, setEarring] = useState({});
     const [openDetails, setOpenDetails] = useState(false);
-    const [isWished, setIsWished] = useState(false);
     const [quantity, setQuantity] = useState(1);
+    const wishlist = useSelector((state) => state.wishlist.wishlist);
+    const [isWished, setIsWished] = useState(false);
 
     useEffect(() => {
-        const fetchEarringsDetail = async () => {
+        const fetchEarringDetail = async () => {
             try {
                 const res = await axios.get(`http://localhost:4000/earrings?id=${id}`);
                 const product = res.data[0];
                 setEarring(product);
                 setIsWished(wishlist.some(item => item.id === product.id));
             } catch (error) {
-                console.log('Failed to fetch earrings:', error.message);
+                console.error('Failed to fetch earring:', error.message);
             }
         };
-        fetchEarringsDetail();
+        fetchEarringDetail();
     }, [id, location.pathname, wishlist]);
 
     const toggleWishlist = () => {
         if (isWished) {
-            removeFromWishlist(earring.id);
+            dispatch(removeFromWishlist(earring.id));
+            toast.info(`${earring.name} ${t("toast.removedFromWishlist")}`);
         } else {
-            addToWishlist(earring);
+            dispatch(addToWishlist(earring));
+            toast.success(`${earring.name} ${t("toast.addedToWishlist")}`);
         }
         setIsWished(!isWished);
+    };
+
+    const handleAddToCart = () => {
+        dispatch(addToCart({ ...earring, quantity }));
+        toast.success(`${earring.name} ${t("toast.addedToCart")}`);
     };
 
     const images = earring.image
@@ -52,23 +61,19 @@ const EarringsDetail = () => {
     return (
         <div className="flex w-[90%] mx-auto pt-[40px] mt-[20px] h-[700px] bg-[#efeeee] justify-center items-start gap-[40px]">
             <div className="relative w-[400px] rounded-[8px] shadow-md overflow-hidden">
-                <Swiper
-                    modules={[Navigation]}
-                    navigation
-                    spaceBetween={10}
-                    slidesPerView={1}
-                >
+                <Swiper modules={[Navigation]} navigation spaceBetween={10} slidesPerView={1}>
                     {images.map((img, index) => (
                         <SwiperSlide key={index}>
                             <img
                                 src={img}
-                                alt={`brooch image ${index}`}
+                                alt={`earring image ${index}`}
                                 className="w-[400px] h-auto object-cover"
                             />
                         </SwiperSlide>
                     ))}
                 </Swiper>
             </div>
+
             <div className="flex flex-col justify-center items-start gap-[40px] w-[50%]">
                 <Link to={`/${lng}/earrings/`}>
                     <button className="bg-[#f7f7f7] text-[#0a0a39] transition duration-500 border-none cursor-pointer py-[10px] px-[18px] font-semibold rounded-[6px] hover:bg-[#0a0a39] hover:text-[white]">
@@ -81,9 +86,7 @@ const EarringsDetail = () => {
                         <span className="text-[25px] font-bold text-[#213547]">{earring.name}</span>
                         <span
                             onClick={toggleWishlist}
-                            className={`text-[28px] cursor-pointer transition-all duration-300 ${
-                                isWished ? 'text-[#0a0a39]' : 'text-gray-400'
-                            }`}
+                            className={`text-[28px] cursor-pointer transition-all duration-300 ${isWished ? 'text-[#0a0a39]' : 'text-gray-400'}`}
                             title={t('addToWishlist')}
                         >
                             <i className={`bi ${isWished ? 'bi-heart-fill' : 'bi-heart'} transition-all duration-300`}></i>
@@ -96,8 +99,7 @@ const EarringsDetail = () => {
 
                     <div className="flex items-center gap-3 mt-3">
                         <button
-                            onClick={() =>
-                                setQuantity(q => (q > 1 ? q - 1 : 1))}
+                            onClick={() => setQuantity(q => (q > 1 ? q - 1 : 1))}
                             className="w-[30px] h-[30px] flex items-center justify-center bg-[#f7f7f7] rounded hover:bg-[#0a0a39] hover:text-white transition"
                         >
                             -
@@ -106,10 +108,7 @@ const EarringsDetail = () => {
                             type="number"
                             min="1"
                             value={quantity}
-                            onChange={e => {
-                                const val = Math.max(1, Number(e.target.value));
-                                setQuantity(val);
-                            }}
+                            onChange={e => setQuantity(Math.max(1, Number(e.target.value)))}
                             className="w-[50px] h-[30px] text-center border rounded bg-[#f7f7f7]"
                         />
                         <button
@@ -124,9 +123,7 @@ const EarringsDetail = () => {
 
                     <button
                         id="addBtn"
-                        onClick={() =>
-                            dispatch(addToCart({ ...earring, quantity }))
-                        }
+                        onClick={handleAddToCart}
                         className="transition duration-500 border-none cursor-pointer py-[10px] px-[18px] font-semibold rounded-[6px] bg-[#f7f7f7] text-[#0a0a39] hover:bg-[#0a0a39] hover:text-[white]"
                     >
                         {t('earringDetail.add')}
@@ -134,9 +131,7 @@ const EarringsDetail = () => {
 
                     <div className="mt-[20px] w-full bg-[white] rounded-[8px] shadow-md overflow-hidden">
                         <div
-                            className={`text-[18px] font-bold flex justify-between items-center px-[20px] py-[12px] bg-[#f7f7f7] border-b border-[#ddd] cursor-pointer select-none ${
-                                openDetails ? 'open' : ''
-                            }`}
+                            className={`text-[18px] font-bold flex justify-between items-center px-[20px] py-[12px] bg-[#f7f7f7] border-b border-[#ddd] cursor-pointer select-none ${openDetails ? 'open' : ''}`}
                             onClick={() => setOpenDetails(!openDetails)}
                         >
                             <span>{t('earringDetail.details')}</span>

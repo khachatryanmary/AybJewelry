@@ -161,5 +161,8 @@
   },
   "broochesGallery": {
     "title": "BROOCHES"
+  },
+  "toast": {
+    "addedToCart": "Added To Cart!"
   }
 }

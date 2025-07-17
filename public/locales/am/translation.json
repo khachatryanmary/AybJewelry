@@ -162,6 +162,9 @@
   },
   "broochesGallery": {
     "title": "ՄԱԶԱԿԱԼՆԵՐ"
+  },
+  "toast": {
+    "addedToCart": "Ավելացվել է զամբյուղ"
   }
 }
 

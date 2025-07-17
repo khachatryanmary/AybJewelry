@@ -3,17 +3,14 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams, useLocation } from "react-router-dom";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
-import { useCart } from "../Providers/CartProvider.jsx";
-import { useWishlist } from "../Providers/WishlistProvider.jsx";
-import {Swiper, SwiperSlide} from "swiper/react";
-import {Navigation} from "swiper/modules";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation } from "swiper/modules";
 import { addToCart } from "../Toolkit/slices/cartSlice.js";
-import {useDispatch} from "react-redux";
+import { useDispatch } from "react-redux";
+import { toast } from "react-toastify";
 
 const RingDetail = () => {
     const dispatch = useDispatch();
-    const { addToCart } = useCart();
-    const { wishlist, addToWishlist, removeFromWishlist } = useWishlist();
     const { t } = useTranslation();
     const { id } = useParams();
     const location = useLocation();
@@ -51,6 +48,12 @@ const RingDetail = () => {
         ? [ring.image, ...(ring.images || [])]
         : ring.images || [];
 
+    const handleAddToCart = () => {
+        dispatch(addToCart({ ...ring, quantity }));
+        const message = t("toast.addedToCart") || "🛒 Added to cart!";
+        toast.success(`${ring.name} ${message}`);
+    };
+
     return (
         <div className="flex w-[90%] mx-auto pt-[40px] mt-[20px] h-[700px] bg-[#efeeee] justify-center items-start gap-[40px]">
             <div className="relative w-[400px] rounded-[8px] shadow-md overflow-hidden">
@@ -84,9 +87,7 @@ const RingDetail = () => {
                         <span className="text-[25px] font-bold text-[#213547]">{ring.name}</span>
                         <span
                             onClick={toggleWishlist}
-                            className={`text-[28px] cursor-pointer transition-all duration-300 ${
-                                isWished ? 'text-[#0a0a39]' : 'text-gray-400'
-                            }`}
+                            className={`text-[28px] cursor-pointer transition-all duration-300 ${isWished ? 'text-[#0a0a39]' : 'text-gray-400'}`}
                             title={t('addToWishlist')}
                         >
                             <i className={`bi ${isWished ? 'bi-heart-fill' : 'bi-heart'} transition-all duration-300`}></i>
@@ -96,10 +97,10 @@ const RingDetail = () => {
                     <span className="text-[20px] text-[#666] font-semibold my-[10px] mb-[20px]">
                         {ring.price * quantity} AMD
                     </span>
+
                     <div className="flex items-center gap-3 mt-3">
                         <button
-                            onClick={() =>
-                                setQuantity(q => (q > 1 ? q - 1 : 1))}
+                            onClick={() => setQuantity(q => (q > 1 ? q - 1 : 1))}
                             className="w-[30px] h-[30px] flex items-center justify-center bg-[#f7f7f7] rounded hover:bg-[#0a0a39] hover:text-white transition"
                         >
                             -
@@ -122,12 +123,11 @@ const RingDetail = () => {
                         </button>
                     </div>
 
-
                     <p className="text-[16px] leading-[1.5] text-[#444] mb-[20px]">{ring.description}</p>
 
                     <button
                         id="addBtn"
-                        onClick={()=> dispatch(addToCart({ ...ring, quantity }))}
+                        onClick={handleAddToCart}
                         className="transition duration-500 border-none cursor-pointer py-[10px] px-[18px] font-semibold rounded-[6px] bg-[#f7f7f7] text-[#0a0a39] hover:bg-[#0a0a39] hover:text-[white]"
                     >
                         {t('ringDetail.add')}
@@ -135,9 +135,7 @@ const RingDetail = () => {
 
                     <div className="mt-[20px] w-full bg-[white] rounded-[8px] shadow-md overflow-hidden">
                         <div
-                            className={`text-[18px] font-bold flex justify-between items-center px-[20px] py-[12px] bg-[#f7f7f7] border-b border-[#ddd] cursor-pointer select-none ${
-                                openDetails ? 'open' : ''
-                            }`}
+                            className={`text-[18px] font-bold flex justify-between items-center px-[20px] py-[12px] bg-[#f7f7f7] border-b border-[#ddd] cursor-pointer select-none ${openDetails ? 'open' : ''}`}
                             onClick={() => setOpenDetails(!openDetails)}
                         >
                             <span>{t('ringDetail.details')}</span>

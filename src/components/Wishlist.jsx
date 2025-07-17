@@ -1,13 +1,16 @@
 import React from 'react';
 import { useTranslation } from "react-i18next";
 import { Link, useLocation } from "react-router-dom";
-import { useWishlist } from '../Providers/WishlistProvider.jsx';
+import { useSelector, useDispatch } from "react-redux";
+import { removeFromWishlist, clearWishlist } from "../Toolkit/slices/wishlistSlice.js";
 
 const Wishlist = () => {
     const { t } = useTranslation();
     const location = useLocation();
-    const { wishlist, removeFromWishlist, clearWishlist } = useWishlist();
     const lng = location.pathname.split("/")[1];
+
+    const dispatch = useDispatch();
+    const wishlist = useSelector(state => state.wishlist.wishlist);
 
     return (
         <div className="w-[90%] mx-auto flex flex-col items-center justify-center min-h-[80vh]">
@@ -32,7 +35,7 @@ const Wishlist = () => {
                     <div className="w-full flex justify-between items-center border-b pb-[10px]">
                         <h2 className="font-[Against] text-[30px] p-[20px]">{t('wishlist')}</h2>
                         <button
-                            onClick={clearWishlist}
+                            onClick={() => dispatch(clearWishlist())}
                             className="hover:text-[white] w-[200px] h-[40px] rounded-[10px] bg-[#efeeee] text-[#0a0a39] hover:bg-[#0a0a39] transition"
                         >
                             {t('clearWishlist')}
@@ -43,11 +46,12 @@ const Wishlist = () => {
                         {wishlist.map((item, i) => (
                             <li key={i} className="flex justify-between items-center border border-[gray] rounded p-[10px]">
                                 <img src={item.image} alt={item.name} className="w-[200px] h-auto object-cover" />
-                                <span className="text-[20px]" >{item.name}</span>
+                                <span className="text-[20px]">{item.name}</span>
                                 <span className="text-[20px]">{item.price} AMD</span>
                                 <button
-                                    onClick={() => removeFromWishlist(item.id)}
-                                    className="text-[black]  hover:text-[white] w-[150px] h-[40px] rounded-[10px] bg-[#efeeee]  hover:bg-[#0a0a39] transition">
+                                    onClick={() => dispatch(removeFromWishlist(item.id))}
+                                    className="text-[black] hover:text-[white] w-[150px] h-[40px] rounded-[10px] bg-[#efeeee] hover:bg-[#0a0a39] transition"
+                                >
                                     {t('cart.removeCart')}
                                 </button>
                             </li>

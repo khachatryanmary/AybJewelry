@@ -160,5 +160,8 @@
   },
   "broochesGallery": {
     "title": "БРОШИ"
+  },
+  "toast": {
+    "addedToCart": "Добавлено в корзину"
   }
 }

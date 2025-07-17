@@ -28,18 +28,18 @@ function Header({ setSearchActive }) {
                         <ul className="flex items-center justify-around gap-[30px] ">
                             <li>
                                 <Link
-                                    to={`/${lng}/all-products`}
-                                    className="text-[#0e0e53] text-[18px] font-[Against] hover:text-[white] transition"
-                                >
-                                    {t('nav.shop')}
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
                                     to={`/${lng}`}
                                     className="text-[#0e0e53] text-[18px] font-[Against] hover:text-[white] transition"
                                 >
                                     {t('nav.home')}
+                                </Link>
+                            </li>
+                            <li>
+                                <Link
+                                    to={`/${lng}/all-products`}
+                                    className="text-[#0e0e53] text-[18px] font-[Against] hover:text-[white] transition"
+                                >
+                                    {t('nav.shop')}
                                 </Link>
                             </li>
                             <li>

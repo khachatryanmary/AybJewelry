@@ -2,18 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams, useLocation } from "react-router-dom";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
-import { useWishlist } from "../Providers/WishlistProvider.jsx";
-import {Swiper, SwiperSlide} from "swiper/react";
-import {Navigation} from "swiper/modules";
-import { useDispatch } from "react-redux";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation } from "swiper/modules";
+import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../Toolkit/slices/cartSlice.js";
+import { addToWishlist, removeFromWishlist } from "../Toolkit/slices/wishlistSlice.js";
+import { toast } from "react-toastify";
+
 import 'swiper/css';
 import 'swiper/css/navigation';
 
-
 const BroochesDetail = () => {
     const dispatch = useDispatch();
-    const { wishlist, addToWishlist, removeFromWishlist } = useWishlist();
     const { t } = useTranslation();
     const { id } = useParams();
     const location = useLocation();
@@ -21,30 +21,37 @@ const BroochesDetail = () => {
 
     const [brooch, setBrooch] = useState({});
     const [openDetails, setOpenDetails] = useState(false);
-    const [isWished, setIsWished] = useState(false);
     const [quantity, setQuantity] = useState(1);
 
+    const wishlist = useSelector(state => state.wishlist.wishlist);
+    const isWished = wishlist.some(item => item.id === parseInt(id));
+
     useEffect(() => {
-        const fetchBroochesDetail = async () => {
+        const fetchBroochDetail = async () => {
             try {
                 const res = await axios.get(`http://localhost:4000/brooches?id=${id}`);
                 const product = res.data[0];
                 setBrooch(product);
-                setIsWished(wishlist.some(item => item.id === product.id));
             } catch (error) {
                 console.log('Failed to fetch brooches:', error.message);
             }
         };
-        fetchBroochesDetail();
-    }, [id, location.pathname, wishlist]);
+        fetchBroochDetail();
+    }, [id]);
 
     const toggleWishlist = () => {
         if (isWished) {
-            removeFromWishlist(brooch.id);
+            dispatch(removeFromWishlist(brooch.id));
+            toast.info(`${brooch.name} ${t("toast.removedFromWishlist") || "removed from wishlist"}`);
         } else {
-            addToWishlist(brooch);
+            dispatch(addToWishlist(brooch));
+            toast.success(`${brooch.name} ${t("toast.addedToWishlist") || "added to wishlist"}`);
         }
-        setIsWished(!isWished);
+    };
+
+    const handleAddToCart = () => {
+        dispatch(addToCart({ ...brooch, quantity }));
+        toast.success(`${brooch.name} ${t("toast.addedToCart") || "🛒 Added to cart!"}`);
     };
 
     const images = brooch.image
@@ -71,6 +78,7 @@ const BroochesDetail = () => {
                     ))}
                 </Swiper>
             </div>
+
             <div className="flex flex-col justify-center items-start gap-[40px] w-[50%]">
                 <Link to={`/${lng}/brooches/`}>
                     <button className="bg-[#f7f7f7] text-[#0a0a39] transition duration-500 border-none cursor-pointer py-[10px] px-[18px] font-semibold rounded-[6px] hover:bg-[#0a0a39] hover:text-[white]">
@@ -98,8 +106,7 @@ const BroochesDetail = () => {
 
                     <div className="flex items-center gap-3 mt-3">
                         <button
-                            onClick={() =>
-                                setQuantity(q => (q > 1 ? q - 1 : 1))}
+                            onClick={() => setQuantity(q => (q > 1 ? q - 1 : 1))}
                             className="w-[30px] h-[30px] flex items-center justify-center bg-[#f7f7f7] rounded hover:bg-[#0a0a39] hover:text-white transition"
                         >
                             -
@@ -108,10 +115,7 @@ const BroochesDetail = () => {
                             type="number"
                             min="1"
                             value={quantity}
-                            onChange={e => {
-                                const val = Math.max(1, Number(e.target.value));
-                                setQuantity(val);
-                            }}
+                            onChange={e => setQuantity(Math.max(1, Number(e.target.value)))}
                             className="w-[50px] h-[30px] text-center border rounded bg-[#f7f7f7]"
                         />
                         <button
@@ -122,19 +126,15 @@ const BroochesDetail = () => {
                         </button>
                     </div>
 
-
                     <p className="text-[16px] leading-[1.5] text-[#444] mb-[20px]">{brooch.description}</p>
 
                     <button
                         id="addBtn"
-                        onClick={() =>
-                            dispatch(addToCart({ ...brooch, quantity }))
-                        }
+                        onClick={handleAddToCart}
                         className="transition duration-500 border-none cursor-pointer py-[10px] px-[18px] font-semibold rounded-[6px] bg-[#f7f7f7] text-[#0a0a39] hover:bg-[#0a0a39] hover:text-[white]"
                     >
                         {t('broochDetail.add')}
                     </button>
-
 
                     <div className="mt-[20px] w-full bg-[white] rounded-[8px] shadow-md overflow-hidden">
                         <div
