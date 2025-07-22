@@ -6,8 +6,9 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
-import {useDispatch} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import { addToCart } from "../Toolkit/slices/cartSlice.js";
+import { addToWishlist, removeFromWishlist } from "../Toolkit/slices/wishlistSlice.js";
 import { toast } from "react-toastify";
 
 
@@ -21,8 +22,10 @@ const NecklaceDetail = () => {
 
   const [necklace, setNecklace] = useState({});
   const [openDetails, setOpenDetails] = useState(false);
-  const [isWished, setIsWished] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  
+  const wishlist = useSelector(state => state.wishlist.wishlist);
+  const [isWished, setIsWished] = useState(false);
 
   useEffect(() => {
     const fetchNecklacesDetail = async () => {
@@ -40,11 +43,12 @@ const NecklaceDetail = () => {
 
   const toggleWishlist = () => {
     if (isWished) {
-      removeFromWishlist(necklace.id);
+      dispatch(removeFromWishlist(necklace.id))
+      toast.info(`${necklace.name} ${t("toast.removedFromWishlist") || "removed from wishlist"}`)
     } else {
-      addToWishlist(necklace);
+      dispatch(addToWishlist(necklace))
+      toast.success(`${necklace.name} ${t("toast.addedToWishlist") || "added to wishlist"}`)
     }
-    setIsWished(!isWished);
   };
 
   const images = necklace.image
@@ -53,13 +57,12 @@ const NecklaceDetail = () => {
 
   const handleAddToCart = () => {
     dispatch(addToCart({ ...necklace, quantity }));
-    const message = t("toast.addedToCart") || "🛒 Added to cart!";
+    const message = t("toast.addedToCart") || "Added to cart!";
     toast.success(`${necklace.name} ${message}`);
   };
 
   return (
     <div className="flex w-[90%] mx-[0auto] pt-[40px] mt-[20px] h-[700px] bg-[#efeeee] justify-center items-start gap-[40px]">
-      
       <div className="relative w-[400px] rounded-[8px] shadow-md overflow-hidden">
           <Swiper
             modules={[Navigation]}
@@ -73,7 +76,7 @@ const NecklaceDetail = () => {
                 <img
                   src={img}
                   alt={`necklace image ${index}`}
-                  className="w-[400px] h-auto object-cover"
+                  className="w-[400px] h-[400px] object-contain"
                 />
               </SwiperSlide>
             ))}

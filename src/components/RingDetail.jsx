@@ -1,4 +1,3 @@
-// RingDetail.jsx
 import React, { useEffect, useState } from 'react';
 import { Link, useParams, useLocation } from "react-router-dom";
 import axios from "axios";
@@ -6,8 +5,9 @@ import { useTranslation } from "react-i18next";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import { addToCart } from "../Toolkit/slices/cartSlice.js";
-import { useDispatch } from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import { toast } from "react-toastify";
+import { addToWishlist, removeFromWishlist} from "../Toolkit/slices/wishlistSlice.js";
 
 const RingDetail = () => {
     const dispatch = useDispatch();
@@ -18,6 +18,7 @@ const RingDetail = () => {
 
     const [ring, setRing] = useState({});
     const [openDetails, setOpenDetails] = useState(false);
+    const wishlist = useSelector(state => state.wishlist.wishlist);
     const [isWished, setIsWished] = useState(false);
     const [quantity, setQuantity] = useState(1);
 
@@ -37,12 +38,14 @@ const RingDetail = () => {
 
     const toggleWishlist = () => {
         if (isWished) {
-            removeFromWishlist(ring.id);
+            dispatch(removeFromWishlist(ring.id))
+            toast.info(`${ring.name} ${t("toast.removedFromWishlist") || "removed from wishlist"}`);
         } else {
-            addToWishlist(ring);
-        }
-        setIsWished(!isWished);
+            dispatch(addToWishlist(ring));
+            toast.success(`${ring.name} ${t("toast.addedToWishlist") || "added to wishlist"}`);        }
     };
+
+
 
     const images = ring.image
         ? [ring.image, ...(ring.images || [])]
@@ -50,9 +53,10 @@ const RingDetail = () => {
 
     const handleAddToCart = () => {
         dispatch(addToCart({ ...ring, quantity }));
-        const message = t("toast.addedToCart") || "🛒 Added to cart!";
+        const message = t("toast.addedToCart") || "Added to cart!";
         toast.success(`${ring.name} ${message}`);
     };
+
 
     return (
         <div className="flex w-[90%] mx-auto pt-[40px] mt-[20px] h-[700px] bg-[#efeeee] justify-center items-start gap-[40px]">
@@ -68,7 +72,7 @@ const RingDetail = () => {
                             <img
                                 src={img}
                                 alt={`ring image ${index}`}
-                                className="w-[400px] h-auto object-cover"
+                                className="w-[400px] h-[400px] object-contain"
                             />
                         </SwiperSlide>
                     ))}

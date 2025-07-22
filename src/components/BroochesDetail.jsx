@@ -24,7 +24,7 @@ const BroochesDetail = () => {
     const [quantity, setQuantity] = useState(1);
 
     const wishlist = useSelector(state => state.wishlist.wishlist);
-    const isWished = wishlist.some(item => item.id === parseInt(id));
+    const [isWished, setIsWished] = useState(false);
 
     useEffect(() => {
         const fetchBroochDetail = async () => {
@@ -32,12 +32,13 @@ const BroochesDetail = () => {
                 const res = await axios.get(`http://localhost:4000/brooches?id=${id}`);
                 const product = res.data[0];
                 setBrooch(product);
+                setIsWished(wishlist.some(item => item.id === product.id));
             } catch (error) {
                 console.log('Failed to fetch brooches:', error.message);
             }
         };
         fetchBroochDetail();
-    }, [id]);
+    }, [id, location.pathname, wishlist]);
 
     const toggleWishlist = () => {
         if (isWished) {
@@ -51,7 +52,7 @@ const BroochesDetail = () => {
 
     const handleAddToCart = () => {
         dispatch(addToCart({ ...brooch, quantity }));
-        toast.success(`${brooch.name} ${t("toast.addedToCart") || "🛒 Added to cart!"}`);
+        toast.success(`${brooch.name} ${t("toast.addedToCart") || "Added to cart!"}`);
     };
 
     const images = brooch.image
@@ -72,7 +73,7 @@ const BroochesDetail = () => {
                             <img
                                 src={img}
                                 alt={`brooch image ${index}`}
-                                className="w-[400px] h-auto object-cover"
+                                className="w-[400px] h-[400px] object-contain"
                             />
                         </SwiperSlide>
                     ))}

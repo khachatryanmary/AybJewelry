@@ -163,6 +163,8 @@
     "title": "BROOCHES"
   },
   "toast": {
-    "addedToCart": "Added To Cart!"
+    "addedToCart": "Added to Cart!",
+    "addedToWishlist": "Added to Wishlist",
+    "removedFromWishlist": "Removed from Wishlist"
   }
 }

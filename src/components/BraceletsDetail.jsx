@@ -23,7 +23,7 @@ const BraceletsDetail = () => {
     const [openDetails, setOpenDetails] = useState(false);
 
     const wishlist = useSelector(state => state.wishlist.wishlist);
-    const isWished = wishlist.some(item => item.id === parseInt(id));
+    const [isWished, setIsWished] = useState(false);
 
     useEffect(() => {
         const fetchBraceletDetail = async () => {
@@ -31,12 +31,14 @@ const BraceletsDetail = () => {
                 const res = await axios.get(`http://localhost:4000/bracelets?id=${id}`);
                 const product = res.data[0];
                 setBracelet(product);
+                setIsWished(wishlist.some(item => item.id === product.id));
+
             } catch (error) {
                 console.log('Failed to fetch bracelet:', error.message);
             }
         };
         fetchBraceletDetail();
-    }, [id]);
+    }, [id, location.pathname, wishlist]);
 
     const toggleWishlist = () => {
         if (isWished) {
@@ -71,7 +73,7 @@ const BraceletsDetail = () => {
                             <img
                                 src={img}
                                 alt={`bracelet image ${index}`}
-                                className="w-[400px] h-auto object-cover"
+                                className="w-[400px] h-[400px] object-contain"
                             />
                         </SwiperSlide>
                     ))}

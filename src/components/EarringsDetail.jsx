@@ -67,7 +67,7 @@ const EarringsDetail = () => {
                             <img
                                 src={img}
                                 alt={`earring image ${index}`}
-                                className="w-[400px] h-auto object-cover"
+                                className="w-[400px] h-[400px] object-contain"
                             />
                         </SwiperSlide>
                     ))}
