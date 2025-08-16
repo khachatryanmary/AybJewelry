@@ -1,13 +1,8 @@
 {
-  "wishlist": "WISHLIST",
-  "clearWishlist": "Clear Wishlist",
-  "wishListMessage": "Your wishlist is empty.",
-  "clickToAdd": "Click the heart icon to add items here.",
-  "addToWishlist": "Add to Wishlist",
-  "returnToShop": "Return to shop",
-  "cartTitle": "Cart",
+  "cartTitle": "CART",
   "cartEmpty": "Your cart is currently empty",
   "contactTitle": "CONTACT US",
+  "returnToShop": "Return to Shop",
   "contact": {
     "address": "Address",
     "addressText": "Vernissage, Yerevan",
@@ -40,45 +35,85 @@
   },
   "allProductsGallery": {
     "title": "ALL PRODUCTS",
-    "loadMore" : "Load More"
-
+    "loadMore": "Load More",
+    "add": "Add",
+    "addToCart": "Add to Cart",
+    "addedToCart": "Added to Cart",
+    "addedToWishlist": "Added to wishlist",
+    "removedFromWishlist": "Removed from wishlist",
+    "cartError": "Failed to add to cart",
+    "wishlistError": "Error updating wishlist",
+    "addToWishlist": "Add to Wishlist",
+    "loginPrompt": {
+      "cart": "Please log in to add to cart",
+      "wishlist": "Please log in to add to wishlist"
+    },
+    "loginButton": "Log In",
+    "cancel": "Cancel"
   },
   "login": {
-    "myAccount": "MY ACCOUNT",
-    "login": "LOGIN",
-    "usernameOrEmail": "Username or email address",
+    "myAccount": "My Account",
+    "login": "Login",
+    "email": "Email",
     "password": "Password",
     "rememberMe": "Remember Me",
-    "lostPassword": "Lost Your Password?",
-    "logIn": "LOG IN",
-    "notMember": "Not A Member?",
+    "lostPassword": "Lost your password?",
+    "notMember": "Not a member?",
     "register": "Register",
-    "loginSuccess": "Logged in successfully!"
+    "success": "Logged in successfully!",
+    "error": "Login failed. Please check your credentials."
   },
   "register": {
-    "title": "Create Account",
-    "register": "REGISTER",
-    "username": "Username",
+    "title": "Register",
+    "register": "Register",
+    "firstName": "First Name",
+    "lastName": "Last Name",
     "email": "Email",
     "password": "Password",
     "haveAccount": "Already have an account?",
-    "login": "Log in",
-    "success": "Registration successful! You can login now."
+    "login": "Login",
+    "success": "Registration successful! You can login now.",
+    "error": "Registration failed. Please try again.",
+    "usernameError": "Full name must be at least 3 characters long"
   },
+
   "profile": {
-    "title": "My Profile",
-    "username": "Username",
+    "title": "Profile",
+    "name": "Name",
+    "firstName": "First Name",
+    "lastName": "Last Name",
     "email": "Email",
-    "logout": "Log Out",
-    "notLoggedIn": "You are not logged in."
+    "orders": "Orders",
+    "noOrders": "No orders yet",
+    "logout": "Logout",
+    "save": "Save",
+    "cancel": "Cancel",
+    "updateSuccess": "Username updated successfully!",
+    "updateFailed": "Failed to update username",
+    "usernameError": "Full name must be at least 3 characters long"
   },
+
   "necklaceDetail": {
     "backToSelection": "BACK TO SELECTION",
     "add": "ADD",
     "details": "DETAILS"
   },
   "necklaceGallery": {
-    "title": "NECKLACES"
+    "title": "NECKLACE",
+    "loadMore": "Load More",
+    "addToCart": "Add to Cart",
+    "addedToCart": "Added to Cart",
+    "addedToWishlist": "Added to wishlist",
+    "removedFromWishlist": "Removed from wishlist",
+    "cartError": "Failed to add to cart",
+    "wishlistError": "Error updating wishlist",
+    "addToWishlist": "Add to Wishlist",
+    "loginPrompt": {
+      "cart": "Please log in to add to cart",
+      "wishlist": "Please log in to add to wishlist"
+    },
+    "loginButton": "Log In",
+    "cancel": "Cancel"
   },
   "search": {
     "title": "WHAT ARE YOU LOOKING FOR?",
@@ -104,7 +139,7 @@
     "button": "Explore the Collection"
   },
   "sectionNav": {
-    "heading": "What will you fall in love with today?",
+    "heading": "Shop by Type",
     "necklaces": "NECKLACES",
     "necklacesAlt": "Necklaces",
     "rings": "RINGS",
@@ -113,30 +148,79 @@
     "earringsAlt": "Earrings",
     "bracelets": "BRACELETS",
     "braceletsAlt": "Bracelets",
-    "brooches": "BROOCHES",
-    "broochesAlt": "Brooches"
+    "brooches": "HEADCLIPS",
+    "broochesAlt": "Headclips"
   },
   "cart": {
     "clearCart": "Clear Cart",
-    "cartTitle": "Your Cart",
+    "cartTitle": "Cart",
     "cartEmpty": "Your cart is empty",
     "returnToShop": "Return to Shop",
     "removeCart": "Remove",
-    "total": "Total"
+    "total": "Total",
+    "addNote": "ADD A NOTE TO YOUR ORDER",
+    "continueShopping": "Continue Shopping",
+    "checkOut": "Check Out",
+    "size": "Size",
+    "loginPrompt": "Please log in to view your cart",
+    "loginButton": "Log In"
   },
+  "checkout": {
+    "checkoutTitle": "Check Out",
+    "email": "Email",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "phone": "Phone",
+    "region": "Region",
+    "selectRegion": "Select a region",
+    "address": "Street Address",
+    "apartment": "Apartment",
+    "postalCode": "Postal Code",
+    "deliveryType": "Delivery Type",
+    "delivery": "Delivery",
+    "pickup": "Pick up from Vernissage store",
+    "paymentDetails": "Payment Details",
+    "cardNumber": "Card Number",
+    "cardHolder": "Cardholder Name",
+    "placeOrder": "Place Order"
+  },
+
   "ringGallery": {
-    "title": "RINGS"
-  },
-  "ringDetail": {
-    "backToSelection": "Back to selection",
-    "add": "Add to Cart",
-    "details": "Details"
+    "title": "RINGS",
+    "loadMore": "Load More",
+    "addToCart": "Add to Cart",
+    "addedToCart": "Added to Cart",
+    "addedToWishlist": "Added to wishlist",
+    "removedFromWishlist": "Removed from wishlist",
+    "cartError": "Failed to add to cart",
+    "wishlistError": "Error updating wishlist",
+    "addToWishlist": "Add to Wishlist",
+    "loginPrompt": {
+      "cart": "Please log in to add to cart",
+      "wishlist": "Please log in to add to wishlist"
+    },
+    "loginButton": "Log In",
+    "cancel": "Cancel"
   },
   "earringsGallery": {
     "title": "EARRINGS"
   },
-  "earringsDetail": {
-    "backToSelection": "Back to Selection"
+  "earringGallery": {
+    "title": "EARRINGS",
+    "loadMore": "Load More",
+    "addToCart": "Add to Cart",
+    "addedToCart": "Added to Cart",
+    "addedToWishlist": "Added to wishlist",
+    "removedFromWishlist": "Removed from wishlist",
+    "cartError": "Failed to add to cart",
+    "wishlistError": "Error updating wishlist",
+    "addToWishlist": "Add to Wishlist",
+    "loginPrompt": {
+      "cart": "Please log in to add to cart",
+      "wishlist": "Please log in to add to wishlist"
+    },
+    "loginButton": "Log In",
+    "cancel": "Cancel"
   },
   "earringDetail": {
     "add": "Add to Cart",
@@ -149,9 +233,25 @@
     "add": "Add to Cart",
     "details": "Details"
   },
-  "braceletsGallery": {
-    "title": "BRACELETS "
+
+  "braceletGallery": {
+    "title": "BRACELETS",
+    "loadMore": "Load More",
+    "addToCart": "Add to Cart",
+    "addedToCart": "Added to Cart",
+    "addedToWishlist": "Added to wishlist",
+    "removedFromWishlist": "Removed from wishlist",
+    "cartError": "Failed to add to cart",
+    "wishlistError": "Error updating wishlist",
+    "addToWishlist": "Add to Wishlist",
+    "loginPrompt": {
+      "cart": "Please log in to add to cart",
+      "wishlist": "Please log in to add to wishlist"
+    },
+    "loginButton": "Log In",
+    "cancel": "Cancel"
   },
+
   "broochesDetail": {
     "backToSelection": "Back to Selection"
   },
@@ -159,12 +259,83 @@
     "add": "Add to Cart",
     "details": "Details"
   },
-  "broochesGallery": {
-    "title": "BROOCHES"
+  "broochGallery": {
+    "title": "BROOCHES",
+    "loadMore": "Load More",
+    "addToCart": "Add to Cart",
+    "addedToCart": "Added to Cart",
+    "addedToWishlist": "Added to wishlist",
+    "removedFromWishlist": "Removed from wishlist",
+    "cartError": "Failed to add to cart",
+    "wishlistError": "Error updating wishlist",
+    "addToWishlist": "Add to Wishlist",
+    "loginPrompt": {
+      "cart": "Please log in to add to cart",
+      "wishlist": "Please log in to add to wishlist"
+    },
+    "loginButton": "Log In",
+    "cancel": "Cancel"
   },
   "toast": {
     "addedToCart": "Added to Cart!",
     "addedToWishlist": "Added to Wishlist",
     "removedFromWishlist": "Removed from Wishlist"
+  },
+
+  "wishlist": {
+    "wishlist": "Wishlist",
+    "loginPrompt": "Please login to see your wishlist",
+    "loginButton": "Login",
+    "wishListMessage": "Your wishlist is empty",
+    "clickToAdd": "Click heart icons to add items to your wishlist",
+    "returnToShop": "Return to Shop",
+    "removeWishlist": "Remove",
+    "removeSuccess": "Removed from wishlist",
+    "removeFailed": "Failed to remove from wishlist",
+    "fetchFailed": "Failed to fetch wishlist",
+    "clearWishlist": "Clear Wishlist",
+    "clearSuccess": "Wishlist cleared successfully",
+    "clearFailed": "Failed to clear wishlist",
+    "moveToCart": "Move to Cart",
+    "moveToCartSuccess": "Moved to cart successfully",
+    "moveToCartFailed": "Failed to move to cart",
+    "selectRingSize": "Select Ring Size",
+    "addToCart": "Add to Cart",
+    "sizeGuide": "Size Guide",
+    "cancel": "Cancel"
+  },
+  "ringDetail": {
+    "backToSelection": "Back to Selection",
+    "add": "Add to Cart",
+    "sizeGuide": "Size Guide",
+    "details": "Details",
+    "measureInstructionsRing": "How to Measure Using a Ring",
+    "measureInstructionsFinger": "How to Measure Your Finger",
+    "measureRingStep1": "Take an existing ring that fits you well.",
+    "measureRingStep2": "Place the ring on a ruler.",
+    "measureRingStep3": "Measure the inner diameter in millimeters (from inside edge to inside edge).",
+    "measureRingStep4": "Compare the measurement to the diameter in the table below.",
+    "measureFingerStep1": "Wrap a thin strip of paper or string around the base of your finger.",
+    "measureFingerStep2": "Mark where the ends meet with a pen.",
+    "measureFingerStep3": "Measure the length in millimeters with a ruler.",
+    "measureFingerStep4": "Compare the measurement to the circumference in the table below.",
+    "measureFingerStep5": "Measure in the evening for accuracy, as fingers may swell slightly.",
+    "measureFingerStep6": "If between sizes, choose the larger size for comfort.",
+    "size": "Size",
+    "sizeChart": "Size Chart",
+    "diameter": "Diameter",
+    "circumference": "Circumference",
+    "loginPrompt": {
+      "cart": "Please log in to add to your cart",
+      "wishlist": "Please log in to add to your wishlist"
+    },
+    "loginButton": "Log In",
+    "cancel": "Cancel",
+      "addedToCart": "Added to cart",
+      "addedToWishlist": "Added to wishlist",
+      "removedFromWishlist": "Removed from wishlist",
+      "selectSize": "Please select a ring size",
+      "cartError": "Failed to add to cart",
+      "wishlistError": "Error updating wishlist"
   }
 }

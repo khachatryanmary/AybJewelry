@@ -17,7 +17,7 @@ const SectionGallery = () => {
                     <source src="/videos/JewelryIntro.mp4" type="video/mp4" />
                 </video>
                 <div className="mt-[50px] w-[80%] px-6">
-                    <h2 className="text-[#0a0a39] font-against italic font-light text-[25px] mb-[10px]">
+                    <h2 className="text-[#0a0a39] font-[Against] font-light text-[25px] mb-[10px]">
                         {t('sectionGallery.title')}
                     </h2>
                     <p className="text-base mb-[10px]">

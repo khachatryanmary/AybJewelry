@@ -1,15 +1,19 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, useParams, useLocation } from "react-router-dom";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
-import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../Toolkit/slices/cartSlice.js";
-import { addToWishlist, removeFromWishlist } from "../Toolkit/slices/wishlistSlice.js";
 import { toast } from "react-toastify";
+import { useDispatch, useSelector } from "react-redux";
 import 'swiper/css';
 import 'swiper/css/navigation';
+import { motion, AnimatePresence } from "framer-motion";
+
+const SkeletonBox = ({ className }) => (
+    <div className={`bg-gray-300 animate-pulse rounded ${className}`} />
+);
 
 const EarringsDetail = () => {
     const dispatch = useDispatch();
@@ -17,143 +21,264 @@ const EarringsDetail = () => {
     const { id } = useParams();
     const location = useLocation();
     const lng = location.pathname.split("/")[1];
+    const from = location.state?.from || `/${lng}/earrings`;
 
     const [earring, setEarring] = useState({});
     const [openDetails, setOpenDetails] = useState(false);
     const [quantity, setQuantity] = useState(1);
-    const wishlist = useSelector((state) => state.wishlist.wishlist);
+    const [isLoginPromptOpen, setIsLoginPromptOpen] = useState(false);
+    const [loginPromptType, setLoginPromptType] = useState("");
     const [isWished, setIsWished] = useState(false);
+    const [isAddedToCart, setIsAddedToCart] = useState(false); // New state for button text
+    const [loading, setLoading] = useState(true);
+
+    const currentUser = useSelector((state) => state.auth.user);
+    const userId = currentUser?.id;
+    const API_URL = import.meta.env.VITE_API_URL;
+
+    const loginPromptRef = useRef(null);
 
     useEffect(() => {
-        const fetchEarringDetail = async () => {
+        const fetchEarringDetailAndWishlistStatus = async () => {
             try {
-                const res = await axios.get(`http://localhost:4000/earrings?id=${id}`);
-                const product = res.data[0];
+                setLoading(true);
+                const productRes = await axios.get(`${API_URL}/api/products/${id}`);
+                const product = productRes.data;
                 setEarring(product);
-                setIsWished(wishlist.some(item => item.id === product.id));
+
+                if (currentUser) {
+                    const wishRes = await axios.get(`${API_URL}/api/wishlist/${currentUser.id}`);
+                    const items = wishRes.data?.items || [];
+                    const found = items.some(item => item._id === product._id);
+                    setIsWished(found);
+                }
             } catch (error) {
-                console.error('Failed to fetch earring:', error.message);
+                console.error("Failed to fetch data:", error.message);
+            } finally {
+                setLoading(false);
             }
         };
-        fetchEarringDetail();
-    }, [id, location.pathname, wishlist]);
 
-    const toggleWishlist = () => {
-        if (isWished) {
-            dispatch(removeFromWishlist(earring.id));
-            toast.info(`${earring.name} ${t("toast.removedFromWishlist")}`);
+        fetchEarringDetailAndWishlistStatus();
+    }, [id, location.pathname, API_URL, currentUser]);
+
+    useEffect(() => {
+        if (isLoginPromptOpen) {
+            document.body.classList.add('no-scroll');
         } else {
-            dispatch(addToWishlist(earring));
-            toast.success(`${earring.name} ${t("toast.addedToWishlist")}`);
+            document.body.classList.remove('no-scroll');
         }
-        setIsWished(!isWished);
+        return () => document.body.classList.remove('no-scroll');
+    }, [isLoginPromptOpen]);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (isLoginPromptOpen && loginPromptRef.current && !loginPromptRef.current.contains(event.target)) {
+                setIsLoginPromptOpen(false);
+            }
+        };
+
+        if (isLoginPromptOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isLoginPromptOpen]);
+
+    const toggleWishlist = async () => {
+        if (!userId || !earring._id) {
+            setLoginPromptType("wishlist");
+            setIsLoginPromptOpen(true);
+            return;
+        }
+        try {
+            if (isWished) {
+                await axios.delete(`${API_URL}/api/wishlist/${userId}/${earring._id}`);
+                setIsWished(false);
+                toast.info(t('earringDetail.removedFromWishlist', { defaultValue: `${earring.name} removed from wishlist` }));
+            } else {
+                await axios.post(`${API_URL}/api/wishlist/${userId}`, {
+                    productId: earring._id,
+                });
+                setIsWished(true);
+                toast.success(t('earringDetail.addedToWishlist', { defaultValue: `${earring.name} added to wishlist` }));
+            }
+        } catch (err) {
+            console.error("Wishlist toggle failed:", err.message);
+            toast.error(t('earringDetail.wishlistError', { defaultValue: "Error updating wishlist" }));
+        }
     };
 
-    const handleAddToCart = () => {
-        dispatch(addToCart({ ...earring, quantity }));
-        toast.success(`${earring.name} ${t("toast.addedToCart")}`);
+    const handleAddToCart = async () => {
+        if (!userId) {
+            setLoginPromptType("cart");
+            setIsLoginPromptOpen(true);
+            return;
+        }
+        try {
+            await axios.post(`${API_URL}/api/cart/${userId}`, {
+                productId: earring._id,
+                quantity,
+            });
+            dispatch(addToCart({ ...earring, quantity }));
+            setIsAddedToCart(true);
+            toast.success(t('ringDetail.addedToCart', { defaultValue: `${earring.name} added to cart!` }));
+            setTimeout(() => setIsAddedToCart(false), 3000);
+        } catch (error) {
+            console.error("Failed to add to cart:", error.message);
+            toast.error(t('ringDetail.cartError', { defaultValue: "Failed to add to cart" }));
+        }
     };
 
     const images = earring.image
-        ? [earring.image, ...(earring.images || [])]
-        : earring.images || [];
+        ? [`${API_URL}${earring.image}`, ...(earring.images || []).map(img => `${API_URL}${img}`)]
+        : (earring.images || []).map(img => `${API_URL}${img}`);
 
     return (
         <div className="flex w-[90%] mx-auto pt-[40px] mt-[20px] h-[700px] bg-[#efeeee] justify-center items-start gap-[40px]">
             <div className="relative w-[400px] rounded-[8px] shadow-md overflow-hidden">
-                <Swiper modules={[Navigation]} navigation spaceBetween={10} slidesPerView={1}>
-                    {images.map((img, index) => (
-                        <SwiperSlide key={index}>
-                            <img
-                                src={img}
-                                alt={`earring image ${index}`}
-                                className="w-[400px] h-[400px] object-contain"
-                            />
-                        </SwiperSlide>
-                    ))}
-                </Swiper>
+                {loading ? (
+                    <SkeletonBox className="w-[400px] h-[400px]" />
+                ) : (
+                    <Swiper modules={[Navigation]} navigation spaceBetween={10} slidesPerView={1}>
+                        {images.map((img, index) => (
+                            <SwiperSlide key={index}>
+                                <img
+                                    src={img}
+                                    alt={`earring image ${index}`}
+                                    className="w-[400px] h-[400px] object-contain"
+                                />
+                            </SwiperSlide>
+                        ))}
+                    </Swiper>
+                )}
             </div>
 
             <div className="flex flex-col justify-center items-start gap-[40px] w-[50%]">
-                <Link to={`/${lng}/earrings/`}>
-                    <button className="bg-[#f7f7f7] text-[#0a0a39] transition duration-500 border-none cursor-pointer py-[10px] px-[18px] font-semibold rounded-[6px] hover:bg-[#0a0a39] hover:text-[white]">
-                        {t('earringsDetail.backToSelection')}
-                    </button>
-                </Link>
+                {loading ? (
+                    <>
+                        <SkeletonBox className="w-[150px] h-[40px]" />
+                        <SkeletonBox className="w-[80%] h-[30px]" />
+                        <SkeletonBox className="w-[100px] h-[30px]" />
+                        <SkeletonBox className="w-[50px] h-[30px]" />
+                        <SkeletonBox className="w-full h-[120px]" />
+                    </>
+                ) : (
+                    <>
+                        <Link to={from}>
+                            <button className="bg-[#f7f7f7] text-[#0a0a39] transition duration-500 border-none cursor-pointer py-[10px] px-[18px] font-semibold rounded-[6px] hover:bg-[#0a0a39] hover:text-[white]">
+                                {t('earringDetail.backToSelection')}
+                            </button>
+                        </Link>
 
-                <div className="flex flex-col w-full">
-                    <div className="flex justify-between w-full">
-                        <span className="text-[25px] font-bold text-[#213547]">{earring.name}</span>
-                        <span
-                            onClick={toggleWishlist}
-                            className={`text-[28px] cursor-pointer transition-all duration-300 ${isWished ? 'text-[#0a0a39]' : 'text-gray-400'}`}
-                            title={t('addToWishlist')}
-                        >
-                            <i className={`bi ${isWished ? 'bi-heart-fill' : 'bi-heart'} transition-all duration-300`}></i>
-                        </span>
-                    </div>
+                        <div className="flex flex-col w-full">
+                            <div className="flex justify-between w-full">
+                                <span className="text-[25px] font-bold text-[#213547]">{earring.name}</span>
+                                <span
+                                    onClick={toggleWishlist}
+                                    className={`text-[28px] cursor-pointer transition-all duration-300 ${isWished ? 'text-[#0a0a39]' : 'text-gray-400'}`}
+                                    title={t('earringDetail.addToWishlist')}
+                                >
+                                    <i className={`bi ${isWished ? 'bi-heart-fill' : 'bi-heart'} transition-all duration-300`}></i>
+                                </span>
+                            </div>
 
-                    <span className="text-[20px] text-[#666] font-semibold my-[10px] mb-[20px]">
-                        {earring.price * quantity} AMD
-                    </span>
+                            <span className="text-[20px] text-[#666] font-semibold my-[10px] mb-[20px]">
+                                {earring.price * quantity} AMD
+                            </span>
 
-                    <div className="flex items-center gap-3 mt-3">
-                        <button
-                            onClick={() => setQuantity(q => (q > 1 ? q - 1 : 1))}
-                            className="w-[30px] h-[30px] flex items-center justify-center bg-[#f7f7f7] rounded hover:bg-[#0a0a39] hover:text-white transition"
-                        >
-                            -
-                        </button>
-                        <input
-                            type="number"
-                            min="1"
-                            value={quantity}
-                            onChange={e => setQuantity(Math.max(1, Number(e.target.value)))}
-                            className="w-[50px] h-[30px] text-center border rounded bg-[#f7f7f7]"
-                        />
-                        <button
-                            onClick={() => setQuantity(q => q + 1)}
-                            className="w-[30px] h-[30px] flex items-center justify-center bg-[#f7f7f7] rounded hover:bg-[#0a0a39] hover:text-white transition"
-                        >
-                            +
-                        </button>
-                    </div>
+                            <div className="flex items-center gap-3 mt-3">
+                                <button
+                                    onClick={() => setQuantity(q => (q > 1 ? q - 1 : 1))}
+                                    className="w-[30px] h-[30px] flex items-center justify-center bg-[#f7f7f7] rounded hover:bg-[#0a0a39] hover:text-white transition"
+                                >
+                                    -
+                                </button>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    value={quantity}
+                                    onChange={e => setQuantity(Math.max(1, Number(e.target.value)))}
+                                    className="w-[50px] h-[30px] text-center border rounded bg-[#f7f7f7]"
+                                />
+                                <button
+                                    onClick={() => setQuantity(q => q + 1)}
+                                    className="w-[30px] h-[30px] flex items-center justify-center bg-[#f7f7f7] rounded hover:bg-[#0a0a39] hover:text-white transition"
+                                >
+                                    +
+                                </button>
+                            </div>
 
-                    <p className="text-[16px] leading-[1.5] text-[#444] mb-[20px]">{earring.description}</p>
+                            <p className="text-[16px] leading-[1.5] text-[#444] mb-[20px]">{earring.description}</p>
 
-                    <button
-                        id="addBtn"
-                        onClick={handleAddToCart}
-                        className="transition duration-500 border-none cursor-pointer py-[10px] px-[18px] font-semibold rounded-[6px] bg-[#f7f7f7] text-[#0a0a39] hover:bg-[#0a0a39] hover:text-[white]"
-                    >
-                        {t('earringDetail.add')}
-                    </button>
+                            <button
+                                id="addBtn"
+                                onClick={handleAddToCart}
+                                className="transition duration-500 border-none cursor-pointer py-[10px] px-[18px] font-semibold rounded-[6px] bg-[#f7f7f7] text-[#0a0a39] hover:bg-[#0a0a39] hover:text-[white]"
+                            >
+                                {isAddedToCart ? t('ringDetail.addedToCart') : t('ringDetail.add')}
+                            </button>
 
-                    <div className="mt-[20px] w-full bg-[white] rounded-[8px] shadow-md overflow-hidden">
-                        <div
-                            className={`text-[18px] font-bold flex justify-between items-center px-[20px] py-[12px] bg-[#f7f7f7] border-b border-[#ddd] cursor-pointer select-none ${openDetails ? 'open' : ''}`}
-                            onClick={() => setOpenDetails(!openDetails)}
-                        >
-                            <span>{t('earringDetail.details')}</span>
-                            <i className={`bi bi-chevron-double-down transition-transform duration-300 ${openDetails ? 'rotate-180' : ''}`}></i>
+                            <div className="mt-[20px] w-full bg-[white] rounded-[8px] shadow-md overflow-hidden">
+                                <div
+                                    className={`text-[18px] font-bold flex justify-between items-center px-[20px] py-[12px] bg-[#f7f7f7] border-b border-[#ddd] cursor-pointer select-none ${openDetails ? 'open' : ''}`}
+                                    onClick={() => setOpenDetails(!openDetails)}
+                                >
+                                    <span>{t('earringDetail.details')}</span>
+                                    <i className={`bi bi-chevron-double-down transition-transform duration-300 ${openDetails ? 'rotate-180' : ''}`}></i>
+                                </div>
+
+                                {openDetails && (
+                                    <ul className="list-none m-0 p-[15px] px-[25px] flex flex-col gap-[14px] max-h-[300px] overflow-y-auto">
+                                        {earring.details?.length > 0 &&
+                                            Object.entries(earring.details[0]).map(([key, value], index) => (
+                                                <li
+                                                    key={index}
+                                                    className="flex justify-start items-center w-full gap-[20px] text-left"
+                                                >
+                                                    <strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong> {value}
+                                                </li>
+                                            ))}
+                                    </ul>
+                                )}
+                            </div>
                         </div>
-
-                        {openDetails && (
-                            <ul className="list-none m-0 p-[15px] px-[25px] flex flex-col gap-[14px] max-h-[300px] overflow-y-auto">
-                                {earring.details?.length > 0 &&
-                                    Object.entries(earring.details[0]).map(([key, value], index) => (
-                                        <li
-                                            key={index}
-                                            className="flex justify-start items-center w-full gap-[20px] text-left"
-                                        >
-                                            <strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong> {value}
-                                        </li>
-                                    ))}
-                            </ul>
-                        )}
-                    </div>
-                </div>
+                    </>
+                )}
             </div>
+
+            <AnimatePresence>
+                {isLoginPromptOpen && (
+                    <motion.div
+                        ref={loginPromptRef}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="fixed inset-0 flex items-center justify-center z-50"
+                    >
+                        <div className="bg-white rounded-[10px] p-[20px] w-[500px] flex flex-col items-center justify-center gap-[20px]">
+                            <i className="bi bi-lock text-[40px] text-[#0a0a39]" />
+                            <h2 className="text-[25px] text-[#0a0a39]">
+                                {t(`earringDetail.loginPrompt.${loginPromptType}`)}
+                            </h2>
+                            <Link to={`/${lng}/login`}>
+                                <button className="w-[200px] h-[40px] bg-[#efeeee] border-none rounded-[10px] text-[#0a0a39] font-semibold transition duration-500 hover:bg-[#0a0a39] hover:text-white">
+                                    {t('earringDetail.loginButton')}
+                                </button>
+                            </Link>
+                            <button
+                                onClick={() => setIsLoginPromptOpen(false)}
+                                className="text-[#0a0a39] hover:text-[#213547] text-[16px]"
+                            >
+                                {t('earringDetail.cancel')}
+                            </button>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };

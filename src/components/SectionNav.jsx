@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 
 const SectionNav = () => {
     const location = useLocation();
-    const lng = location.pathname.split("/")[1]; // get current language from URL
+    const lng = location.pathname.split("/")[1];
     const { t } = useTranslation();
 
     const navItems = [
@@ -44,7 +44,7 @@ const SectionNav = () => {
         <div className="h-[60vh] flex flex-col justify-center items-center">
             <h2
                 id="secText"
-                className="text-[#0e0e53] font-against italic font-light text-center text-[30px]"
+                className="text-[28px] text-[#0a0a39] font-[Against] italic font-light text-center"
             >
                 {t('sectionNav.heading')}
             </h2>

@@ -31,6 +31,7 @@ import BraceletsDetail from "./components/BraceletsDetail.jsx";
 import BroochesDetail from "./components/BroochesDetail.jsx";
 import AllProducts from "./components/AllProducts.jsx";
 import {ToastContainer} from "react-toastify";
+import CheckOut from "./components/CheckOut.jsx";
 
 function App() {
     const [searchActive, setSearchActive] = useState(false);
@@ -97,7 +98,9 @@ function App() {
                 { path: "cart", element: <Cart /> },
                 { path: "wishlist", element: <Wishlist /> },
                 { path: "register", element: <Register /> },
-                { path: "profile", element: <Profile /> }
+                { path: "profile", element: <Profile /> },
+                { path: "checkout", element: <CheckOut />}
+
             ]
         },
         {

@@ -1,3 +1,4 @@
+/*@import url('https://fonts.cdnfonts.com/css/against');*/
 @import 'swiper/css';
 @import 'swiper/css/navigation';
 @import 'swiper/css/pagination';
@@ -70,4 +71,21 @@ html, body {
 .Toastify__progress-bar {
     background: #0a0a39 !important;
 }
+body.no-scroll {
+    overflow: hidden;
+}
 
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+@media (max-width: 400px) {
+    .size-guide-grid {
+        grid-template-columns: 1fr !important;
+    }
+}

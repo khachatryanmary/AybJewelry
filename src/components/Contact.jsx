@@ -6,7 +6,7 @@ const Contact = () => {
 
     return (
         <div className="w-[75%] mx-auto my-8">
-            <div className="text-center font-against italic">
+            <div className="text-center font-[Against] italic">
                 <h2 className="text-[28px] text-[#0a0a39]">{t('contactTitle')}</h2>
             </div>
 

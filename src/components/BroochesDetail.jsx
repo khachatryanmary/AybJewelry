@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import { Link, useParams, useLocation } from "react-router-dom";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
@@ -6,8 +6,8 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../Toolkit/slices/cartSlice.js";
-import { addToWishlist, removeFromWishlist } from "../Toolkit/slices/wishlistSlice.js";
 import { toast } from "react-toastify";
+import { motion, AnimatePresence } from "framer-motion";
 
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -16,48 +16,121 @@ const BroochesDetail = () => {
     const dispatch = useDispatch();
     const { t } = useTranslation();
     const { id } = useParams();
+
     const location = useLocation();
     const lng = location.pathname.split("/")[1];
+    const from = location.state?.from || `/${lng}/brooches`;
 
     const [brooch, setBrooch] = useState({});
     const [openDetails, setOpenDetails] = useState(false);
     const [quantity, setQuantity] = useState(1);
+    const [isLoginPromptOpen, setIsLoginPromptOpen] = useState(false);
+    const [loginPromptType, setLoginPromptType] = useState("");
+    const [isAddedToCart, setIsAddedToCart] = useState(false);
 
-    const wishlist = useSelector(state => state.wishlist.wishlist);
     const [isWished, setIsWished] = useState(false);
+    const currentUser = useSelector((state) => state.auth.user);
+    const userId = currentUser?.id;
+    const API_URL = import.meta.env.VITE_API_URL;
+
+    const loginPromptRef = useRef(null);
+
 
     useEffect(() => {
-        const fetchBroochDetail = async () => {
+        const fetchBroochDetailAndWishlistStatus = async () => {
             try {
-                const res = await axios.get(`http://localhost:4000/brooches?id=${id}`);
-                const product = res.data[0];
+                const productRes = await axios.get(`${API_URL}/api/products/${id}`);
+                const product = productRes.data;
                 setBrooch(product);
-                setIsWished(wishlist.some(item => item.id === product.id));
+
+                if (currentUser) {
+                    const wishRes = await axios.get(`${API_URL}/api/wishlist/${currentUser.id}`);
+                    const items = wishRes.data?.items || [];
+                    const found = items.some(item => item._id === product._id);
+                    setIsWished(found);
+                }
             } catch (error) {
-                console.log('Failed to fetch brooches:', error.message);
+                console.error("Failed to fetch data:", error.message);
             }
         };
-        fetchBroochDetail();
-    }, [id, location.pathname, wishlist]);
 
-    const toggleWishlist = () => {
-        if (isWished) {
-            dispatch(removeFromWishlist(brooch.id));
-            toast.info(`${brooch.name} ${t("toast.removedFromWishlist") || "removed from wishlist"}`);
+        fetchBroochDetailAndWishlistStatus();
+    }, [id, location.pathname, API_URL, currentUser]);
+
+    useEffect(() => {
+        if (isLoginPromptOpen) {
+            document.body.classList.add('no-scroll');
         } else {
-            dispatch(addToWishlist(brooch));
-            toast.success(`${brooch.name} ${t("toast.addedToWishlist") || "added to wishlist"}`);
+            document.body.classList.remove('no-scroll');
+        }
+        return () => document.body.classList.remove('no-scroll');
+    }, [isLoginPromptOpen]);
+
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (isLoginPromptOpen && loginPromptRef.current && !loginPromptRef.current.contains(event.target)) {
+                setIsLoginPromptOpen(false);
+            }
+        };
+
+        if (isLoginPromptOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isLoginPromptOpen]);
+
+    const toggleWishlist = async () => {
+        if (!userId || !brooch._id) {
+            setLoginPromptType("wishlist");
+            setIsLoginPromptOpen(true);
+            return;
+        }
+        try {
+            if (isWished) {
+                await axios.delete(`${API_URL}/api/wishlist/${userId}/${brooch._id}`);
+                setIsWished(false);
+                toast.info(`${brooch.name} removed from wishlist`);
+            } else {
+                await axios.post(`${API_URL}/api/wishlist/${userId}`, {
+                    productId: brooch._id,
+                });
+                setIsWished(true);
+                toast.success(`${brooch.name} added to wishlist`);
+            }
+        } catch (err) {
+            console.error("Wishlist toggle failed:", err.message);
+            toast.error("Error updating wishlist");
         }
     };
 
-    const handleAddToCart = () => {
-        dispatch(addToCart({ ...brooch, quantity }));
-        toast.success(`${brooch.name} ${t("toast.addedToCart") || "Added to cart!"}`);
+    const handleAddToCart = async () => {
+        if (!userId) {
+            setLoginPromptType("cart");
+            setIsLoginPromptOpen(true);
+            return;
+        }
+        try {
+            await axios.post(`${API_URL}/api/cart/${userId}`, {
+                productId: brooch._id,
+                quantity,
+            });
+            dispatch(addToCart({ ...brooch, quantity }));
+            setIsAddedToCart(true);
+            toast.success(t('ringDetail.addedToCart', { defaultValue: `${brooch.name} added to cart!` }));
+            setTimeout(() => setIsAddedToCart(false), 3000);
+        } catch (error) {
+            console.error("Failed to add to cart:", error.message);
+            toast.error(t('ringDetail.cartError', { defaultValue: "Failed to add to cart" }));
+        }
     };
 
     const images = brooch.image
-        ? [brooch.image, ...(brooch.images || [])]
-        : brooch.images || [];
+        ? [`${import.meta.env.VITE_API_URL}${brooch.image}`, ...(brooch.images || []).map(img => `${import.meta.env.VITE_API_URL}${img}`)]
+        : (brooch.images || []).map(img => `${import.meta.env.VITE_API_URL}${img}`);
 
     return (
         <div className="flex w-[90%] mx-auto pt-[40px] mt-[20px] h-[700px] bg-[#efeeee] justify-center items-start gap-[40px]">
@@ -81,7 +154,7 @@ const BroochesDetail = () => {
             </div>
 
             <div className="flex flex-col justify-center items-start gap-[40px] w-[50%]">
-                <Link to={`/${lng}/brooches/`}>
+                <Link to={from}>
                     <button className="bg-[#f7f7f7] text-[#0a0a39] transition duration-500 border-none cursor-pointer py-[10px] px-[18px] font-semibold rounded-[6px] hover:bg-[#0a0a39] hover:text-[white]">
                         {t('broochesDetail.backToSelection')}
                     </button>
@@ -134,7 +207,7 @@ const BroochesDetail = () => {
                         onClick={handleAddToCart}
                         className="transition duration-500 border-none cursor-pointer py-[10px] px-[18px] font-semibold rounded-[6px] bg-[#f7f7f7] text-[#0a0a39] hover:bg-[#0a0a39] hover:text-[white]"
                     >
-                        {t('broochDetail.add')}
+                        {isAddedToCart ? t('ringDetail.addedToCart') : t('ringDetail.add')}
                     </button>
 
                     <div className="mt-[20px] w-full bg-[white] rounded-[8px] shadow-md overflow-hidden">
@@ -164,6 +237,36 @@ const BroochesDetail = () => {
                     </div>
                 </div>
             </div>
+            <AnimatePresence>
+                {isLoginPromptOpen && (
+                    <motion.div
+                        ref={loginPromptRef}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="fixed inset-0  flex items-center justify-center z-50"
+                    >
+                        <div className="bg-white rounded-[10px] p-[20px] w-[500px] flex flex-col items-center justify-center gap-[20px]">
+                            <i className="bi bi-lock text-[40px] text-[#0a0a39]" />
+                            <h2 className="text-[25px] text-[#0a0a39]">
+                                {t(`ringDetail.loginPrompt.${loginPromptType}`)}
+                            </h2>
+                            <Link to={`/${lng}/login`}>
+                                <button className="w-[200px] h-[40px] bg-[#efeeee] border-none rounded-[10px] text-[#0a0a39] font-semibold transition duration-500 hover:bg-[#0a0a39] hover:text-white">
+                                    {t('ringDetail.loginButton')}
+                                </button>
+                            </Link>
+                            <button
+                                onClick={() => setIsLoginPromptOpen(false)}
+                                className="text-[#0a0a39] hover:text-[#213547] text-[16px]"
+                            >
+                                {t('ringDetail.cancel')}
+                            </button>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };

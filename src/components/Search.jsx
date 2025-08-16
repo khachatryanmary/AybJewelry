@@ -6,42 +6,24 @@ function Search({ searchActive, setSearchActive, lng }) {
     const { t } = useTranslation();
 
     const [search, setSearch] = useState('');
-    const [allProducts, setAllProducts] = useState([]); // to store combined data
+    const [allProducts, setAllProducts] = useState([]);
     const [loading, setLoading] = useState(false);
+
+    const API_URL = import.meta.env.VITE_API_URL;
 
     useEffect(() => {
         if (!searchActive) return;
 
         setLoading(true);
 
-        // Fetch all categories in parallel
-        Promise.all([
-            fetch('http://localhost:4000/necklaces').then(res => res.json()),
-            fetch('http://localhost:4000/rings').then(res => res.json()),
-            fetch('http://localhost:4000/earrings').then(res => res.json()),
-            fetch('http://localhost:4000/bracelets').then(res => res.json()),
-            fetch('http://localhost:4000/brooches').then(res => res.json()),
-        ])
-            .then(([necklaces, rings, earrings, bracelets, brooches]) => {
-                const necklacesWithCategory = necklaces.map(item => ({ ...item, category: 'necklaces' }));
-                const ringsWithCategory = rings.map(item => ({ ...item, category: 'rings' }));
-                const earringsWithCategory = earrings.map(item => ({ ...item, category: 'earrings' }));
-                const braceletsWithCategory = bracelets.map(item => ({ ...item, category: 'bracelets' }));
-                const broochesWithCategory = brooches.map(item => ({ ...item, category: 'brooches' }));
-
-                const combined = [
-                    ...necklacesWithCategory,
-                    ...ringsWithCategory,
-                    ...earringsWithCategory,
-                    ...braceletsWithCategory,
-                    ...broochesWithCategory,
-                ];
-
-                setAllProducts(combined);
+        fetch(`${API_URL}/api/products`)
+            .then(res => res.json())
+            .then(data => {
+                setAllProducts(data);
                 setLoading(false);
             })
             .catch(() => setLoading(false));
-    }, [searchActive]);
+    }, [searchActive, API_URL]);
 
     const filteredProducts = useMemo(() => {
         if (search.trim() === '') return [];
@@ -51,6 +33,14 @@ function Search({ searchActive, setSearchActive, lng }) {
     }, [search, allProducts]);
 
     if (!searchActive) return null;
+
+    const categoryPathMap = {
+        ring: "rings",
+        bracelet: "bracelets",
+        earring: "earrings",
+        brooch: "brooches",
+        necklace: "necklaces"
+    };
 
     return (
         <div className="fixed w-full h-full bg-[rgba(200,195,195,0.8)] z-50 flex justify-center pt-[100px]">
@@ -82,13 +72,13 @@ function Search({ searchActive, setSearchActive, lng }) {
                         {filteredProducts.length > 0 ? (
                             filteredProducts.map((item) => (
                                 <Link
-                                    key={`${item.category}-${item.id}`}
-                                    to={`/${lng}/${item.category}/${item.id}`}
+                                    key={item._id}
+                                    to={`/${lng}/${categoryPathMap[item.category]}/${item._id}`}
                                     className="flex items-center gap-4 bg-white shadow-md rounded-lg p-4 hover:bg-gray-100 transition"
                                     onClick={() => setSearchActive(false)}
                                 >
                                     <img
-                                        src={item.image}
+                                        src={`${API_URL}${item.image}`}
                                         alt={item.alt || item.name}
                                         className="w-[200px] h-[150px] object-cover rounded"
                                     />

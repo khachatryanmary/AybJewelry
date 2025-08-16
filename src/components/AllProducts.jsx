@@ -1,71 +1,175 @@
-import React, { useEffect, useState } from 'react';
-import { Link } from "react-router-dom";
+import React, { useEffect, useState, useRef } from 'react';
+import { Link, useLocation } from "react-router-dom";
 import axios from "axios";
 import Filter from "./Filter.jsx";
 import { useFilteredProduct } from "./useFilteredProduct.jsx";
 import { useTranslation } from "react-i18next";
-import { useLocation } from 'react-router-dom';
+import { useDispatch, useSelector } from "react-redux";
+import { addToCart } from "../Toolkit/slices/cartSlice.js";
+import { toast } from "react-toastify";
+import { motion, AnimatePresence } from "framer-motion";
 
+// Map singular to plural path for URLs
+const categoryPathMap = {
+    ring: "rings",
+    bracelet: "bracelets",
+    earring: "earrings",
+    brooch: "brooches",
+    necklace: "necklaces"
+};
 
-function interleaveById(dataByCategory) {
-    const result = [];
-    let maxLength = Math.max(...dataByCategory.map(arr => arr.length));
+// Helper to interleave products
+function interleaveByCategory(products, categories) {
+    const grouped = {};
+    categories.forEach(cat => {
+        grouped[cat] = products.filter(p => p.category === cat);
+    });
+
+    const maxLength = Math.max(...Object.values(grouped).map(arr => arr.length));
+    const interleaved = [];
 
     for (let i = 0; i < maxLength; i++) {
-        for (let category of dataByCategory) {
-            if (category[i]) result.push(category[i]);
+        for (let cat of categories) {
+            if (grouped[cat][i]) {
+                interleaved.push(grouped[cat][i]);
+            }
         }
     }
 
-    return result;
-}
-
-function shuffleArray(array) {
-    return array.sort(() => Math.random() - 0.5);
+    return interleaved;
 }
 
 const AllProductsGallery = () => {
+    const dispatch = useDispatch();
     const location = useLocation();
     const lng = location.pathname.split("/")[1];
     const { t } = useTranslation();
     const { setProduct, filteredProduct } = useFilteredProduct();
+    const [loading, setLoading] = useState(true);
+    const [visibleCount, setVisibleCount] = useState(15);
+    const [addedToCart, setAddedToCart] = useState({}); // Track per product
+    const [isWished, setIsWished] = useState({}); // Track wishlist per product
+    const [isLoginPromptOpen, setIsLoginPromptOpen] = useState(false);
+    const [loginPromptType, setLoginPromptType] = useState("");
+    const currentUser = useSelector((state) => state.auth.user);
+    const userId = currentUser?.id;
+    const API_URL = import.meta.env.VITE_API_URL;
+    const loginPromptRef = useRef(null);
 
-    const [visibleCount, setVisibleCount] = useState(9); // Start by showing 8 items
+    const CATEGORIES = ['necklace', 'ring', 'earring', 'brooch', 'bracelet'];
+    const skeletons = Array(8).fill(null);
 
+    // Scroll to top on mount
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }, []);
+
+    // Fetch products and wishlist status
     useEffect(() => {
         const getAllProducts = async () => {
             try {
-                const endpoints = [
-                    "http://localhost:4000/necklaces",
-                    "http://localhost:4000/rings",
-                    "http://localhost:4000/bracelets",
-                    "http://localhost:4000/earrings",
-                    "http://localhost:4000/brooches"
-                ];
+                setLoading(true);
+                const response = await axios.get(`${API_URL}/api/products`);
+                setProduct(response.data);
 
-                const categories = ['necklace', 'ring', 'bracelet', 'earring', 'brooch'];
-
-                const responses = await Promise.all(endpoints.map(url => axios.get(url)));
-
-                const grouped = responses.map((res, index) =>
-                    res.data.map(item => ({ ...item, category: categories[index] }))
-                );
-
-                const interleaved = interleaveById(grouped);
-                setProduct(interleaved);
+                if (currentUser) {
+                    const wishRes = await axios.get(`${API_URL}/api/wishlist/${currentUser.id}`);
+                    const items = wishRes.data?.items || [];
+                    const wished = {};
+                    items.forEach(item => {
+                        wished[item._id] = true;
+                    });
+                    setIsWished(wished);
+                }
             } catch (error) {
-                console.log("Error fetching products:", error.message);
+                console.error("Error fetching products:", error.message);
+            } finally {
+                setLoading(false);
             }
         };
 
         getAllProducts();
-    }, [setProduct]);
+    }, [setProduct, currentUser, API_URL]);
 
+    // Lock/unlock body scroll for login prompt
+    useEffect(() => {
+        if (isLoginPromptOpen) {
+            document.body.classList.add('no-scroll');
+        } else {
+            document.body.classList.remove('no-scroll');
+        }
+        return () => document.body.classList.remove('no-scroll');
+    }, [isLoginPromptOpen]);
 
-    const visibleProducts = filteredProduct?.slice(0, visibleCount);
+    // Close login prompt on outside click
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (isLoginPromptOpen && loginPromptRef.current && !loginPromptRef.current.contains(event.target)) {
+                setIsLoginPromptOpen(false);
+            }
+        };
+
+        if (isLoginPromptOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isLoginPromptOpen]);
+
+    const handleAddToCart = async (product) => {
+        if (!userId) {
+            setLoginPromptType("cart");
+            setIsLoginPromptOpen(true);
+            return;
+        }
+        try {
+            await axios.post(`${API_URL}/api/cart/${userId}`, {
+                productId: product._id,
+                quantity: 1,
+            });
+            dispatch(addToCart({ ...product, quantity: 1 }));
+            setAddedToCart(prev => ({ ...prev, [product._id]: true }));
+            toast.success(t('allProductsGallery.addedToCart', { defaultValue: `${product.name} added to cart!` }));
+            setTimeout(() => {
+                setAddedToCart(prev => ({ ...prev, [product._id]: false }));
+            }, 3000);
+        } catch (error) {
+            console.error("Failed to add to cart:", error.message);
+            toast.error(t('allProductsGallery.cartError', { defaultValue: "Failed to add to cart" }));
+        }
+    };
+
+    const toggleWishlist = async (product) => {
+        if (!userId) {
+            setLoginPromptType("wishlist");
+            setIsLoginPromptOpen(true);
+            return;
+        }
+        try {
+            if (isWished[product._id]) {
+                await axios.delete(`${API_URL}/api/wishlist/${userId}/${product._id}`);
+                setIsWished(prev => ({ ...prev, [product._id]: false }));
+                toast.info(t('allProductsGallery.removedFromWishlist', { defaultValue: `${product.name} removed from wishlist` }));
+            } else {
+                await axios.post(`${API_URL}/api/wishlist/${userId}`, {
+                    productId: product._id,
+                });
+                setIsWished(prev => ({ ...prev, [product._id]: true }));
+                toast.success(t('allProductsGallery.addedToWishlist', { defaultValue: `${product.name} added to wishlist` }));
+            }
+        } catch (err) {
+            console.error("Wishlist toggle failed:", err.message);
+            toast.error(t('allProductsGallery.wishlistError', { defaultValue: "Error updating wishlist" }));
+        }
+    };
+
+    const interleavedProducts = interleaveByCategory(filteredProduct || [], CATEGORIES);
+    const visibleProducts = interleavedProducts.slice(0, visibleCount);
 
     const handleLoadMore = () => {
-        setVisibleCount(prev => prev + 9);
+        setVisibleCount(prev => prev + 15);
     };
 
     return (
@@ -78,21 +182,69 @@ const AllProductsGallery = () => {
                 <Filter />
 
                 <div className="mt-[50px] mb-[30px] w-full flex justify-center items-center flex-wrap gap-[50px]">
-                    {visibleProducts && visibleProducts.map(({ id, image, name, price, category }, i) => (
-                        <Link to={`/${lng}/${category}s/${id}`} key={`${id}-${i}`}>
-                            <div className="w-[280px] h-[280px] flex flex-col items-center relative">
-                                <img src={image} alt={name || 'image'} className="w-[280px] h-[180px] object-cover" />
-                                <p className="w-full flex flex-col items-start justify-start pl-[30px] text-left">
-                                    <span className="text-[20px] font-bold text-[#213547]">{name}</span>
-                                    <span className="text-[15px] text-[gray]">{price} AMD</span>
-                                    <span className="text-[13px] text-[#999] italic">{category}</span>
-                                </p>
+                    {loading ? (
+                        skeletons.map((_, index) => (
+                            <div
+                                key={`skeleton-${index}`}
+                                className="w-[280px] h-[280px] flex flex-col items-center animate-pulse"
+                            >
+                                <div className="w-[280px] h-[180px] bg-gray-300 rounded-md"></div>
+                                <div className="w-full flex flex-col items-start justify-start pl-[30px] mt-2">
+                                    <div className="h-[20px] w-[150px] bg-gray-300 rounded mb-2"></div>
+                                    <div className="h-[15px] w-[80px] bg-gray-300 rounded mb-1"></div>
+                                    <div className="h-[13px] w-[60px] bg-gray-300 rounded"></div>
+                                </div>
                             </div>
-                        </Link>
-                    ))}
+                        ))
+                    ) : (
+                        visibleProducts.map(({ _id, image, name, price, category }, i) => {
+                            const pathCategory = categoryPathMap[category] || `${category}s`;
+
+                            return (
+                                <div
+                                    key={`${_id}-${i}`}
+                                    className="w-[280px] h-[280px] flex flex-col items-center relative"
+                                >
+                                    <Link
+                                        to={`/${lng}/${pathCategory}/${_id}`}
+                                        state={{ from: `/${lng}/all-products` }}
+                                    >
+                                        <img
+                                            src={`${API_URL}${image}`}
+                                            alt={name || 'image'}
+                                            className="w-[280px] h-[180px] object-cover rounded-md"
+                                        />
+                                    </Link>
+                                   <div className="flex w-full justify-between">
+                                       <div className="w-full flex flex-col  text-left mt-2">
+                                           <span className="text-[20px] font-bold text-[#213547]">{name}</span>
+                                           <span className="text-[15px] text-gray-600">{price} AMD</span>
+                                           <span className="text-[13px] text-gray-500 italic">{category}</span>
+                                       </div>
+                                       <div className="flex gap-2 mt-2">
+                                           <span
+                                               onClick={() => handleAddToCart({ _id, name, price, category })}
+                                               className="text-[20px] cursor-pointer transition-all duration-300"
+                                               title={addedToCart[_id] ? t('allProductsGallery.addedToCart') : t('allProductsGallery.addToCart')}
+                                           >
+                                               <i className={`bi ${addedToCart[_id] ? 'bi-cart-check-fill text-[#0e0e53]' : 'bi-cart text-gray-400'} text-[20px]  hover:text-gray-200 transition-all`}></i>
+                                           </span>
+                                           <span
+                                               onClick={() => toggleWishlist({ _id, name })}
+                                               className={`text-[20px] cursor-pointer transition-all duration-300 ${isWished[_id] ? 'text-[#0e0e53]' : 'text-gray-400'}`}
+                                               title={t('allProductsGallery.addToWishlist')}
+                                           >
+                                            <i className={`bi ${isWished[_id] ? 'bi-heart-fill' : 'text-[20px]  bi-heart text-gray-400 hover:text-gray-200 transition-all'}`}></i>
+                                        </span>
+                                       </div>
+                                   </div>
+                                </div>
+                            );
+                        })
+                    )}
                 </div>
 
-                {visibleProducts && filteredProduct && visibleCount < filteredProduct.length && (
+                {!loading && visibleCount < interleavedProducts.length && (
                     <button
                         onClick={handleLoadMore}
                         className="mb-[50px] px-6 py-2 border border-[#0e0e53] text-[#0e0e53] hover:bg-[#0e0e53] hover:text-white transition-all rounded"
@@ -101,6 +253,37 @@ const AllProductsGallery = () => {
                     </button>
                 )}
             </div>
+
+            <AnimatePresence>
+                {isLoginPromptOpen && (
+                    <motion.div
+                        ref={loginPromptRef}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="fixed inset-0 flex items-center justify-center z-50"
+                    >
+                        <div className="bg-white rounded-[10px] p-[20px] w-[500px] flex flex-col items-center justify-center gap-[20px]">
+                            <i className="bi bi-lock text-[40px] text-[#0e0e53]" />
+                            <h2 className=" text-[25px] text-[#0e0e53]">
+                                {t(`allProductsGallery.loginPrompt.${loginPromptType}`)}
+                            </h2>
+                            <Link to={`/${lng}/login`}>
+                                <button className="w-[200px] h-[40px] bg-[#efeeee] border-none rounded-[10px] text-[#0e0e53] font-semibold transition duration-500 hover:bg-[#0e0e53] hover:text-white">
+                                    {t('allProductsGallery.loginButton')}
+                                </button>
+                            </Link>
+                            <button
+                                onClick={() => setIsLoginPromptOpen(false)}
+                                className="text-[#0e0e53] hover:text-[#213547] text-[16px]"
+                            >
+                                {t('allProductsGallery.cancel')}
+                            </button>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };

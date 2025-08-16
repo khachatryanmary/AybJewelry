@@ -8,7 +8,7 @@ const SectionAboutUs = () => {
         <div className="mt-[50px] h-[600px] bg-[#efeeee]">
             <div className="grid grid-cols-[2fr_1fr] h-full">
                 <div className="m-auto w-[80%] space-y-4">
-                    <h2 className="text-[28px] text-[#0a0a39] font-against italic font-light mb-[15px]">
+                    <h2 className="text-[28px] text-[#0a0a39] font-[Against] font-light mb-[15px]">
                         {t('aboutUs.title')}
                     </h2>
                     <p className="text-[16px] mb-[10px]">{t('aboutUs.paragraph1')}</p>
