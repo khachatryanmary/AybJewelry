@@ -1,0 +1,8 @@
+@font-face {
+    font-family: 'Against';
+    src: url('/fonts/against-regular.ttf') format('truetype'),
+    url('/fonts/against-regular.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap; /* Use swap to show fallback font while custom font loads */
+}

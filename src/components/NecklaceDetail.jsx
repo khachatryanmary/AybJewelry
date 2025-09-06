@@ -1,69 +1,137 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, { useEffect, useRef, useState, useContext } from 'react';
 import { Link, useParams, useLocation } from "react-router-dom";
-import axios from "axios";
 import { useTranslation } from "react-i18next";
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
-import { addToCart } from "../Toolkit/slices/cartSlice.js";
 import { toast } from "react-toastify";
-import { useDispatch, useSelector } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
+import { UserContext } from '../Providers/UserContext';
+import { CartContext } from '../Providers/CartContext';
+import { WishlistContext } from '../Providers/WishlistContext';
+
+const toastStyles = `
+  @media (max-width: 639px) {
+    .Toastify__toast {
+      width: 280px;
+      font-size: 14px;
+      padding: 8px 12px;
+      line-height: 1.4;
+    }
+    .Toastify__toast-body {
+      padding: 4px;
+    }
+    .Toastify__close-button {
+      font-size: 14px;
+    }
+  }
+  @media (min-width: 640px) and (max-width: 767px) {
+    .Toastify__toast {
+      width: 320px;
+      font-size: 15px;
+      padding: 10px 14px;
+      line-height: 1.5;
+    }
+    .Toastify__toast-body {
+      padding: 6px;
+    }
+    .Toastify__close-button {
+      font-size: 15px;
+    }
+  }
+  @media (min-width: 768px) {
+    .Toastify__toast {
+      width: 360px;
+      font-size: 16px;
+      padding: 12px 16px;
+      line-height: 1.5;
+    }
+    .Toastify__toast-body {
+      padding: 8px;
+    }
+    .Toastify__close-button {
+      font-size: 16px;
+    }
+  }
+`;
 
 const SkeletonBox = ({ className }) => (
     <div className={`bg-gray-300 animate-pulse rounded ${className}`} />
 );
 
 const NecklaceDetail = () => {
-  const dispatch = useDispatch();
   const { t } = useTranslation();
   const { id } = useParams();
-
   const location = useLocation();
   const lng = location.pathname.split("/")[1];
-  const from = location.state?.from || `/${lng}/necklaces`;
-
+  const validFromPaths = [`/${lng}/all-products`, `/${lng}/necklaces`];
+  const from = validFromPaths.includes(location.state?.from) ? location.state.from : `/${lng}/necklaces`;
+  const { user } = useContext(UserContext);
+  const { addToCart, removeFromCart, isCartItem, fetchCart } = useContext(CartContext);
+  const { toggleWishlist, isWishlistItem, fetchWishlist } = useContext(WishlistContext);
   const [necklace, setNecklace] = useState({});
   const [openDetails, setOpenDetails] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
   const [isLoginPromptOpen, setIsLoginPromptOpen] = useState(false);
   const [loginPromptType, setLoginPromptType] = useState("");
-  const [isAddedToCart, setIsAddedToCart] = useState(false);
-
-
-  const [isWished, setIsWished] = useState(false);
-  const currentUser = useSelector((state) => state.auth.user);
-  const userId = currentUser?.id;
+  const [cartLoading, setCartLoading] = useState(false);
   const API_URL = import.meta.env.VITE_API_URL;
-
   const loginPromptRef = useRef(null);
 
+  // Number formatter for locale-specific price display
+  const numberFormatter = new Intl.NumberFormat(lng === "ru" ? "ru-RU" : lng === "am" ? "hy-AM" : "en-US", {
+    style: "decimal",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
 
   useEffect(() => {
-    const fetchNecklaceDetailAndWishlistStatus = async () => {
+    const fetchNecklaceDetail = async () => {
       setLoading(true);
       try {
-        const productRes = await axios.get(`${API_URL}/api/products/${id}`);
-        const product = productRes.data;
+        const productRes = await fetch(`${API_URL}/api/products/${id}`);
+        if (!productRes.ok) {
+          throw new Error(`HTTP error! Status: ${productRes.status}`);
+        }
+        const product = await productRes.json();
         setNecklace(product);
 
-        if (currentUser) {
-          const wishRes = await axios.get(`${API_URL}/api/wishlist/${currentUser.id}`);
-          const items = wishRes.data?.items || [];
-          const found = items.some(item => item._id === product._id);
-          setIsWished(found);
+        if (user?.id) {
+          console.log("NecklaceDetail.jsx current user:", user);
+          await Promise.all([fetchCart(), fetchWishlist()]);
         }
       } catch (error) {
-        console.error("Failed to fetch data:", error.message);
+        console.error("NecklaceDetail.jsx fetch data error:", error.message);
+        toast.error(t('necklaceDetail.fetchError', { defaultValue: "Error fetching necklace details" }));
       } finally {
         setLoading(false);
       }
     };
 
-    fetchNecklaceDetailAndWishlistStatus();
-  }, [id, location.pathname, API_URL, currentUser]);
+    fetchNecklaceDetail();
+  }, [id, API_URL, user, t, fetchCart, fetchWishlist]);
+
+  useEffect(() => {
+    const handleCartUpdate = async () => {
+      await fetchCart();
+    };
+    const handleWishlistUpdate = async () => {
+      await fetchWishlist();
+    };
+
+    window.addEventListener("cart-updated", handleCartUpdate);
+    window.addEventListener("wishlist-updated", handleWishlistUpdate);
+    return () => {
+      window.removeEventListener("cart-updated", handleCartUpdate);
+      window.removeEventListener("wishlist-updated", handleWishlistUpdate);
+    };
+  }, [fetchCart, fetchWishlist]);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
 
   useEffect(() => {
     if (isLoginPromptOpen) {
@@ -90,60 +158,53 @@ const NecklaceDetail = () => {
     };
   }, [isLoginPromptOpen]);
 
-  const toggleWishlist = async () => {
-    if (!userId || !necklace._id) {
-      setLoginPromptType("wishlist");
-      setIsLoginPromptOpen(true);
-      return;
-    }
-    try {
-      if (isWished) {
-        await axios.delete(`${API_URL}/api/wishlist/${userId}/${necklace._id}`);
-        setIsWished(false);
-        toast.info(`${necklace.name} removed from wishlist`);
-      } else {
-        await axios.post(`${API_URL}/api/wishlist/${userId}`, {
-          productId: necklace._id,
-        });
-        setIsWished(true);
-        toast.success(`${necklace.name} added to wishlist`);
-      }
-    } catch (err) {
-      console.error("Wishlist toggle failed:", err.message);
-      toast.error("Error updating wishlist");
-    }
-  };
-
-  const images = necklace.image
-      ? [`${import.meta.env.VITE_API_URL}${necklace.image}`, ...(necklace.images || []).map(img => `${import.meta.env.VITE_API_URL}${img}`)]
-      : (necklace.images || []).map(img => `${import.meta.env.VITE_API_URL}${img}`);
-
-  const handleAddToCart = async () => {
-    if (!userId) {
+  const handleCartToggle = async () => {
+    if (!user?.id) {
       setLoginPromptType("cart");
       setIsLoginPromptOpen(true);
       return;
     }
     try {
-      await axios.post(`${API_URL}/api/cart/${userId}`, {
-        productId: necklace._id,
-        quantity,
-      });
-      dispatch(addToCart({ ...necklace, quantity }));
-      setIsAddedToCart(true);
-      toast.success(t('ringDetail.addedToCart', { defaultValue: `${necklace.name} added to cart!` }));
-      setTimeout(() => setIsAddedToCart(false), 3000);
+      setCartLoading(true);
+      if (isCartItem(necklace._id)) {
+        await removeFromCart(necklace._id);
+        toast.info(t('necklaceDetail.removedFromCart', { defaultValue: `${necklace.name} removed from cart` }));
+      } else {
+        await addToCart(necklace._id, quantity);
+        toast.success(t('necklaceDetail.addedToCart', { defaultValue: `${necklace.name} added to cart!` }));
+      }
     } catch (error) {
-      console.error("Failed to add to cart:", error.message);
-      toast.error(t('ringDetail.cartError', { defaultValue: "Failed to add to cart" }));
+      console.error("NecklaceDetail.jsx handleCartToggle error:", error.message);
+      toast.error(t('necklaceDetail.cartError', { defaultValue: "Error updating cart" }));
+    } finally {
+      setCartLoading(false);
     }
   };
 
+  const handleWishlistToggle = async () => {
+    if (!user?.id || !necklace._id) {
+      setLoginPromptType("wishlist");
+      setIsLoginPromptOpen(true);
+      return;
+    }
+    try {
+      await toggleWishlist({ _id: necklace._id, name: necklace.name, price: necklace.price, category: necklace.category, image: necklace.image });
+    } catch (error) {
+      console.error("NecklaceDetail.jsx handleWishlistToggle error:", error.message);
+      toast.error(t('necklaceDetail.wishlistError', { defaultValue: "Error updating wishlist" }));
+    }
+  };
+
+  const images = necklace.image
+      ? [`${API_URL}${necklace.image}`, ...(necklace.images || []).map(img => `${API_URL}${img}`)]
+      : (necklace.images || []).map(img => `${API_URL}${img}`);
+
   return (
-      <div className="flex w-[90%] mx-auto pt-[40px] mt-[20px] min-h-[500px] bg-[#efeeee] justify-center items-start gap-[40px]">
-        <div className="relative w-[400px] rounded-[8px] shadow-md overflow-hidden">
+      <div className="flex flex-col sm:flex-row w-[90%] mx-auto pt-[20px] sm:pt-[30px] md:pt-[40px] mt-[10px] sm:mt-[15px] md:mt-[20px] min-h-[400px] sm:min-h-[450px] md:min-h-[500px] bg-[#f5f5f5] justify-center items-start gap-[20px] sm:gap-[30px] md:gap-[40px] pb-[20px]">
+        <style>{toastStyles}</style>
+        <div className="relative w-full sm:w-[300px] md:w-[400px] rounded-[8px] overflow-hidden">
           {loading ? (
-              <SkeletonBox className="w-[400px] h-[400px]" />
+              <SkeletonBox className="w-full sm:w-[300px] md:w-[400px] h-[200px] sm:h-[300px] md:h-[400px]" />
           ) : (
               <Swiper modules={[Navigation]} navigation spaceBetween={10} slidesPerView={1}>
                 {images.map((img, index) => (
@@ -151,7 +212,7 @@ const NecklaceDetail = () => {
                       <img
                           src={img}
                           alt={`necklace image ${index}`}
-                          className="w-[400px] h-[400px] object-contain"
+                          className="w-full sm:w-[300px] md:w-[400px] h-[200px] sm:h-[300px] md:h-[400px] object-contain"
                       />
                     </SwiperSlide>
                 ))}
@@ -160,42 +221,42 @@ const NecklaceDetail = () => {
         </div>
 
         {/* Right: Info */}
-        <div className="flex flex-col justify-center items-start gap-[40px] w-[50%]">
+        <div className="flex flex-col justify-center items-start gap-[20px] sm:gap-[30px] md:gap-[40px] w-full sm:w-[50%] px-2 sm:px-4 md:px-0">
           {loading ? (
               <>
-                <SkeletonBox className="w-[150px] h-[40px]" />
-                <SkeletonBox className="w-[80%] h-[30px]" />
-                <SkeletonBox className="w-[100px] h-[30px]" />
-                <SkeletonBox className="w-full h-[120px]" />
+                <SkeletonBox className="w-[120px] sm:w-[140px] md:w-[150px] h-[30px] sm:h-[35px] md:h-[40px]" />
+                <SkeletonBox className="w-[60%] sm:w-[70%] md:w-[80%] h-[25px] sm:h-[28px] md:h-[30px]" />
+                <SkeletonBox className="w-[80px] sm:w-[90px] md:w-[100px] h-[25px] sm:h-[28px] md:h-[30px]" />
+                <SkeletonBox className="w-full h-[80px] sm:h-[100px] md:h-[120px]" />
               </>
           ) : (
               <>
                 <Link to={from}>
-                  <button className="bg-[#f7f7f7] text-[#0a0a39] transition duration-500 border-none cursor-pointer py-[10px] px-[18px] font-semibold rounded-[6px] hover:bg-[#0a0a39] hover:text-[white]">
+                  <button className="bg-white text-[#0a0a39] transition duration-300 border-none cursor-pointer py-[8px] sm:py-[9px] md:py-[10px] px-[12px] sm:px-[15px] md:px-[18px] font-semibold rounded-[6px] text-[14px] sm:text-[15px] md:text-[16px] hover:bg-[#0a0a39] hover:text-white">
                     {t('necklaceDetail.backToSelection')}
                   </button>
                 </Link>
 
-                <div className="flex flex-col w-full">
-                  <div className="flex justify-between w-full">
-                    <span className="text-[25px] font-bold text-[#213547]">{necklace.name}</span>
+                <div className="flex flex-col w-full gap-3">
+                  <div className="flex items-center justify-between w-full">
+                    <span className="text-[18px] sm:text-[22px] md:text-[25px] font-bold text-[#213547]">{necklace.name}</span>
                     <span
-                        onClick={toggleWishlist}
-                        className={`text-[28px] cursor-pointer transition-all duration-300 ${isWished ? 'text-[#0a0a39]' : 'text-gray-400'}`}
-                        title={t('addToWishlist')}
+                        onClick={handleWishlistToggle}
+                        className={`text-[20px] sm:text-[24px] md:text-[28px] cursor-pointer transition-all duration-300 ${isWishlistItem(necklace._id) ? 'text-[#0a0a39]' : 'text-gray-400'}`}
+                        title={t('necklaceDetail.addToWishlist')}
                     >
-                  <i className={`bi ${isWished ? 'bi-heart-fill' : 'bi-heart'}`}></i>
-                </span>
+                                    <i className={`bi ${isWishlistItem(necklace._id) ? 'bi-heart-fill' : 'bi-heart'}`}></i>
+                                </span>
                   </div>
 
-                  <span className="text-[20px] text-[#666] font-semibold my-[10px] mb-[20px]">
-                {necklace.price * quantity} AMD
-              </span>
+                  <span className="text-[14px] sm:text-[18px] md:text-[20px] text-[#666] font-semibold">
+                                {numberFormatter.format(necklace.price * quantity)} {t("checkout.currency", { defaultValue: "AMD" })}
+                            </span>
 
-                  <div className="flex items-center gap-3 mt-3">
+                  <div className="flex items-center gap-2 sm:gap-3 md:gap-3">
                     <button
                         onClick={() => setQuantity(q => (q > 1 ? q - 1 : 1))}
-                        className="w-[30px] h-[30px] flex items-center justify-center bg-[#f7f7f7] rounded hover:bg-[#0a0a39] hover:text-white transition"
+                        className="w-[24px] sm:w-[28px] md:w-[30px] h-[24px] sm:h-[28px] md:h-[30px] flex items-center justify-center text-[#0a0a39] bg-white rounded hover:bg-[#0a0a39] font-bold hover:text-white transition text-[14px] sm:text-[15px] md:text-[16px]"
                     >
                       -
                     </button>
@@ -207,43 +268,50 @@ const NecklaceDetail = () => {
                           const val = Math.max(1, Number(e.target.value));
                           setQuantity(val);
                         }}
-                        className="w-[50px] h-[30px] text-center border rounded bg-[#f7f7f7]"
+                        className="w-[40px] sm:w-[48px] md:w-[50px] h-[24px] sm:h-[28px] md:h-[30px] text-[#0a0a39] text-center font-bold rounded bg-white text-[14px] sm:text-[15px] md:text-[16px]"
                     />
                     <button
                         onClick={() => setQuantity(q => q + 1)}
-                        className="w-[30px] h-[30px] flex items-center justify-center bg-[#f7f7f7] rounded hover:bg-[#0a0a39] hover:text-white transition"
+                        className="w-[24px] sm:w-[28px] md:w-[30px] h-[24px] sm:h-[28px] md:h-[30px] flex items-center justify-center text-[#0a0a39] bg-white font-bold rounded hover:bg-[#0a0a39] hover:text-white transition text-[14px] sm:text-[15px] md:text-[16px] "
                     >
                       +
                     </button>
                   </div>
 
-                  <p className="text-[16px] leading-[1.5] text-[#444] mb-[20px]">{necklace.description}</p>
+                  <p className="text-[14px] sm:text-[15px] md:text-[16px] leading-[1.4] sm:leading-[1.5] md:leading-[1.5] text-[#444] mb-[12px] sm:mb-[15px] md:mb-[20px]">{necklace.description}</p>
 
                   <button
                       id="addBtn"
-                      onClick={handleAddToCart}
-                      className="transition duration-500 border-none cursor-pointer py-[10px] px-[18px] font-semibold rounded-[6px] bg-[#f7f7f7] text-[#0a0a39] hover:bg-[#0a0a39] hover:text-[white]"
+                      onClick={handleCartToggle}
+                      className="flex items-center justify-center duration-300 border-none cursor-pointer py-[8px] sm:py-[9px] md:py-[10px] px-[12px] sm:px-[15px] md:px-[18px] font-semibold rounded-[6px] bg-white text-[#0a0a39] hover:bg-[#0a0a39] hover:text-white disabled:opacity-50 text-[14px] sm:text-[15px] md:text-[16px]"
+                      disabled={cartLoading}
                   >
-                    {isAddedToCart ? t('ringDetail.addedToCart') : t('ringDetail.add')}
+                    {cartLoading ? (
+                        <div className="w-[20px] sm:w-[22px] md:w-[24px] h-[20px] sm:h-[22px] md:h-[24px] border-4 border-[#0a0a39] border-t-transparent rounded-full animate-spin"></div>
+                    ) : isCartItem(necklace._id) ? (
+                        t('necklaceDetail.addedToCart')
+                    ) : (
+                        t('necklaceDetail.add')
+                    )}
                   </button>
 
-                  <div className="mt-[20px] w-full bg-[white] rounded-[8px] shadow-md overflow-hidden">
+                  <div className="mt-[12px] sm:mt-[15px] md:mt-[20px] w-full bg-white rounded-[8px] overflow-hidden">
                     <div
-                        className={`text-[18px] font-bold flex justify-between items-center px-[20px] py-[12px] bg-[#f7f7f7] border-b border-[#ddd] cursor-pointer select-none ${
+                        className={`text-[16px] sm:text-[17px] md:text-[18px] font-bold text-[#0a0a39] flex justify-between items-center px-[10px] sm:px-[15px] md:px-[20px] py-[8px] sm:py-[10px] md:py-[12px] bg-[#f7f7f7] border-b border-[#ddd] cursor-pointer select-none ${
                             openDetails ? 'open' : ''
                         }`}
                         onClick={() => setOpenDetails(!openDetails)}
                     >
                       <span>{t('necklaceDetail.details')}</span>
-                      <i className={`bi bi-chevron-double-down transition-transform duration-300 ${openDetails ? 'rotate-180' : ''}`}></i>
+                      <i className={`bi bi-chevron-double-down transition-transform duration-300 text-[#0a0a39] ${openDetails ? 'rotate-180' : ''}`}></i>
                     </div>
 
                     {openDetails && (
-                        <ul className="list-none m-0 p-[15px] px-[25px] flex flex-col gap-[14px] max-h-[300px] overflow-y-auto">
+                        <ul className="list-none p-[10px] sm:p-[12px] md:p-[15px] px-[15px] sm:px-[20px] md:px-[25px] flex flex-col gap-[10px] sm:gap-[12px] md:gap-[14px] max-h-[300px] overflow-y-auto">
                           {necklace.details?.length > 0 &&
                               Object.entries(necklace.details[0]).map(([key, value], index) => (
-                                  <li key={index} className="flex justify-start items-center w-full gap-[20px] text-left">
-                                    <strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong> {value}
+                                  <li key={index} className="flex justify-start items-center w-full gap-[10px] sm:gap-[15px] md:gap-[20px] text-left text-[14px] sm:text-[15px] md:text-[16px] text-[#666]">
+                                    <strong className="text-[#0a0a39] ">{key.charAt(0).toUpperCase() + key.slice(1)}:</strong> {value}
                                   </li>
                               ))}
                         </ul>
@@ -261,23 +329,23 @@ const NecklaceDetail = () => {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.3 }}
-                  className="fixed inset-0  flex items-center justify-center z-50"
+                  className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
               >
-                <div className="bg-white rounded-[10px] p-[20px] w-[500px] flex flex-col items-center justify-center gap-[20px]">
-                  <i className="bi bi-lock text-[40px] text-[#0a0a39]" />
-                  <h2 className="text-[25px] text-[#0a0a39]">
-                    {t(`ringDetail.loginPrompt.${loginPromptType}`)}
+                <div className="bg-white rounded-[8px] p-[10px] sm:p-[15px] md:p-[20px] w-[280px] sm:w-[400px] md:w-[500px] flex flex-col items-center justify-center gap-[10px] sm:gap-[15px] md:gap-[20px] shadow-sm sm:shadow-md">
+                  <i className="bi bi-lock text-[30px] sm:text-[35px] md:text-[40px] text-[#0a0a39]" />
+                  <h2 className="text-[18px] sm:text-[22px] md:text-[25px] text-[#0a0a39]">
+                    {t(`necklaceDetail.loginPrompt.${loginPromptType}`)}
                   </h2>
                   <Link to={`/${lng}/login`}>
-                    <button className="w-[200px] h-[40px] bg-[#efeeee] border-none rounded-[10px] text-[#0a0a39] font-semibold transition duration-500 hover:bg-[#0a0a39] hover:text-white">
-                      {t('ringDetail.loginButton')}
+                    <button className="w-[140px] sm:w-[180px] md:w-[200px] h-[30px] sm:h-[35px] md:h-[40px] bg-[#f7f7f7] border-none rounded-[6px] text-[#0a0a39] font-semibold transition duration-300 hover:bg-[#0a0a39] hover:text-white text-[14px] sm:text-[15px] md:text-[16px]">
+                      {t('necklaceDetail.loginButton')}
                     </button>
                   </Link>
                   <button
                       onClick={() => setIsLoginPromptOpen(false)}
-                      className="text-[#0a0a39] hover:text-[#213547] text-[16px]"
+                      className="text-[#0a0a39] hover:text-[#213547] text-[14px] sm:text-[15px] md:text-[16px]"
                   >
-                    {t('ringDetail.cancel')}
+                    {t('necklaceDetail.cancel')}
                   </button>
                 </div>
               </motion.div>

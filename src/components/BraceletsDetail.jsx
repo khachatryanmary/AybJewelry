@@ -1,65 +1,136 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, { useEffect, useRef, useState, useContext } from 'react';
 import { Link, useParams, useLocation } from "react-router-dom";
-import axios from "axios";
 import { useTranslation } from "react-i18next";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation } from "swiper/modules";
-import { useDispatch, useSelector } from "react-redux";
-import { addToCart } from "../Toolkit/slices/cartSlice.js";
-import { motion, AnimatePresence } from "framer-motion";
-import { toast } from "react-toastify";
-
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
+import { toast } from "react-toastify";
+import { motion, AnimatePresence } from "framer-motion";
+import { UserContext } from '../Providers/UserContext';
+import { CartContext } from '../Providers/CartContext';
+import { WishlistContext } from '../Providers/WishlistContext';
+
+const toastStyles = `
+  @media (max-width: 639px) {
+    .Toastify__toast {
+      width: 280px;
+      font-size: 14px;
+      padding: 8px 12px;
+      line-height: 1.4;
+    }
+    .Toastify__toast-body {
+      padding: 4px;
+    }
+    .Toastify__close-button {
+      font-size: 14px;
+    }
+  }
+  @media (min-width: 640px) and (max-width: 767px) {
+    .Toastify__toast {
+      width: 320px;
+      font-size: 15px;
+      padding: 10px 14px;
+      line-height: 1.5;
+    }
+    .Toastify__toast-body {
+      padding: 6px;
+    }
+    .Toastify__close-button {
+      font-size: 15px;
+    }
+  }
+  @media (min-width: 768px) {
+    .Toastify__toast {
+      width: 360px;
+      font-size: 16px;
+      padding: 12px 16px;
+      line-height: 1.5;
+    }
+    .Toastify__toast-body {
+      padding: 8px;
+    }
+    .Toastify__close-button {
+      font-size: 16px;
+    }
+  }
+`;
+
+const SkeletonBox = ({ className }) => (
+    <div className={`bg-gray-300 animate-pulse rounded ${className}`} />
+);
 
 const BraceletDetail = () => {
-    const dispatch = useDispatch();
     const { t } = useTranslation();
     const { id } = useParams();
-
     const location = useLocation();
     const lng = location.pathname.split("/")[1];
-    const from = location.state?.from || `/${lng}/bracelets`;
-
-    const [bracelet, setBracelet] = useState(null);
-    const [quantity, setQuantity] = useState(1);
+    const validFromPaths = [`/${lng}/all-products`, `/${lng}/bracelets`];
+    const from = validFromPaths.includes(location.state?.from) ? location.state.from : `/${lng}/bracelets`;
+    const { user } = useContext(UserContext);
+    const { addToCart, removeFromCart, isCartItem, fetchCart } = useContext(CartContext);
+    const { toggleWishlist, isWishlistItem, fetchWishlist } = useContext(WishlistContext);
+    const [bracelet, setBracelet] = useState({});
     const [openDetails, setOpenDetails] = useState(false);
-    const [loading, setLoading] = useState(true);
+    const [quantity, setQuantity] = useState(1);
     const [isLoginPromptOpen, setIsLoginPromptOpen] = useState(false);
     const [loginPromptType, setLoginPromptType] = useState("");
-    const [isAddedToCart, setIsAddedToCart] = useState(false);
-    const [isWished, setIsWished] = useState(false);
-
-    const currentUser = useSelector((state) => state.auth.user);
-    const userId = currentUser?.id;
+    const [cartLoading, setCartLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const API_URL = import.meta.env.VITE_API_URL;
-
     const loginPromptRef = useRef(null);
 
+    const numberFormatter = new Intl.NumberFormat(lng === "ru" ? "ru-RU" : lng === "am" ? "hy-AM" : "en-US", {
+        style: "decimal",
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+    });
 
     useEffect(() => {
-        const fetchBraceletDetailAndWishlistStatus = async () => {
+        const fetchBraceletDetail = async () => {
+            setLoading(true);
             try {
-                const productRes = await axios.get(`${API_URL}/api/products/${id}`);
-                const product = productRes.data;
+                const productRes = await fetch(`${API_URL}/api/products/${id}`);
+                if (!productRes.ok) {
+                    throw new Error(`HTTP error! Status: ${productRes.status}`);
+                }
+                const product = await productRes.json();
                 setBracelet(product);
 
-                if (currentUser) {
-                    const wishRes = await axios.get(`${API_URL}/api/wishlist/${currentUser.id}`);
-                    const items = wishRes.data?.items || [];
-                    const found = items.some(item => item._id === product._id);
-                    setIsWished(found);
+                if (user?.id) {
+                    console.log("BraceletDetail.jsx current user:", user);
+                    await Promise.all([fetchCart(), fetchWishlist()]);
                 }
             } catch (error) {
-                console.error("Failed to fetch data:", error.message);
-                toast.error("Failed to load product details");
+                console.error("BraceletDetail.jsx fetch data error:", error.message);
+                toast.error(t('braceletDetail.fetchError', { defaultValue: "Failed to load product details" }));
             } finally {
-                setLoading(false); // Set loading to false after fetch
+                setLoading(false);
             }
         };
 
-        fetchBraceletDetailAndWishlistStatus();
-    }, [id, location.pathname, API_URL, currentUser]);
+        fetchBraceletDetail();
+    }, [id, API_URL, user, t, fetchCart, fetchWishlist]);
+
+    useEffect(() => {
+        const handleCartUpdate = async () => {
+            await fetchCart();
+        };
+        const handleWishlistUpdate = async () => {
+            await fetchWishlist();
+        };
+
+        window.addEventListener("cart-updated", handleCartUpdate);
+        window.addEventListener("wishlist-updated", handleWishlistUpdate);
+        return () => {
+            window.removeEventListener("cart-updated", handleCartUpdate);
+            window.removeEventListener("wishlist-updated", handleWishlistUpdate);
+        };
+    }, [fetchCart, fetchWishlist]);
+
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }, []);
 
     useEffect(() => {
         if (isLoginPromptOpen) {
@@ -77,194 +148,172 @@ const BraceletDetail = () => {
             }
         };
 
-        if (isLoginPromptOpen) {
-            document.addEventListener('mousedown', handleClickOutside);
-        }
-
+        document.addEventListener('mousedown', handleClickOutside);
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [isLoginPromptOpen]);
 
-    const toggleWishlist = async () => {
-        if (!userId || !bracelet._id) {
+    const handleWishlistToggle = async () => {
+        if (!user?.id || !bracelet._id) {
             setLoginPromptType("wishlist");
             setIsLoginPromptOpen(true);
             return;
         }
         try {
-            if (isWished) {
-                await axios.delete(`${API_URL}/api/wishlist/${userId}/${bracelet._id}`);
-                setIsWished(false);
-                toast.info(`${bracelet.name} removed from wishlist`);
-            } else {
-                await axios.post(`${API_URL}/api/wishlist/${userId}`, {
-                    productId: bracelet._id,
-                });
-                setIsWished(true);
-                toast.success(`${bracelet.name} added to wishlist`);
-            }
-        } catch (err) {
-            console.error("Wishlist toggle failed:", err.message);
-            toast.error("Error updating wishlist");
+            await toggleWishlist({ _id: bracelet._id, name: bracelet.name, price: bracelet.price, category: bracelet.category, image: bracelet.image });
+        } catch (error) {
+            console.error("BraceletDetail.jsx handleWishlistToggle error:", error.message);
+            toast.error(t('braceletDetail.wishlistError', { defaultValue: "Error updating wishlist" }));
         }
     };
 
-    const handleAddToCart = async () => {
-        if (!userId) {
+    const handleCartToggle = async () => {
+        if (!user?.id) {
             setLoginPromptType("cart");
             setIsLoginPromptOpen(true);
             return;
         }
         try {
-            await axios.post(`${API_URL}/api/cart/${userId}`, {
-                productId: bracelet._id,
-                quantity,
-            });
-            dispatch(addToCart({ ...bracelet, quantity }));
-            setIsAddedToCart(true);
-            toast.success(t('ringDetail.addedToCart', { defaultValue: `${bracelet.name} added to cart!` }));
-            setTimeout(() => setIsAddedToCart(false), 3000);
+            setCartLoading(true);
+            if (isCartItem(bracelet._id)) {
+                await removeFromCart(bracelet._id, null);
+                toast.info(t('braceletDetail.removedFromCart', { defaultValue: `${bracelet.name} removed from cart` }));
+            } else {
+                await addToCart(bracelet._id, quantity, null);
+                toast.success(t('braceletDetail.addedToCart', { defaultValue: `${bracelet.name} added to cart!` }));
+            }
         } catch (error) {
-            console.error("Failed to add to cart:", error.message);
-            toast.error(t('ringDetail.cartError', { defaultValue: "Failed to add to cart" }));
+            console.error("BraceletDetail.jsx handleCartToggle error:", error.message);
+            toast.error(t('braceletDetail.cartError', { defaultValue: "Error updating cart" }));
+        } finally {
+            setCartLoading(false);
         }
     };
 
-    if (loading) {
-        return (
-            <div className="flex w-[90%] mx-auto pt-[40px] mt-[20px] h-[700px] bg-[#efeeee] justify-center items-start gap-[40px] animate-pulse">
-                <div className="w-[400px] h-[400px] bg-gray-300 rounded-[8px]"></div>
-                <div className="flex flex-col justify-center items-start gap-[40px] w-[50%]">
-                    <div className="w-[200px] h-[40px] bg-gray-300 rounded"></div>
-                    <div className="w-full h-[30px] bg-gray-300 rounded mb-[20px]"></div>
-                    <div className="w-[200px] h-[30px] bg-gray-300 rounded mb-[20px]"></div>
-                    <div className="w-[130px] h-[30px] bg-gray-300 rounded mb-[20px]"></div>
-                    <div className="w-full h-[100px] bg-gray-300 rounded mb-[20px]"></div>
-                    <div className="w-[200px] h-[40px] bg-gray-300 rounded"></div>
-                    <div className="w-full h-[200px] bg-gray-300 rounded"></div>
-                </div>
-            </div>
-        );
-    }
-
-    if (!bracelet) {
-        return (
-            <div className="flex w-[90%] mx-auto pt-[40px] mt-[20px] h-[700px] bg-[#efeeee] justify-center items-center">
-                <p className="text-[#0a0a39] text-[20px]">{t('braceletDetail.notFound')}</p>
-            </div>
-        );
-    }
-
     const images = bracelet.image
-        ? [`${import.meta.env.VITE_API_URL}${bracelet.image}`, ...(bracelet.images || []).map(img => `${import.meta.env.VITE_API_URL}${img}`)]
-        : (bracelet.images || []).map(img => `${import.meta.env.VITE_API_URL}${img}`);
+        ? [`${API_URL}${bracelet.image}`, ...(bracelet.images || []).map(img => `${API_URL}${img}`)]
+        : (bracelet.images || []).map(img => `${API_URL}${img}`);
 
     return (
-        <div className="flex w-[90%] mx-auto pt-[40px] mt-[20px] h-[700px] bg-[#efeeee] justify-center items-start gap-[40px]">
-            <div className="relative w-[400px] rounded-[8px] shadow-md overflow-hidden">
-                <Swiper
-                    modules={[Navigation]}
-                    navigation
-                    spaceBetween={10}
-                    slidesPerView={1}
-                >
-                    {images.map((img, index) => (
-                        <SwiperSlide key={index}>
-                            <img
-                                src={img}
-                                alt={`bracelet image ${index}`}
-                                className="w-[400px] h-[400px] object-contain"
-                            />
-                        </SwiperSlide>
-                    ))}
-                </Swiper>
+        <div className="flex flex-col sm:flex-row w-[90%] mx-auto pt-[20px] sm:pt-[30px] md:pt-[40px] mt-[10px] sm:mt-[15px] md:mt-[20px] min-h-[400px] sm:min-h-[450px] md:min-h-[500px] bg-[#f5f5f5] justify-center items-start gap-[20px] sm:gap-[30px] md:gap-[40px] pb-[20px]">
+            <style>{toastStyles}</style>
+            <div className="relative w-full sm:w-[300px] md:w-[400px] rounded-[8px] overflow-hidden">
+                {loading ? (
+                    <SkeletonBox className="w-full sm:w-[300px] md:w-[400px] h-[200px] sm:h-[300px] md:h-[400px]" />
+                ) : (
+                    <Swiper modules={[Navigation]} navigation spaceBetween={10} slidesPerView={1}>
+                        {images.map((img, index) => (
+                            <SwiperSlide key={index}>
+                                <img
+                                    src={img}
+                                    alt={`bracelet image ${index}`}
+                                    className="w-full sm:w-[300px] md:w-[400px] h-[200px] sm:h-[300px] md:h-[400px] object-contain"
+                                />
+                            </SwiperSlide>
+                        ))}
+                    </Swiper>
+                )}
             </div>
 
-            <div className="flex flex-col justify-center items-start gap-[40px] w-[50%]">
-                <Link to={from}>
-                    <button className="bg-[#f7f7f7] text-[#0a0a39] transition duration-500 border-none cursor-pointer py-[10px] px-[18px] font-semibold rounded-[6px] hover:bg-[#0a0a39] hover:text-[white]">
-                        {t('braceletsDetail.backToSelection')}
-                    </button>
-                </Link>
+            <div className="flex flex-col justify-center items-start gap-[20px] sm:gap-[30px] md:gap-[40px] w-full sm:w-[50%] px-2 sm:px-4 md:px-0">
+                {loading ? (
+                    <>
+                        <SkeletonBox className="w-[120px] sm:w-[140px] md:w-[150px] h-[30px] sm:h-[35px] md:h-[40px]" />
+                        <SkeletonBox className="w-[60%] sm:w-[70%] md:w-[80%] h-[25px] sm:h-[28px] md:h-[30px]" />
+                        <SkeletonBox className="w-[80px] sm:w-[90px] md:w-[100px] h-[25px] sm:h-[28px] md:h-[30px]" />
+                        <SkeletonBox className="w-full h-[80px] sm:h-[100px] md:h-[120px]" />
+                    </>
+                ) : !bracelet._id ? (
+                    <p className="text-[#0a0a39] text-[14px] sm:text-[15px] md:text-[16px]">{t('braceletDetail.notFound', { defaultValue: "Product not found" })}</p>
+                ) : (
+                    <>
+                        <Link to={from}>
+                            <button className="bg-white text-[#0a0a39] transition duration-300 border-none cursor-pointer py-[8px] sm:py-[9px] md:py-[10px] px-[12px] sm:px-[15px] md:px-[18px] font-semibold rounded-[6px] text-[14px] sm:text-[15px] md:text-[16px] hover:bg-[#0a0a39] hover:text-white">
+                                {t('braceletDetail.backToSelection')}
+                            </button>
+                        </Link>
 
-                <div className="flex flex-col w-full">
-                    <div className="flex justify-between w-full">
-                        <span className="text-[25px] font-bold text-[#213547]">{bracelet.name}</span>
-                        <span
-                            onClick={toggleWishlist}
-                            className={`text-[28px] cursor-pointer transition-all duration-300 ${
-                                isWished ? 'text-[#0a0a39]' : 'text-gray-400'
-                            }`}
-                            title={t('addToWishlist')}
-                        >
-                            <i className={`bi ${isWished ? 'bi-heart-fill' : 'bi-heart'} transition-all duration-300`}></i>
-                        </span>
-                    </div>
+                        <div className="flex flex-col w-full gap-3">
+                            <div className="flex items-center justify-between w-full">
+                                <span className="text-[18px] sm:text-[22px] md:text-[25px] font-bold text-[#213547]">{bracelet.name}</span>
+                                <span
+                                    onClick={handleWishlistToggle}
+                                    className={`text-[20px] sm:text-[24px] md:text-[28px] cursor-pointer transition-all duration-300 ${isWishlistItem(bracelet._id) ? 'text-[#0a0a39]' : 'text-gray-400'}`}
+                                    title={t('braceletDetail.addToWishlist')}
+                                >
+                                    <i className={`bi ${isWishlistItem(bracelet._id) ? 'bi-heart-fill' : 'bi-heart'}`}></i>
+                                </span>
+                            </div>
 
-                    <span className="text-[20px] text-[#666] font-semibold my-[10px] mb-[20px]">
-                        {bracelet.price * quantity} AMD
-                    </span>
+                            <span className="text-[14px] sm:text-[18px] md:text-[20px] text-[#666] font-semibold">
+                                {numberFormatter.format(bracelet.price * quantity)} {t("checkout.currency", { defaultValue: "AMD" })}
+                            </span>
 
-                    <div className="flex items-center gap-3 mt-3">
-                        <button
-                            onClick={() => setQuantity(q => (q > 1 ? q - 1 : 1))}
-                            className="w-[30px] h-[30px] flex items-center justify-center bg-[#f7f7f7] rounded hover:bg-[#0a0a39] hover:text-white transition"
-                        >
-                            -
-                        </button>
-                        <input
-                            type="number"
-                            min="1"
-                            value={quantity}
-                            onChange={e => setQuantity(Math.max(1, Number(e.target.value)))}
-                            className="w-[50px] h-[30px] text-center border rounded bg-[#f7f7f7]"
-                        />
-                        <button
-                            onClick={() => setQuantity(q => q + 1)}
-                            className="w-[30px] h-[30px] flex items-center justify-center bg-[#f7f7f7] rounded hover:bg-[#0a0a39] hover:text-white transition"
-                        >
-                            +
-                        </button>
-                    </div>
+                            <div className="flex items-center gap-2 sm:gap-3 md:gap-3">
+                                <button
+                                    onClick={() => setQuantity(q => (q > 1 ? q - 1 : 1))}
+                                    className="w-[24px] sm:w-[28px] md:w-[30px] h-[24px] sm:h-[28px] md:h-[30px] flex items-center justify-center text-[#0a0a39] bg-white rounded hover:bg-[#0a0a39] font-bold hover:text-white transition text-[14px] sm:text-[15px] md:text-[16px]"
+                                >
+                                    -
+                                </button>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    value={quantity}
+                                    onChange={e => setQuantity(Math.max(1, Number(e.target.value)))}
+                                    className="w-[40px] sm:w-[48px] md:w-[50px] h-[24px] sm:h-[28px] md:h-[30px] text-[#0a0a39] text-center font-bold rounded bg-white text-[14px] sm:text-[15px] md:text-[16px]"
+                                />
+                                <button
+                                    onClick={() => setQuantity(q => q + 1)}
+                                    className="w-[24px] sm:w-[28px] md:w-[30px] h-[24px] sm:h-[28px] md:h-[30px] flex items-center justify-center text-[#0a0a39] bg-white font-bold rounded hover:bg-[#0a0a39] hover:text-white transition text-[14px] sm:text-[15px] md:text-[16px]"
+                                >
+                                    +
+                                </button>
+                            </div>
 
-                    <p className="text-[16px] leading-[1.5] text-[#444] mb-[20px]">{bracelet.description}</p>
+                            <p className="text-[14px] sm:text-[15px] md:text-[16px] leading-[1.4] sm:leading-[1.5] md:leading-[1.5] text-[#444] mb-[12px] sm:mb-[15px] md:mb-[20px]">{bracelet.description}</p>
 
-                    <button
-                        id="addBtn"
-                        onClick={handleAddToCart}
-                        className="transition duration-500 border-none cursor-pointer py-[10px] px-[18px] font-semibold rounded-[6px] bg-[#f7f7f7] text-[#0a0a39] hover:bg-[#0a0a39] hover:text-[white]"
-                    >
-                        {isAddedToCart ? t('ringDetail.addedToCart') : t('ringDetail.add')}
-                    </button>
+                            <button
+                                id="addBtn"
+                                onClick={handleCartToggle}
+                                className="flex items-center justify-center duration-300 border-none cursor-pointer py-[8px] sm:py-[9px] md:py-[10px] px-[12px] sm:px-[15px] md:px-[18px] font-semibold rounded-[6px] bg-white text-[#0a0a39] hover:bg-[#0a0a39] hover:text-white disabled:opacity-50 text-[14px] sm:text-[15px] md:text-[16px]"
+                                disabled={cartLoading}
+                            >
+                                {cartLoading ? (
+                                    <div className="w-[20px] sm:w-[22px] md:w-[24px] h-[20px] sm:h-[22px] md:h-[24px] border-4 border-[#0a0a39] border-t-transparent rounded-full animate-spin"></div>
+                                ) : isCartItem(bracelet._id) ? (
+                                    t('braceletDetail.addedToCart')
+                                ) : (
+                                    t('braceletDetail.add')
+                                )}
+                            </button>
 
-                    <div className="mt-[20px] w-full bg-[white] rounded-[8px] shadow-md overflow-hidden">
-                        <div
-                            className={`text-[18px] font-bold flex justify-between items-center px-[20px] py-[12px] bg-[#f7f7f7] border-b border-[#ddd] cursor-pointer select-none ${
-                                openDetails ? 'open' : ''
-                            }`}
-                            onClick={() => setOpenDetails(!openDetails)}
-                        >
-                            <span>{t('braceletDetail.details')}</span>
-                            <i className={`bi bi-chevron-double-down transition-transform duration-300 ${openDetails ? 'rotate-180' : ''}`}></i>
+                            <div className="mt-[12px] sm:mt-[15px] md:mt-[20px] w-full bg-white rounded-[8px] overflow-hidden">
+                                <div
+                                    className={`text-[16px] sm:text-[17px] md:text-[18px] font-bold text-[#0a0a39] flex justify-between items-center px-[10px] sm:px-[15px] md:px-[20px] py-[8px] sm:py-[10px] md:py-[12px] bg-[#f7f7f7] border-b border-[#ddd] cursor-pointer select-none ${openDetails ? 'open' : ''}`}
+                                    onClick={() => setOpenDetails(!openDetails)}
+                                >
+                                    <span>{t('braceletDetail.details')}</span>
+                                    <i className={`bi bi-chevron-double-down transition-transform duration-300 text-[#0a0a39] ${openDetails ? 'rotate-180' : ''}`}></i>
+                                </div>
+
+                                {openDetails && (
+                                    <ul className="list-none p-[10px] sm:p-[12px] md:p-[15px] px-[15px] sm:px-[20px] md:px-[25px] flex flex-col gap-[10px] sm:gap-[12px] md:gap-[14px] max-h-[300px] overflow-y-auto">
+                                        {bracelet.details?.length > 0 &&
+                                            Object.entries(bracelet.details[0]).map(([key, value], index) => (
+                                                <li key={index} className="flex justify-start items-center w-full gap-[10px] sm:gap-[15px] md:gap-[20px] text-left text-[14px] sm:text-[15px] md:text-[16px] text-[#666]">
+                                                    <strong className="text-[#0a0a39]">{key.charAt(0).toUpperCase() + key.slice(1)}:</strong> {value}
+                                                </li>
+                                            ))}
+                                    </ul>
+                                )}
+                            </div>
                         </div>
-
-                        {openDetails && (
-                            <ul className="list-none m-0 p-[15px] px-[25px] flex flex-col gap-[14px] max-h-[300px] overflow-y-auto">
-                                {bracelet.details?.length > 0 &&
-                                    Object.entries(bracelet.details[0]).map(([key, value], index) => (
-                                        <li
-                                            key={index}
-                                            className="flex justify-start items-center w-full gap-[20px] text-left"
-                                        >
-                                            <strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong> {value}
-                                        </li>
-                                    ))}
-                            </ul>
-                        )}
-                    </div>
-                </div>
+                    </>
+                )}
             </div>
+
             <AnimatePresence>
                 {isLoginPromptOpen && (
                     <motion.div
@@ -273,23 +322,23 @@ const BraceletDetail = () => {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.3 }}
-                        className="fixed inset-0  flex items-center justify-center z-50"
+                        className="fixed inset-0 flex items-center justify-center z-50"
                     >
-                        <div className="bg-white rounded-[10px] p-[20px] w-[500px] flex flex-col items-center justify-center gap-[20px]">
-                            <i className="bi bi-lock text-[40px] text-[#0a0a39]" />
-                            <h2 className="text-[25px] text-[#0a0a39]">
-                                {t(`ringDetail.loginPrompt.${loginPromptType}`)}
+                        <div className="bg-white rounded-[8px] p-[10px] sm:p-[15px] md:p-[20px] w-[280px] sm:w-[400px] md:w-[500px] flex flex-col items-center justify-center gap-[10px] sm:gap-[15px] md:gap-[20px] shadow-sm sm:shadow-md">
+                            <i className="bi bi-lock text-[30px] sm:text-[35px] md:text-[40px] text-[#0a0a39]" />
+                            <h2 className="text-[18px] sm:text-[22px] md:text-[25px] text-[#0a0a39]">
+                                {t(`braceletDetail.loginPrompt.${loginPromptType}`)}
                             </h2>
                             <Link to={`/${lng}/login`}>
-                                <button className="w-[200px] h-[40px] bg-[#efeeee] border-none rounded-[10px] text-[#0a0a39] font-semibold transition duration-500 hover:bg-[#0a0a39] hover:text-white">
-                                    {t('ringDetail.loginButton')}
+                                <button className="w-[140px] sm:w-[180px] md:w-[200px] h-[30px] sm:h-[35px] md:h-[40px] bg-[#f7f7f7] border-none rounded-[6px] text-[#0a0a39] font-semibold transition duration-300 hover:bg-[#0a0a39] hover:text-white text-[14px] sm:text-[15px] md:text-[16px]">
+                                    {t('braceletDetail.loginButton')}
                                 </button>
                             </Link>
                             <button
                                 onClick={() => setIsLoginPromptOpen(false)}
-                                className="text-[#0a0a39] hover:text-[#213547] text-[16px]"
+                                className="text-[#0a0a39] hover:text-[#213547] text-[14px] sm:text-[15px] md:text-[16px]"
                             >
-                                {t('ringDetail.cancel')}
+                                {t('braceletDetail.cancel')}
                             </button>
                         </div>
                     </motion.div>

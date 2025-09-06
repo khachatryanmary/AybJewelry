@@ -1,4 +1,3 @@
-// src/i18n.js
 import i18next from "i18next";
 import I18NextHttpBackend from "i18next-http-backend";
 import I18nextBrowserLanguageDetector from "i18next-browser-languagedetector";
@@ -12,7 +11,7 @@ i18next
         lng: "en",
         supportedLngs: ["am", "ru", "en"],
         fallbackLng: "en",
-        debug: true,
+        debug: process.env.NODE_ENV === "development", // Only enable debug in development
         backend: {
             loadPath: "/locales/{{lng}}/translation.json",
         },
@@ -20,3 +19,5 @@ i18next
             useSuspense: false,
         },
     });
+
+export default i18next;

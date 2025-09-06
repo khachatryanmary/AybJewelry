@@ -1,29 +1,42 @@
 import React from 'react';
-import { useTranslation } from "react-i18next";
+import { useTranslation } from 'react-i18next';
+import { Link, useParams } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 const SectionAboutUs = () => {
     const { t } = useTranslation();
+    const { lng } = useParams();
+
+    const sectionVariants = {
+        hidden: { opacity: 0, y: 50 },
+        visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: 'easeOut' } },
+    };
 
     return (
-        <div className="mt-[50px] h-[600px] bg-[#efeeee]">
-            <div className="grid grid-cols-[2fr_1fr] h-full">
-                <div className="m-auto w-[80%] space-y-4">
-                    <h2 className="text-[28px] text-[#0a0a39] font-[Against] font-light mb-[15px]">
+        <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={sectionVariants}
+            className="w-[90%] mx-auto py-8 min-h-[500px] bg-[#efeeee] flex justify-center items-center"
+        >
+            <div className="w-full flex justify-center items-center">
+                <div className="flex flex-col justify-center items-center gap-4 w-[80%] space-y-4">
+                    <h2 className="text-[30px] text-[#0e0e53] font-[Against] font-light mb-4">
                         {t('aboutUs.title')}
                     </h2>
-                    <p className="text-[16px] mb-[10px]">{t('aboutUs.paragraph1')}</p>
-                    <p className="text-[16px] mb-[10px]">{t('aboutUs.paragraph2')}</p>
-                    <p className="text-[16px] mb-[10px]">{t('aboutUs.paragraph3')}</p>
-                    <p className="text-[16px] mb-[10px]">{t('aboutUs.paragraph4')}</p>
-                    <p className="text-[16px] mb-[10px]">{t('aboutUs.paragraph5')}</p>
+                    <p className="text-[16px] text-gray-400 text-center">{t('aboutUs.paragraph1')}</p>
+                    <p className="text-[16px] text-gray-400 text-center">{t('aboutUs.paragraph2')}</p>
+                    <p className="text-[16px] text-gray-400 text-center">{t('aboutUs.paragraph3')}</p>
+                    <p className="text-[16px] text-gray-400 text-center">{t('aboutUs.paragraph4')}</p>
+                    <p className="text-[16px] text-gray-400 text-center">{t('aboutUs.paragraph5')}</p>
+                    {/*<Link to={`/${lng}/about`}>*/}
+                    {/*    <button className="px-6 py-2 border border-[#0e0e53] text-[#0e0e53] bg-transparent hover:bg-[#0e0e53] hover:text-white transition-all rounded mt-4">*/}
+                    {/*        {t('aboutUs.learnMore', { defaultValue: 'Discover More' })}*/}
+                    {/*    </button>*/}
+                    {/*</Link>*/}
                 </div>
-                <img
-                    src="/images/CoverAboutUs.jpg"
-                    alt={t('aboutUs.imageAlt')}
-                    className="w-full h-[600px] object-cover"
-                />
             </div>
-        </div>
+        </motion.div>
     );
 };
 

@@ -1,30 +1,82 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useContext } from 'react';
 import { Link, useLocation } from "react-router-dom";
-import axios from "axios";
 import Filter from "./Filter.jsx";
 import { useFilteredProduct } from "./useFilteredProduct.jsx";
 import { useTranslation } from "react-i18next";
-import { useDispatch, useSelector } from "react-redux";
-import { addToCart } from "../Toolkit/slices/cartSlice.js";
 import { toast } from "react-toastify";
 import { motion, AnimatePresence } from "framer-motion";
+import { UserContext } from '../Providers/UserContext';
+import { CartContext } from '../Providers/CartContext';
+import { WishlistContext } from '../Providers/WishlistContext';
+
+const toastStyles = `
+  @media (max-width: 639px) {
+    .Toastify__toast {
+      width: 280px;
+      font-size: 14px;
+      padding: 8px 12px;
+      line-height: 1.4;
+    }
+    .Toastify__toast-body {
+      padding: 4px;
+    }
+    .Toastify__close-button {
+      font-size: 14px;
+    }
+  }
+  @media (min-width: 640px) and (max-width: 767px) {
+    .Toastify__toast {
+      width: 320px;
+      font-size: 15px;
+      padding: 10px 14px;
+      line-height: 1.5;
+    }
+    .Toastify__toast-body {
+      padding: 6px;
+    }
+    .Toastify__close-button {
+      font-size: 15px;
+    }
+  }
+  @media (min-width: 768px) {
+    .Toastify__toast {
+      width: 360px;
+      font-size: 16px;
+      padding: 12px 16px;
+      line-height: 1.5;
+    }
+    .Toastify__toast-body {
+      padding: 8px;
+    }
+    .Toastify__close-button {
+      font-size: 16px;
+    }
+  }
+`;
 
 const BraceletGallery = () => {
-    const dispatch = useDispatch();
     const location = useLocation();
     const lng = location.pathname.split("/")[1];
     const { t } = useTranslation();
     const { setProduct, filteredProduct } = useFilteredProduct();
+    const { user } = useContext(UserContext);
+    const { addToCart, removeFromCart, isCartItem, fetchCart } = useContext(CartContext);
+    const { toggleWishlist, isWishlistItem, fetchWishlist } = useContext(WishlistContext);
     const [loading, setLoading] = useState(true);
     const [visibleCount, setVisibleCount] = useState(15);
     const [addedToCart, setAddedToCart] = useState({});
     const [isWished, setIsWished] = useState({});
     const [isLoginPromptOpen, setIsLoginPromptOpen] = useState(false);
     const [loginPromptType, setLoginPromptType] = useState("");
-    const currentUser = useSelector((state) => state.auth.user);
-    const userId = currentUser?.id;
+    const [cartLoading, setCartLoading] = useState(null);
     const API_URL = import.meta.env.VITE_API_URL;
     const loginPromptRef = useRef(null);
+
+    const numberFormatter = new Intl.NumberFormat(lng === "ru" ? "ru-RU" : lng === "am" ? "hy-AM" : "en-US", {
+        style: "decimal",
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+    });
 
     const skeletons = Array(8).fill(null);
 
@@ -36,27 +88,58 @@ const BraceletGallery = () => {
         const getBracelets = async () => {
             try {
                 setLoading(true);
-                const res = await axios.get(`${API_URL}/api/products?category=bracelet`);
-                setProduct(res.data);
+                const res = await fetch(`${API_URL}/api/products?category=bracelet`);
+                if (!res.ok) {
+                    throw new Error(`HTTP error! Status: ${res.status}`);
+                }
+                const data = await res.json();
+                setProduct(data);
 
-                if (currentUser) {
-                    const wishRes = await axios.get(`${API_URL}/api/wishlist/${currentUser.id}`);
-                    const items = wishRes.data?.items || [];
-                    const wished = {};
-                    items.forEach(item => {
-                        wished[item._id] = true;
-                    });
-                    setIsWished(wished);
+                if (user?.id) {
+                    console.log("BraceletGallery.jsx current user:", user);
+                    const [cartItems, wishlistItems] = await Promise.all([fetchCart(), fetchWishlist()]);
+                    setAddedToCart(cartItems.reduce((acc, item) => ({
+                        ...acc,
+                        [item.id]: true,
+                    }), {}));
+                    setIsWished(wishlistItems.reduce((acc, item) => ({ ...acc, [item._id]: true }), {}));
+                } else {
+                    setAddedToCart({});
+                    setIsWished({});
                 }
             } catch (error) {
-                console.error("Error fetching bracelets:", error.message);
+                console.error("BraceletGallery.jsx getBracelets error:", error.message);
+                toast.error(t('braceletGallery.fetchError', { defaultValue: "Error fetching bracelets" }));
+                setAddedToCart({});
+                setIsWished({});
             } finally {
                 setLoading(false);
             }
         };
 
         getBracelets();
-    }, [setProduct, currentUser, API_URL]);
+    }, [setProduct, user, API_URL, t, fetchCart, fetchWishlist]);
+
+    useEffect(() => {
+        const handleCartUpdate = async () => {
+            const cartItems = await fetchCart();
+            setAddedToCart(cartItems.reduce((acc, item) => ({
+                ...acc,
+                [item.id]: true,
+            }), {}));
+        };
+        const handleWishlistUpdate = async () => {
+            const wishlistItems = await fetchWishlist();
+            setIsWished(wishlistItems.reduce((acc, item) => ({ ...acc, [item._id]: true }), {}));
+        };
+
+        window.addEventListener("cart-updated", handleCartUpdate);
+        window.addEventListener("wishlist-updated", handleWishlistUpdate);
+        return () => {
+            window.removeEventListener("cart-updated", handleCartUpdate);
+            window.removeEventListener("wishlist-updated", handleWishlistUpdate);
+        };
+    }, [fetchCart, fetchWishlist]);
 
     useEffect(() => {
         if (isLoginPromptOpen) {
@@ -74,58 +157,48 @@ const BraceletGallery = () => {
             }
         };
 
-        if (isLoginPromptOpen) {
-            document.addEventListener('mousedown', handleClickOutside);
-        }
-
+        document.addEventListener('mousedown', handleClickOutside);
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [isLoginPromptOpen]);
 
-    const handleAddToCart = async (product) => {
-        if (!userId) {
+    const handleCartToggle = async (product) => {
+        if (!user?.id) {
             setLoginPromptType("cart");
             setIsLoginPromptOpen(true);
             return;
         }
         try {
-            await axios.post(`${API_URL}/api/cart/${userId}`, {
-                productId: product._id,
-                quantity: 1,
-            });
-            dispatch(addToCart({ ...product, quantity: 1 }));
-            setAddedToCart(prev => ({ ...prev, [product._id]: true }));
-            toast.success(t('braceletGallery.addedToCart', { defaultValue: `${product.name} added to cart!` }));
-            setTimeout(() => {
+            setCartLoading(product._id);
+            if (isCartItem(product._id)) {
+                await removeFromCart(product._id, null);
                 setAddedToCart(prev => ({ ...prev, [product._id]: false }));
-            }, 3000);
+                toast.info(t('braceletGallery.removedFromCart', { defaultValue: `${product.name} removed from cart` }));
+            } else {
+                await addToCart(product._id, 1, null);
+                setAddedToCart(prev => ({ ...prev, [product._id]: true }));
+                toast.success(t('braceletGallery.addedToCart', { defaultValue: `${product.name} added to cart!` }));
+            }
         } catch (error) {
-            console.error("Failed to add to cart:", error.message);
-            toast.error(t('braceletGallery.cartError', { defaultValue: "Failed to add to cart" }));
+            console.error("BraceletGallery.jsx handleCartToggle error:", error.message);
+            toast.error(t('braceletGallery.cartError', { defaultValue: "Error updating cart" }));
+        } finally {
+            setCartLoading(null);
         }
     };
 
-    const toggleWishlist = async (product) => {
-        if (!userId) {
+    const handleWishlistToggle = async (product) => {
+        if (!user?.id) {
             setLoginPromptType("wishlist");
             setIsLoginPromptOpen(true);
             return;
         }
         try {
-            if (isWished[product._id]) {
-                await axios.delete(`${API_URL}/api/wishlist/${userId}/${product._id}`);
-                setIsWished(prev => ({ ...prev, [product._id]: false }));
-                toast.info(t('braceletGallery.removedFromWishlist', { defaultValue: `${product.name} removed from wishlist` }));
-            } else {
-                await axios.post(`${API_URL}/api/wishlist/${userId}`, {
-                    productId: product._id,
-                });
-                setIsWished(prev => ({ ...prev, [product._id]: true }));
-                toast.success(t('braceletGallery.addedToWishlist', { defaultValue: `${product.name} added to wishlist` }));
-            }
-        } catch (err) {
-            console.error("Wishlist toggle failed:", err.message);
+            await toggleWishlist({ _id: product._id, name: product.name, price: product.price, category: product.category, image: product.image });
+            setIsWished(prev => ({ ...prev, [product._id]: !isWishlistItem(product._id) }));
+        } catch (error) {
+            console.error("BraceletGallery.jsx handleWishlistToggle error:", error.message);
             toast.error(t('braceletGallery.wishlistError', { defaultValue: "Error updating wishlist" }));
         }
     };
@@ -138,8 +211,9 @@ const BraceletGallery = () => {
 
     return (
         <div className="w-full">
+            <style>{toastStyles}</style>
             <div className="w-[90%] flex flex-col justify-center items-center mx-auto">
-                <div className="my-[30px] flex flex-col justify-center items-center text-[#0e0e53] text-center font-[Against] italic font-light">
+                <div className="my-[30px] flex flex-col justify-center items-center text-[#0e0e53] text-center font-[Against] font-light">
                     <h2 className="text-[30px]">{t('braceletGallery.title')}</h2>
                 </div>
 
@@ -178,23 +252,29 @@ const BraceletGallery = () => {
                                 <div className="flex w-full justify-between">
                                     <div className="w-full flex flex-col text-left mt-2">
                                         <span className="text-[20px] font-bold text-[#213547]">{name}</span>
-                                        <span className="text-[15px] text-gray-600">{price} AMD</span>
+                                        <span className="text-[15px] text-gray-600">
+                                            {numberFormatter.format(price)} {t("checkout.currency", { defaultValue: "AMD" })}
+                                        </span>
                                         <span className="text-[13px] text-gray-500 italic">{category}</span>
                                     </div>
                                     <div className="flex gap-2 mt-2">
                                         <span
-                                            onClick={() => handleAddToCart({ _id, name, price, category })}
+                                            onClick={() => handleCartToggle({ _id, name, price, category })}
                                             className="text-[20px] cursor-pointer transition-all duration-300"
-                                            title={addedToCart[_id] ? t('braceletGallery.addedToCart') : t('braceletGallery.addToCart')}
+                                            title={isCartItem(_id) ? t('braceletGallery.removeFromCart') : t('braceletGallery.addToCart')}
                                         >
-                                            <i className={`bi ${addedToCart[_id] ? 'bi-cart-check-fill text-[#0e0e53]' : 'bi-cart text-gray-400'} text-[20px] hover:text-gray-200 transition-all`}></i>
+                                            {cartLoading === _id ? (
+                                                <div className="w-[20px] h-[20px] border-4 border-[#0e0e53] border-t-transparent rounded-full animate-spin"></div>
+                                            ) : (
+                                                <i className={`bi ${isCartItem(_id) ? 'bi-cart-check-fill text-[#0e0e53]' : 'bi-cart text-gray-400'} text-[20px] hover:text-gray-200 transition-all`}></i>
+                                            )}
                                         </span>
                                         <span
-                                            onClick={() => toggleWishlist({ _id, name })}
-                                            className={`text-[20px] cursor-pointer transition-all duration-300 ${isWished[_id] ? 'text-[#0e0e53]' : 'text-gray-400'}`}
+                                            onClick={() => handleWishlistToggle({ _id, name, price, category, image })}
+                                            className={`text-[20px] cursor-pointer transition-all duration-300 ${isWishlistItem(_id) ? 'text-[#0e0e53]' : 'text-gray-400'}`}
                                             title={t('braceletGallery.addToWishlist')}
                                         >
-                                            <i className={`bi ${isWished[_id] ? 'bi-heart-fill' : 'bi-heart text-gray-400 hover:text-gray-200 transition-all'}`}></i>
+                                            <i className={`bi ${isWishlistItem(_id) ? 'bi-heart-fill' : 'bi-heart text-gray-400 hover:text-gray-200 transition-all'}`}></i>
                                         </span>
                                     </div>
                                 </div>

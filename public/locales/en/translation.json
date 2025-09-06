@@ -18,7 +18,7 @@
     "button": "Contact Us"
   },
   "sort": {
-    "sortBy": "SORT BY",
+    "sortByPrice": "Sort by Price",
     "popularity": "Popularity",
     "type": "Type",
     "price": "Price",
@@ -27,11 +27,15 @@
     "apply": "Apply"
   },
   "nav": {
+    "login": "Log In",
     "home": "HOME",
     "about": "ABOUT",
-    "newReleases": "NEW RELEASES",
+    "newReleases": "NEW",
     "contact": "CONTACT",
-    "shop":"SHOP"
+    "shop":"SHOP",
+    "search": "SEARCH",
+    "cart": "CART",
+    "wishlist": "WISHLIST"
   },
   "allProductsGallery": {
     "title": "ALL PRODUCTS",
@@ -80,26 +84,30 @@
   "profile": {
     "title": "Profile",
     "name": "Name",
-    "firstName": "First Name",
-    "lastName": "Last Name",
+    "surname": "Surname",
     "email": "Email",
-    "orders": "Orders",
-    "noOrders": "No orders yet",
+    "wishlist": "Wishlist",
+    "cart": "Cart",
     "logout": "Logout",
+    "logoutSuccess": "Logged out successfully!",
+    "orders": "Orders",
+    "noOrders": "You have no orders yet.",
+    "nameError": "Name must be at least 1 character long",
+    "updateSuccess": "Profile updated successfully!",
+    "updateFailed": "Failed to update profile",
     "save": "Save",
     "cancel": "Cancel",
-    "updateSuccess": "Username updated successfully!",
-    "updateFailed": "Failed to update username",
-    "usernameError": "Full name must be at least 3 characters long"
+    "sessionExpired": "Session expired. Please log in again."
   },
 
   "necklaceDetail": {
     "backToSelection": "BACK TO SELECTION",
-    "add": "ADD",
+    "add": "Add to Cart",
+    "addedToCart": "Added to Cart",
     "details": "DETAILS"
   },
   "necklaceGallery": {
-    "title": "NECKLACE",
+    "title": "NECKLACES",
     "loadMore": "Load More",
     "addToCart": "Add to Cart",
     "addedToCart": "Added to Cart",
@@ -122,21 +130,21 @@
     "noResults": "No results found."
   },
   "aboutUs": {
-    "title": "About Us",
-    "paragraph1": "At the heart of our brand lies a deep love for beauty, craftsmanship, and meaningful expression. We are a silver jewelry house dedicated to creating timeless pieces from the finest 925 sterling silver — each one designed to become a cherished part of your story.",
-    "paragraph2": "Our commitment to excellence begins with our materials. We use only high-quality 925 silver, known for its purity, durability, and luminous finish. This foundation ensures that every piece not only looks stunning, but lasts a lifetime and beyond.",
-    "paragraph3": "Behind every design is the hand and heart of our lead designer — an artist with a passion for detail and emotion. Drawing inspiration from nature, love, and the quiet poetry of everyday moments, they create pieces that speak softly yet powerfully. Each curve, sparkle, and silhouette is thoughtfully crafted to highlight your individuality and grace.",
-    "paragraph4": "We believe that jewelry should not only adorn but also connect — to memories, to feelings, and to your truest self.",
-    "paragraph5": "Welcome to a world where elegance meets meaning, and where every piece tells a story — yours.",
-    "imageAlt": "About Us Cover"
+    "title": "Our Story",
+    "paragraph1": "For seven years, AYB Jewelry has been crafting timeless elegance in the heart of our silver jewelry house. Each piece, born from a deep passion for beauty, is made with the finest 925 sterling silver, chosen for its radiant shine and enduring quality.",
+    "paragraph2": "Our creations are more than jewelry—they are the vision of our dedicated designer, who pours heart and soul into every detail. From the delicate curve of a pendant to the intricate sparkle of a ring, every element is thoughtfully crafted to reflect individuality and grace.",
+    "paragraph3": "Since our founding, we’ve been driven by a commitment to excellence. Our 925 silver is selected for its purity and strength, ensuring that every piece not only captivates but also stands the test of time, becoming a cherished part of your story.",
+    "paragraph4": "At AYB Jewelry, we believe that jewelry should tell a story—of love, of moments, of you. Our designs draw inspiration from life’s quiet beauty, transforming silver into wearable art that resonates with meaning.",
+    "paragraph5": "Join us in celebrating seven years of craftsmanship, where every piece is a testament to our dedication to quality, creativity, and the stories we share through our jewelry.",
+    "learnMore": "Discover More"
   },
   "sectionGallery": {
-    "title": "Introducing our new collection of elegance",
-    "paragraph1": "Introducing our new Collection – a celebration of renewal and romance captured in gleaming 925 sterling silver. Each piece tells a story of springtime awakening, delicately crafted by our master artisans to embody both timeless sophistication and contemporary design.",
-    "paragraph2": "Like the first bloom after a long winter, these creations whisper of new beginnings and the quiet beauty of love.",
-    "paragraph3": "Our designer has translated these fleeting moments into wearable treasures – poetry in silver – that will adorn you with subtle radiance and speak to the heart.",
-    "paragraph4": "Let every curve, every shimmer, remind you of your own grace, your strength, and the infinite tenderness that lives within.",
-    "button": "Explore the Collection"
+      "title": "Discover Our New Collection",
+      "description": "Explore the elegance and charm of our latest jewelry pieces, crafted with passion and precision.",
+      "fallbackTitle": "New Collection",
+      "fallbackDescription": "Explore our latest collection.",
+      "exploreCollection": "Explore Collection",
+      "loadError": "Error loading homepage assets"
   },
   "sectionNav": {
     "heading": "Shop by Type",
@@ -148,8 +156,68 @@
     "earringsAlt": "Earrings",
     "bracelets": "BRACELETS",
     "braceletsAlt": "Bracelets",
-    "brooches": "HEADCLIPS",
-    "broochesAlt": "Headclips"
+    "hairclips": "HAIRCLIPS",
+    "hairclipsAlt": "HAIRCLIPS"
+  },
+  "admin": {
+    "products": {
+      "serverError": "Server error uploading image. Check server logs or file size.",
+      "compressionError": "Failed to compress image",
+      "imageSizeError": "File size should be less than 100MB",
+      "imageTypeError": "Please select an image file",
+      "imageSizeErrorSlider": "File {name} is too large. Maximum size is 100MB",
+      "imageTypeErrorSlider": "File {name} is not an image",
+      "singleImageError": "Please drop only one image for the main product image",
+      "imageRequired": "Main product image is required",
+      "formIncomplete": "Please fill in all required fields",
+      "imageUploadFailed": "Error uploading image: ",
+      "sliderUploadFailed": "Error uploading slider images: ",
+      "errorFetching": "Error fetching data: ",
+      "errorDeletingImage": "Error deleting image: ",
+      "errorSaving": "Error saving product: ",
+      "errorDeleting": "Error deleting product: ",
+      "errorUpdatingImages": "Error updating images: ",
+      "confirmDelete": "Are you sure you want to delete this product?",
+      "updateSuccess": "Product updated successfully!",
+      "addSuccess": "Product added successfully!",
+      "deleteSuccess": "Product deleted successfully!",
+      "imagesUpdated": "Product images updated successfully!",
+      "title": "Manage Products",
+      "loggedInAs": "Logged in as: ",
+      "name": "Product Name",
+      "price": "Price",
+      "selectCategory": "Select Category",
+      "necklace": "Necklace",
+      "ring": "Ring",
+      "earring": "Earring",
+      "bracelet": "Bracelet",
+      "hairclip": "Hairclip",
+      "alt": "Image Alt Text",
+      "description": "Description",
+      "details": "Product Details",
+      "material": "Material",
+      "stone": "Stone",
+      "finish": "Finish",
+      "mainImage": "Main Product Image",
+      "sliderImages": "Slider Images (Multiple)",
+      "dragDropMain": "Drag and drop an image here or click to select (max 100MB, compressed to ~5MB)",
+      "dragDropSlider": "Drag and drop images here or click to select (max 100MB each, compressed to ~5MB)",
+      "currentSliderImages": "Current Slider Images",
+      "newSliderImages": "New Slider Images",
+      "uploading": "Uploading...",
+      "updateProduct": "Update Product",
+      "addProduct": "Add Product",
+      "clearForm": "Clear Form",
+      "existingProducts": "Existing Products",
+      "edit": "Edit",
+      "delete": "Delete",
+      "manageImages": "Images",
+      "imageManager": "Manage Images for ",
+      "addNewImages": "Add New Images",
+      "addDetail": "Add Detail",
+      "close": "Close",
+      "saveImages": "Save Images"
+    }
   },
   "cart": {
     "clearCart": "Clear Cart",
@@ -163,10 +231,11 @@
     "checkOut": "Check Out",
     "size": "Size",
     "loginPrompt": "Please log in to view your cart",
-    "loginButton": "Log In"
+    "loginButton": "Log In",
+    "deliveryNote": "Delivery will be in 24 hours"
   },
   "checkout": {
-    "checkoutTitle": "Check Out",
+    "checkoutTitle": "CHECK OUT",
     "email": "Email",
     "firstName": "First Name",
     "lastName": "Last Name",
@@ -182,25 +251,40 @@
     "paymentDetails": "Payment Details",
     "cardNumber": "Card Number",
     "cardHolder": "Cardholder Name",
-    "placeOrder": "Place Order"
+    "pay": "Pay",
+    "emptyCart": "Your cart is empty",
+    "fetchCartError": "Failed to load cart",
+    "loginRequired": "Please log in to proceed",
+    "missingDeliveryInfo": "Please provide region, address, and postal code",
+    "paymentSuccess": "Payment successful! Order placed.",
+    "paymentPending": "Payment is still processing.",
+    "paymentFailed": "Payment failed. Please try again.",
+    "deliveryOptions": "Delivery Options",
+    "contactInfo": "Contact Information",
+    "deliveryInfo": "Delivery Information",
+    "streetAddress": "Street address",
+    "successTitle": "Payment Successful",
+    "successMessage": "Your order has been placed. Thank you for shopping with Ayb Jewelry!",
+    "currency": "AMD"
   },
 
   "ringGallery": {
     "title": "RINGS",
-    "loadMore": "Load More",
-    "addToCart": "Add to Cart",
-    "addedToCart": "Added to Cart",
-    "addedToWishlist": "Added to wishlist",
-    "removedFromWishlist": "Removed from wishlist",
-    "cartError": "Failed to add to cart",
+    "addedToCart": "Added to cart!",
+    "addToCart": "Add to cart!",
+    "removedFromCart": "{{name}} removed from cart",
+    "cartError": "Error updating cart",
+    "selectRemoveSize": "Select Size to Remove",
     "wishlistError": "Error updating wishlist",
-    "addToWishlist": "Add to Wishlist",
+    "selectRingSize": "Select Ring Size",
+    "sizeGuide": "Size Guide",
     "loginPrompt": {
       "cart": "Please log in to add to cart",
       "wishlist": "Please log in to add to wishlist"
     },
     "loginButton": "Log In",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "loadMore": "Load More"
   },
   "earringsGallery": {
     "title": "EARRINGS"
@@ -223,15 +307,19 @@
     "cancel": "Cancel"
   },
   "earringDetail": {
+    "backToSelection": "Back to Selection",
     "add": "Add to Cart",
+    "addedToCart": "Added to Cart",
     "details": "Details"
   },
-  "braceletsDetail": {
-    "backToSelection": "Back to Selection"
-  },
+
   "braceletDetail": {
     "add": "Add to Cart",
-    "details": "Details"
+    "addToCart": "Add to Cart",
+    "addedToCart": "Added to Cart",
+    "details": "Details",
+    "backToSelection": "Back to Selection"
+
   },
 
   "braceletGallery": {
@@ -252,15 +340,15 @@
     "cancel": "Cancel"
   },
 
-  "broochesDetail": {
-    "backToSelection": "Back to Selection"
-  },
-  "broochDetail": {
+  "hairclipDetail": {
     "add": "Add to Cart",
-    "details": "Details"
+    "details": "Details",
+    "backToSelection": "Back to Selection",
+    "addedToCart": "Added to Cart"
+
   },
-  "broochGallery": {
-    "title": "BROOCHES",
+  "hairclipGallery": {
+    "title": "hairclips",
     "loadMore": "Load More",
     "addToCart": "Add to Cart",
     "addedToCart": "Added to Cart",
@@ -306,6 +394,7 @@
   },
   "ringDetail": {
     "backToSelection": "Back to Selection",
+    "addToCart": "Add to Cart",
     "add": "Add to Cart",
     "sizeGuide": "Size Guide",
     "details": "Details",
@@ -331,11 +420,48 @@
     },
     "loginButton": "Log In",
     "cancel": "Cancel",
-      "addedToCart": "Added to cart",
+      "addedToCart": "Added to Cart",
       "addedToWishlist": "Added to wishlist",
       "removedFromWishlist": "Removed from wishlist",
       "selectSize": "Please select a ring size",
       "cartError": "Failed to add to cart",
       "wishlistError": "Error updating wishlist"
+  },
+  "forgotPassword": {
+    "header": "Reset Your Password",
+    "title": "Reset Your Password",
+    "email": "Enter your email",
+    "submit": "Send Reset Link",
+    "success": "Password reset link sent to your email!",
+    "error": "Failed to send reset link. Please try again.",
+    "backToLogin": "Back to",
+    "login": "Login"
+  },
+  "resetPassword": {
+    "title": "RESET PASSWORD",
+    "header": "Set New Password",
+    "password": "Enter new password",
+    "submit": "Reset Password",
+    "success": "Password reset successful!",
+    "error": "Failed to reset password. Please try again."
+  },
+  "newCollection": {
+    "title": "New Collection",
+    "currency": "AMD",
+    "loadError": "Error fetching products",
+    "noProducts": "No products in New Collection",
+    "addedToCart": "{name} added to cart!",
+    "removedFromCart": "{name} removed from cart",
+    "cartError": "Error updating cart",
+    "addedToWishlist": "{name} added to wishlist",
+    "removedFromWishlist": "{name} removed from wishlist",
+    "wishlistError": "Error updating wishlist",
+    "loadMore": "Load More",
+    "loginPrompt": {
+      "cart": "Please login to add to cart",
+      "wishlist": "Please login to add to wishlist"
+    },
+    "loginButton": "Login",
+    "cancel": "Cancel"
   }
 }

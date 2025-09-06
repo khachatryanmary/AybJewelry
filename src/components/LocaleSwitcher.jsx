@@ -35,22 +35,22 @@ const LocaleSwitcher = () => {
     return (
         <div className="relative text-[#0e0e53] font-sans select-none">
             <div
-                className="flex items-center gap-1 px-[12px] py-[6px] rounded-md cursor-pointer hover:bg-[#efeeee] transition"
+                className="flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer hover:bg-[#efeeee] transition text-sm sm:text-base"
                 onClick={() => setIsOpen(!isOpen)}
             >
-                <span className="text-sm font-medium">{languageLabels[lng]}</span>
-                <i className={`bi bi-chevron-down text-sm transition-transform ${isOpen ? 'rotate-180' : ''}`}></i>
+                <span className="font-medium">{languageLabels[lng]}</span>
+                <i className={`bi bi-chevron-down transition-transform ${isOpen ? 'rotate-180' : ''}`}></i>
             </div>
 
             {isOpen && (
-                <div className="absolute top-full mt-1 right-0 bg-[#efeeee] shadow-md rounded-md overflow-hidden z-50 w-[150px]">
+                <div className="absolute top-full mt-1  bg-[#efeeee] shadow-md rounded-md overflow-hidden z-50 w-32 sm:w-40">
                     {locales
                         .filter((l) => l !== lng)
                         .map((l) => (
                             <div
                                 key={l}
                                 onClick={() => handleLanguageChange(l)}
-                                className="px-[12px] py-[8px] hover:bg-[#0a0a39] hover:text-[white] cursor-pointer text-sm transition-colors"
+                                className="px-3 py-2 hover:bg-[#0a0a39] hover:text-white cursor-pointer text-sm sm:text-base transition-colors"
                             >
                                 {languageLabels[l]}
                             </div>

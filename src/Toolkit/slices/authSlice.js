@@ -13,7 +13,6 @@ export const registerUser = createAsyncThunk(
                 email,
                 password,
             });
-
             return data;
         } catch (err) {
             const message =
@@ -32,12 +31,29 @@ export const loginUser = createAsyncThunk(
                 usernameOrEmail,
                 password,
             });
-
             localStorage.setItem("loggedInUser", JSON.stringify(data));
             return data;
         } catch (err) {
             const message =
                 err.response?.data?.message || "Login failed. Please try again.";
+            return thunkAPI.rejectWithValue(message);
+        }
+    }
+);
+
+// Forgot Password
+export const forgotPassword = createAsyncThunk(
+    "auth/forgotPassword",
+    async ({ email, lng }, thunkAPI) => {
+        try {
+            const { data } = await axios.post(`${API_URL}/api/auth/forgot-password`, {
+                email,
+                lng,
+            });
+            return data;
+        } catch (err) {
+            const message =
+                err.response?.data?.message || "Failed to send reset link. Please try again.";
             return thunkAPI.rejectWithValue(message);
         }
     }
@@ -85,6 +101,18 @@ const authSlice = createSlice({
                 state.error = null;
             })
             .addCase(loginUser.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+            .addCase(forgotPassword.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(forgotPassword.fulfilled, (state) => {
+                state.loading = false;
+                state.error = null;
+            })
+            .addCase(forgotPassword.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
             });
