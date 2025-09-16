@@ -103,7 +103,7 @@ const HairclipDetail = () => {
                 }
             } catch (error) {
                 console.error("HairclipDetail.jsx fetch data error:", error.message);
-                toast.error(t('hairclipDetail.fetchError', { defaultValue: "Failed to load product details" }));
+                toast.error(t('productsDetail.fetchError', { defaultValue: "Failed to load product details" }));
             } finally {
                 setLoading(false);
             }
@@ -164,7 +164,7 @@ const HairclipDetail = () => {
             await toggleWishlist({ _id: hairclip._id, name: hairclip.name, price: hairclip.price, category: hairclip.category, image: hairclip.image });
         } catch (error) {
             console.error("HairclipDetail.jsx handleWishlistToggle error:", error.message);
-            toast.error(t('hairclipDetail.wishlistError', { defaultValue: "Error updating wishlist" }));
+            toast.error(t('productsDetail.wishlistError', { defaultValue: "Error updating wishlist" }));
         }
     };
 
@@ -178,22 +178,22 @@ const HairclipDetail = () => {
             setCartLoading(true);
             if (isCartItem(hairclip._id)) {
                 await removeFromCart(hairclip._id, null);
-                toast.info(t('hairclipDetail.removedFromCart', { defaultValue: `${hairclip.name} removed from cart` }));
+                toast.info(t('productsDetail.removedFromCart', { defaultValue: `${hairclip.name} removed from cart` }));
             } else {
                 await addToCart(hairclip._id, quantity, null);
-                toast.success(t('hairclipDetail.addedToCart', { defaultValue: `${hairclip.name} added to cart!` }));
+                toast.success(t('productsDetail.addedToCart', { defaultValue: `${hairclip.name} added to cart!` }));
             }
         } catch (error) {
             console.error("HairclipDetail.jsx handleCartToggle error:", error.message);
-            toast.error(t('hairclipDetail.cartError', { defaultValue: "Error updating cart" }));
+            toast.error(t('productsDetail.cartError', { defaultValue: "Error updating cart" }));
         } finally {
             setCartLoading(false);
         }
     };
 
     const images = hairclip.image
-        ? [`${API_URL}${hairclip.image}`, ...(hairclip.images || []).map(img => `${API_URL}${img}`)]
-        : (hairclip.images || []).map(img => `${API_URL}${img}`);
+        ? [`${hairclip.image}`, ...(hairclip.images || []).map(img => `${img}`)]
+        : (hairclip.images || []).map(img => `${img}`);
 
     return (
         <div className="flex flex-col sm:flex-row w-[90%] mx-auto pt-[20px] sm:pt-[30px] md:pt-[40px] mt-[10px] sm:mt-[15px] md:mt-[20px] min-h-[400px] sm:min-h-[450px] md:min-h-[500px] bg-[#f5f5f5] justify-center items-start gap-[20px] sm:gap-[30px] md:gap-[40px] pb-[20px]">
@@ -230,7 +230,7 @@ const HairclipDetail = () => {
                     <>
                         <Link to={from}>
                             <button className="bg-white text-[#0a0a39] transition duration-300 border-none cursor-pointer py-[8px] sm:py-[9px] md:py-[10px] px-[12px] sm:px-[15px] md:px-[18px] font-semibold rounded-[6px] text-[14px] sm:text-[15px] md:text-[16px] hover:bg-[#0a0a39] hover:text-white">
-                                {t('hairclipDetail.backToSelection')}
+                                {t('productsDetail.backToSelection')}
                             </button>
                         </Link>
 
@@ -240,7 +240,7 @@ const HairclipDetail = () => {
                                 <span
                                     onClick={handleWishlistToggle}
                                     className={`text-[20px] sm:text-[24px] md:text-[28px] cursor-pointer transition-all duration-300 ${isWishlistItem(hairclip._id) ? 'text-[#0a0a39]' : 'text-gray-400'}`}
-                                    title={t('hairclipDetail.addToWishlist')}
+                                    title={t('productsDetail.addToWishlist')}
                                 >
                                     <i className={`bi ${isWishlistItem(hairclip._id) ? 'bi-heart-fill' : 'bi-heart'}`}></i>
                                 </span>
@@ -283,9 +283,9 @@ const HairclipDetail = () => {
                                 {cartLoading ? (
                                     <div className="w-[20px] sm:w-[22px] md:w-[24px] h-[20px] sm:h-[22px] md:h-[24px] border-4 border-[#0a0a39] border-t-transparent rounded-full animate-spin"></div>
                                 ) : isCartItem(hairclip._id) ? (
-                                    t('hairclipDetail.addedToCart')
+                                    t('productsDetail.addedToCart')
                                 ) : (
-                                    t('hairclipDetail.add')
+                                    t('productsDetail.add')
                                 )}
                             </button>
 
@@ -294,7 +294,7 @@ const HairclipDetail = () => {
                                     className={`text-[16px] sm:text-[17px] md:text-[18px] font-bold text-[#0a0a39] flex justify-between items-center px-[10px] sm:px-[15px] md:px-[20px] py-[8px] sm:py-[10px] md:py-[12px] bg-[#f7f7f7] border-b border-[#ddd] cursor-pointer select-none ${openDetails ? 'open' : ''}`}
                                     onClick={() => setOpenDetails(!openDetails)}
                                 >
-                                    <span>{t('hairclipDetail.details')}</span>
+                                    <span>{t('productsDetail.details')}</span>
                                     <i className={`bi bi-chevron-double-down transition-transform duration-300 text-[#0a0a39] ${openDetails ? 'rotate-180' : ''}`}></i>
                                 </div>
 
@@ -325,23 +325,23 @@ const HairclipDetail = () => {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.3 }}
-                        className="fixed inset-0 flex items-center justify-center z-50"
+                        className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
                     >
                         <div className="bg-white rounded-[8px] p-[10px] sm:p-[15px] md:p-[20px] w-[280px] sm:w-[400px] md:w-[500px] flex flex-col items-center justify-center gap-[10px] sm:gap-[15px] md:gap-[20px] shadow-sm sm:shadow-md">
-                            <i className="bi bi-lock text-[30px] sm:text-[35px] md:text-[40px] text-[#0a0a39]" />
-                            <h2 className="text-[18px] sm:text-[22px] md:text-[25px] text-[#0a0a39]">
-                                {t(`hairclipDetail.loginPrompt.${loginPromptType}`)}
+                            <i className="bi bi-lock text-[30px] sm:text-[35px] md:text-[40px] text-[#0e0e53]" />
+                            <h2 className="text-center text-[18px] sm:text-[22px] md:text-[25px] text-[#0e0e53]">
+                                {t(`productsGallery.loginPrompt.${loginPromptType}`)}
                             </h2>
                             <Link to={`/${lng}/login`}>
-                                <button className="w-[140px] sm:w-[180px] md:w-[200px] h-[30px] sm:h-[35px] md:h-[40px] bg-[#f7f7f7] border-none rounded-[6px] text-[#0a0a39] font-semibold transition duration-300 hover:bg-[#0a0a39] hover:text-white text-[14px] sm:text-[15px] md:text-[16px]">
-                                    {t('hairclipDetail.loginButton')}
+                                <button className="w-[140px] sm:w-[180px] md:w-[200px] h-[30px] sm:h-[35px] md:h-[40px] bg-[#f7f7f7] border-none rounded-[6px] text-[#0e0e53] font-semibold transition duration-300 hover:bg-[#0e0e53] hover:text-white text-[14px] sm:text-[15px] md:text-[16px]">
+                                    {t('productsGallery.loginButton')}
                                 </button>
                             </Link>
                             <button
                                 onClick={() => setIsLoginPromptOpen(false)}
-                                className="text-[#0a0a39] hover:text-[#213547] text-[14px] sm:text-[15px] md:text-[16px]"
+                                className="text-[#0e0e53] hover:text-[#213547] text-[14px] sm:text-[15px] md:text-[16px]"
                             >
-                                {t('hairclipDetail.cancel')}
+                                {t('productsGallery.cancel')}
                             </button>
                         </div>
                     </motion.div>

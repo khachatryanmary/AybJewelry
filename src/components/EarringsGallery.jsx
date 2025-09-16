@@ -4,7 +4,7 @@ import Filter from "./Filter.jsx";
 import { useFilteredProduct } from "./useFilteredProduct.jsx";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
-import { motion, AnimatePresence } from "framer-motion";
+import {AnimatePresence, motion} from "framer-motion";
 import { UserContext } from '../Providers/UserContext';
 import { CartContext } from '../Providers/CartContext';
 import { WishlistContext } from '../Providers/WishlistContext';
@@ -174,15 +174,15 @@ const EarringGallery = () => {
             if (isCartItem(product._id)) {
                 await removeFromCart(product._id, null);
                 setAddedToCart(prev => ({ ...prev, [product._id]: false }));
-                toast.info(t('earringGallery.removedFromCart', { defaultValue: `${product.name} removed from cart` }));
+                toast.info(t('productsGallery.removedFromCart', { defaultValue: `${product.name} removed from cart` }));
             } else {
                 await addToCart(product._id, 1, null);
                 setAddedToCart(prev => ({ ...prev, [product._id]: true }));
-                toast.success(t('earringGallery.addedToCart', { defaultValue: `${product.name} added to cart!` }));
+                toast.success(t('productsGallery.addedToCart', { defaultValue: `${product.name} added to cart!` }));
             }
         } catch (error) {
             console.error("EarringGallery.jsx handleCartToggle error:", error.message);
-            toast.error(t('earringGallery.cartError', { defaultValue: "Error updating cart" }));
+            toast.error(t('productsGallery.cartError', { defaultValue: "Error updating cart" }));
         } finally {
             setCartLoading(null);
         }
@@ -199,7 +199,7 @@ const EarringGallery = () => {
             setIsWished(prev => ({ ...prev, [product._id]: !isWishlistItem(product._id) }));
         } catch (error) {
             console.error("EarringGallery.jsx handleWishlistToggle error:", error.message);
-            toast.error(t('earringGallery.wishlistError', { defaultValue: "Error updating wishlist" }));
+            toast.error(t('productsGallery.wishlistError', { defaultValue: "Error updating wishlist" }));
         }
     };
 
@@ -244,7 +244,7 @@ const EarringGallery = () => {
                                     state={{ from: `/${lng}/earrings` }}
                                 >
                                     <img
-                                        src={`${API_URL}${image}`}
+                                        src={`${image}`}
                                         alt={name || 'image'}
                                         className="w-[280px] h-[180px] object-cover rounded-md"
                                     />
@@ -261,7 +261,7 @@ const EarringGallery = () => {
                                         <span
                                             onClick={() => handleCartToggle({ _id, name, price, category })}
                                             className="text-[20px] cursor-pointer transition-all duration-300"
-                                            title={isCartItem(_id) ? t('earringGallery.removeFromCart') : t('earringGallery.addToCart')}
+                                            title={isCartItem(_id) ? t('productsGallery.removeFromCart') : t('productsGallery.addToCart')}
                                         >
                                             {cartLoading === _id ? (
                                                 <div className="w-[20px] h-[20px] border-4 border-[#0e0e53] border-t-transparent rounded-full animate-spin"></div>
@@ -272,7 +272,7 @@ const EarringGallery = () => {
                                         <span
                                             onClick={() => handleWishlistToggle({ _id, name, price, category, image })}
                                             className={`text-[20px] cursor-pointer transition-all duration-300 ${isWishlistItem(_id) ? 'text-[#0e0e53]' : 'text-gray-400'}`}
-                                            title={t('earringGallery.addToWishlist')}
+                                            title={t('productsGallery.addToWishlist')}
                                         >
                                             <i className={`bi ${isWishlistItem(_id) ? 'bi-heart-fill' : 'bi-heart text-gray-400 hover:text-gray-200 transition-all'}`}></i>
                                         </span>
@@ -288,7 +288,7 @@ const EarringGallery = () => {
                         onClick={handleLoadMore}
                         className="mb-[50px] px-6 py-2 border border-[#0e0e53] text-[#0e0e53] hover:bg-[#0e0e53] hover:text-white transition-all rounded"
                     >
-                        {t('earringGallery.loadMore') || 'Load More'}
+                        {t('productsGallery.loadMore') || 'Load More'}
                     </button>
                 )}
             </div>
@@ -301,23 +301,23 @@ const EarringGallery = () => {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.3 }}
-                        className="fixed inset-0 flex items-center justify-center z-50"
+                        className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
                     >
-                        <div className="bg-white rounded-[10px] p-[20px] w-[500px] flex flex-col items-center justify-center gap-[20px]">
-                            <i className="bi bi-lock text-[40px] text-[#0e0e53]" />
-                            <h2 className="text-[25px] text-[#0e0e53]">
-                                {t(`earringGallery.loginPrompt.${loginPromptType}`)}
+                        <div className="bg-white rounded-[8px] p-[10px] sm:p-[15px] md:p-[20px] w-[280px] sm:w-[400px] md:w-[500px] flex flex-col items-center justify-center gap-[10px] sm:gap-[15px] md:gap-[20px] shadow-sm sm:shadow-md">
+                            <i className="bi bi-lock text-[30px] sm:text-[35px] md:text-[40px] text-[#0e0e53]" />
+                            <h2 className="text-center text-[18px] sm:text-[22px] md:text-[25px] text-[#0e0e53]">
+                                {t(`productsGallery.loginPrompt.${loginPromptType}`)}
                             </h2>
                             <Link to={`/${lng}/login`}>
-                                <button className="w-[200px] h-[40px] bg-[#efeeee] border-none rounded-[10px] text-[#0e0e53] font-semibold transition duration-500 hover:bg-[#0e0e53] hover:text-white">
-                                    {t('earringGallery.loginButton')}
+                                <button className="w-[140px] sm:w-[180px] md:w-[200px] h-[30px] sm:h-[35px] md:h-[40px] bg-[#f7f7f7] border-none rounded-[6px] text-[#0e0e53] font-semibold transition duration-300 hover:bg-[#0e0e53] hover:text-white text-[14px] sm:text-[15px] md:text-[16px]">
+                                    {t('productsGallery.loginButton')}
                                 </button>
                             </Link>
                             <button
                                 onClick={() => setIsLoginPromptOpen(false)}
-                                className="text-[#0e0e53] hover:text-[#213547] text-[16px]"
+                                className="text-[#0e0e53] hover:text-[#213547] text-[14px] sm:text-[15px] md:text-[16px]"
                             >
-                                {t('earringGallery.cancel')}
+                                {t('productsGallery.cancel')}
                             </button>
                         </div>
                     </motion.div>

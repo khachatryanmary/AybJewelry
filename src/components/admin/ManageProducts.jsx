@@ -29,77 +29,95 @@ const ManageProducts = () => {
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [adminName, setAdminName] = useState('Admin');
     const [imageError, setImageError] = useState('');
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
 
     const API_URL = import.meta.env.VITE_API_URL;
 
     useEffect(() => {
         const storedAdminName = localStorage.getItem('adminName') || 'Admin';
         setAdminName(storedAdminName);
-
-        const fetchData = async () => {
-            try {
-                const [productsRes, assetsRes] = await Promise.all([
-                    axios.get(`${API_URL}/api/products`, {
-                        headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
-                    }),
-                    axios.get(`${API_URL}/api/homepage-assets`, {
-                        headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
-                    }),
-                ]);
-
-                setProducts(productsRes.data);
-
-                // Get featured collection from homepage assets
-                const featuredCollection = assetsRes.data.collectionName || 'Spring 2025';
-
-                // Get unique collections from existing products
-                const existingCollections = [...new Set(productsRes.data.map(product => product.productCollection).filter(Boolean))];
-
-                // Combine featured collection with existing collections and Classic
-                const allCollections = [...new Set([featuredCollection, 'Classic', ...existingCollections])];
-
-                setCollections(allCollections);
-                setForm(prev => ({ ...prev, productCollection: featuredCollection }));
-            } catch (error) {
-                console.error('Error fetching data:', error);
-                alert(t('admin.products.errorFetching', { defaultValue: 'Error fetching data: ' }) + error.response?.data?.message);
-            }
-        };
         fetchData();
-    }, [API_URL, t]);
+    }, []);
+
+    const fetchData = async () => {
+        try {
+            setLoading(true);
+            const token = localStorage.getItem('adminToken');
+
+            const [productsRes, assetsRes] = await Promise.all([
+                axios.get(`${API_URL}/api/products`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                }),
+                axios.get(`${API_URL}/api/homepage-assets`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                }).catch(() => ({ data: { collectionName: 'Spring 2025' } })) // Fallback if endpoint doesn't exist
+            ]);
+
+            setProducts(productsRes.data || []);
+
+            // Get featured collection from homepage assets
+            const featuredCollection = assetsRes.data.collectionName || 'Spring 2025';
+
+            // Get unique collections from existing products
+            const existingCollections = [...new Set(productsRes.data.map(product => product.productCollection).filter(Boolean))];
+
+            // Combine featured collection with existing collections and Classic
+            const allCollections = [...new Set([featuredCollection, 'Classic', ...existingCollections])];
+
+            setCollections(allCollections);
+            setForm(prev => ({ ...prev, productCollection: featuredCollection }));
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            setError('Error fetching data: ' + (error.response?.data?.message || error.message));
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            if (file.size > 100 * 1024 * 1024) {
-                setImageError(t('admin.products.imageSizeError', { defaultValue: 'File size should be less than 100MB' }));
-                return;
-            }
-            if (!file.type.startsWith('image/')) {
-                setImageError(t('admin.products.imageTypeError', { defaultValue: 'Please select an image file' }));
-                return;
-            }
-            new Compressor(file, {
-                quality: 0.7,
-                maxWidth: 1920,
-                success(compressedFile) {
-                    setImageError('');
-                    setImageFile(compressedFile);
-                    console.log(`Compressed main image: ${(compressedFile.size / 1024 / 1024).toFixed(2)}MB`);
-                    const reader = new FileReader();
-                    reader.onload = (e) => setImagePreview(e.target.result);
-                    reader.readAsDataURL(compressedFile);
-                },
-                error(err) {
-                    console.error('Compression error:', err);
-                    setImageError(t('admin.products.compressionError', { defaultValue: 'Failed to compress image' }));
-                }
-            });
+            processImageFile(file, 'main');
         }
     };
 
     const handleSliderFilesChange = (e) => {
         const files = Array.from(e.target.files);
+        processMultipleImageFiles(files);
+    };
+
+    const processImageFile = (file, type) => {
+        if (file.size > 100 * 1024 * 1024) {
+            setImageError(t('admin.products.imageSizeError', { defaultValue: 'File size should be less than 100MB' }));
+            return;
+        }
+        if (!file.type.startsWith('image/')) {
+            setImageError(t('admin.products.imageTypeError', { defaultValue: 'Please select an image file' }));
+            return;
+        }
+
+        new Compressor(file, {
+            quality: 0.7,
+            maxWidth: 1920,
+            success(compressedFile) {
+                setImageError('');
+                if (type === 'main') {
+                    setImageFile(compressedFile);
+                    const reader = new FileReader();
+                    reader.onload = (e) => setImagePreview(e.target.result);
+                    reader.readAsDataURL(compressedFile);
+                }
+                console.log(`Compressed ${type} image: ${(compressedFile.size / 1024 / 1024).toFixed(2)}MB`);
+            },
+            error(err) {
+                console.error('Compression error:', err);
+                setImageError(t('admin.products.compressionError', { defaultValue: 'Failed to compress image' }));
+            }
+        });
+    };
+
+    const processMultipleImageFiles = (files) => {
         const validFiles = files.filter(file => {
             if (file.size > 100 * 1024 * 1024) {
                 alert(t('admin.products.imageSizeErrorSlider', { defaultValue: `File ${file.name} is too large. Maximum size is 100MB` }));
@@ -136,76 +154,22 @@ const ManageProducts = () => {
     const handleDrop = (e, type) => {
         e.preventDefault();
         e.stopPropagation();
-        e.dataTransfer.dropEffect = 'copy';
         const files = Array.from(e.dataTransfer.files);
+
         if (type === 'main') {
             if (files.length > 1) {
                 setImageError(t('admin.products.singleImageError', { defaultValue: 'Please drop only one image for the main product image' }));
                 return;
             }
-            const file = files[0];
-            if (file.size > 100 * 1024 * 1024) {
-                setImageError(t('admin.products.imageSizeError', { defaultValue: 'File size should be less than 100MB' }));
-                return;
-            }
-            if (!file.type.startsWith('image/')) {
-                setImageError(t('admin.products.imageTypeError', { defaultValue: 'Please select an image file' }));
-                return;
-            }
-            new Compressor(file, {
-                quality: 0.7,
-                maxWidth: 1920,
-                success(compressedFile) {
-                    setImageError('');
-                    setImageFile(compressedFile);
-                    console.log(`Compressed dropped main image: ${(compressedFile.size / 1024 / 1024).toFixed(2)}MB`);
-                    const reader = new FileReader();
-                    reader.onload = (e) => setImagePreview(e.target.result);
-                    reader.readAsDataURL(compressedFile);
-                },
-                error(err) {
-                    console.error('Compression error:', err);
-                    setImageError(t('admin.products.compressionError', { defaultValue: 'Failed to compress image' }));
-                }
-            });
+            processImageFile(files[0], 'main');
         } else if (type === 'slider') {
-            const validFiles = files.filter(file => {
-                if (file.size > 100 * 1024 * 1024) {
-                    alert(t('admin.products.imageSizeErrorSlider', { defaultValue: `File ${file.name} is too large. Maximum size is 100MB` }));
-                    return false;
-                }
-                if (!file.type.startsWith('image/')) {
-                    alert(t('admin.products.imageTypeErrorSlider', { defaultValue: `File ${file.name} is not an image` }));
-                    return false;
-                }
-                return true;
-            });
-            validFiles.forEach(file => {
-                new Compressor(file, {
-                    quality: 0.7,
-                    maxWidth: 1920,
-                    success(compressedFile) {
-                        setSliderFiles(prev => [...prev, compressedFile]);
-                        console.log(`Compressed dropped slider image: ${(compressedFile.size / 1024 / 1024).toFixed(2)}MB`);
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                            setSliderPreviews(prev => [...prev, { file: compressedFile.name, url: e.target.result }]);
-                        };
-                        reader.readAsDataURL(compressedFile);
-                    },
-                    error(err) {
-                        console.error('Compression error:', err);
-                        alert(t('admin.products.compressionError', { defaultValue: `Failed to compress ${file.name}` }));
-                    }
-                });
-            });
+            processMultipleImageFiles(files);
         }
     };
 
     const handleDragOver = (e) => {
         e.preventDefault();
         e.stopPropagation();
-        e.dataTransfer.dropEffect = 'copy';
     };
 
     const removeSliderFile = (index) => {
@@ -226,7 +190,7 @@ const ManageProducts = () => {
             }));
         } catch (error) {
             console.error('Error deleting slider image:', error);
-            alert(t('admin.products.errorDeletingImage', { defaultValue: 'Error deleting image: ' }) + error.response?.data?.message);
+            alert(t('admin.products.errorDeletingImage', { defaultValue: 'Error deleting image: ' }) + (error.response?.data?.message || error.message));
         }
     };
 
@@ -236,6 +200,7 @@ const ManageProducts = () => {
         formData.append('image', imageFile);
         formData.append('category', form.category ? form.category + 's' : 'general');
         formData.append('productId', editingId || Date.now());
+
         try {
             setUploading(true);
             setUploadProgress(0);
@@ -248,12 +213,11 @@ const ManageProducts = () => {
                     const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
                     setUploadProgress(percentCompleted);
                 },
-                timeout: 300000 // 5 minutes timeout
+                timeout: 300000
             });
-            console.log('Image upload response:', response.data);
             return response.data.imagePath;
         } catch (error) {
-            console.error('Error uploading image:', error.message, error.response?.data);
+            console.error('Error uploading image:', error);
             const errorMsg = error.response?.status === 500
                 ? t('admin.products.serverError', { defaultValue: 'Server error uploading image. Check server logs or file size.' })
                 : t('admin.products.imageUploadFailed', { defaultValue: 'Error uploading image: ' }) + (error.response?.data?.error || error.message);
@@ -273,9 +237,9 @@ const ManageProducts = () => {
         });
         formData.append('category', form.category ? form.category + 's' : 'general');
         formData.append('productId', editingId || Date.now());
+
         try {
             setUploading(true);
-            setUploadProgress(0);
             const response = await axios.post(`${API_URL}/api/upload/multiple`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
@@ -287,10 +251,9 @@ const ManageProducts = () => {
                 },
                 timeout: 300000
             });
-            console.log('Slider images upload response:', response.data);
             return response.data.images.map(img => img.path);
         } catch (error) {
-            console.error('Error uploading slider images:', error.message, error.response?.data);
+            console.error('Error uploading slider images:', error);
             const errorMsg = error.response?.status === 500
                 ? t('admin.products.serverError', { defaultValue: 'Server error uploading images. Check server logs or file size.' })
                 : t('admin.products.sliderUploadFailed', { defaultValue: 'Error uploading slider images: ' }) + (error.response?.data?.error || error.message);
@@ -298,7 +261,6 @@ const ManageProducts = () => {
             return [];
         } finally {
             setUploading(false);
-            setUploadProgress(0);
         }
     };
 
@@ -320,23 +282,21 @@ const ManageProducts = () => {
             let imagePath = form.image;
             let sliderImagePaths = [...form.images];
 
+            // Upload main image if provided
             if (imageFile) {
                 imagePath = await uploadImage();
                 if (!imagePath) {
-                    setImageError(t('admin.products.imageUploadFailed', { defaultValue: 'Failed to upload main image' }));
                     return;
                 }
-            } else if (!editingId && !imagePath) {
-                setImageError(t('admin.products.imageRequired', { defaultValue: 'Main product image is required' }));
-                return;
             }
 
+            // Upload slider images if provided
             if (sliderFiles.length > 0) {
                 const newSliderPaths = await uploadSliderImages();
                 sliderImagePaths = [...sliderImagePaths, ...newSliderPaths];
             }
 
-            // Remove empty fields and _id from details
+            // Clean details
             const cleanDetails = form.details.map(detail => {
                 const cleanDetail = {};
                 Object.keys(detail).forEach(key => {
@@ -354,31 +314,27 @@ const ManageProducts = () => {
                 details: cleanDetails,
             };
 
-            console.log('Submitting product data:', productData);
-
             if (editingId) {
-                await axios.put(`${API_URL}/api/products/${editingId}`, productData, {
+                const response = await axios.put(`${API_URL}/api/products/${editingId}`, productData, {
                     headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
                 });
-                setProducts(products.map(p => (p._id === editingId ? { ...p, ...productData } : p)));
+                setProducts(products.map(p => (p._id === editingId ? response.data : p)));
                 setEditingId(null);
                 alert(t('admin.products.updateSuccess', { defaultValue: 'Product updated successfully!' }));
             } else {
-                const res = await axios.post(`${API_URL}/api/products`, productData, {
+                const response = await axios.post(`${API_URL}/api/products`, productData, {
                     headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
                 });
-                setProducts([res.data, ...products]);
+                setProducts([response.data, ...products]);
                 alert(t('admin.products.addSuccess', { defaultValue: 'Product added successfully!' }));
             }
 
             resetForm();
-            setImageError('');
         } catch (error) {
-            console.error('Error saving product:', error.message, error.response?.data);
+            console.error('Error saving product:', error);
             alert(t('admin.products.errorSaving', { defaultValue: 'Error saving product: ' }) + (error.response?.data?.message || error.message));
         } finally {
             setUploading(false);
-            setUploadProgress(0);
         }
     };
 
@@ -400,15 +356,16 @@ const ManageProducts = () => {
         setSliderPreviews([]);
         setImageError('');
         setUploadProgress(0);
+        setEditingId(null);
     };
 
     const handleEdit = (product) => {
         setForm({
-            name: product.name,
-            price: product.price,
-            category: product.category,
-            image: product.image,
-            productCollection: product.productCollection,
+            name: product.name || '',
+            price: product.price || '',
+            category: product.category || '',
+            image: product.image || '',
+            productCollection: product.productCollection || '',
             images: product.images || [],
             alt: product.alt || '',
             description: product.description || '',
@@ -420,7 +377,8 @@ const ManageProducts = () => {
         setSliderFiles([]);
         setSliderPreviews([]);
         setImageError('');
-        setUploadProgress(0);
+        // Scroll to form on mobile
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const handleDelete = async (id) => {
@@ -434,29 +392,49 @@ const ManageProducts = () => {
             alert(t('admin.products.deleteSuccess', { defaultValue: 'Product deleted successfully!' }));
         } catch (error) {
             console.error('Error deleting product:', error);
-            alert(t('admin.products.errorDeleting', { defaultValue: 'Error deleting product: ' }) + error.response?.data?.message);
+            alert(t('admin.products.errorDeleting', { defaultValue: 'Error deleting product: ' }) + (error.response?.data?.message || error.message));
         }
     };
 
-    const openImageManager = (product) => {
-        setSelectedProduct(product);
-        setShowImageManager(true);
+    const addDetailField = () => {
+        setForm({
+            ...form,
+            details: [...form.details, { material: '', stone: '', finish: '', design: '', fit: '' }]
+        });
     };
 
-    const closeImageManager = () => {
-        setShowImageManager(false);
-        setSelectedProduct(null);
+    const removeDetailField = (index) => {
+        setForm({
+            ...form,
+            details: form.details.filter((_, i) => i !== index)
+        });
     };
 
-    const handleImageManagerUpdate = (updatedProduct) => {
-        setProducts(products.map(p => (p._id === updatedProduct._id ? updatedProduct : p)));
-        alert(t('admin.products.imagesUpdated', { defaultValue: 'Product images updated successfully!' }));
+    const updateDetailField = (index, field, value) => {
+        const newDetails = [...form.details];
+        newDetails[index][field] = value;
+        setForm({ ...form, details: newDetails });
     };
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <div className="text-lg text-gray-600">Loading products...</div>
+            </div>
+        );
+    }
 
     return (
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 max-w-[1400px]">
-            <div className="mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-                <h2 className="text-xl sm:text-2xl font-semibold text-[#0e0e53]">
+        <div className="space-y-6">
+            {error && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                    {error}
+                </div>
+            )}
+
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+                <h2 className="text-xl lg:text-2xl font-semibold text-[#0e0e53]">
                     {t('admin.products.title', { defaultValue: 'Manage Products' })}
                 </h2>
                 <div className="text-sm text-gray-600">
@@ -465,381 +443,414 @@ const ManageProducts = () => {
                 </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="bg-white p-4 sm:p-6 rounded-lg shadow-md mb-6">
-                <div className="grid grid-cols-1 gap-4">
+            {/* Product Form */}
+            <form onSubmit={handleSubmit} className="bg-white p-4 lg:p-6 rounded-lg shadow-md">
+                <h3 className="text-lg font-semibold mb-4">
+                    {editingId ? 'Edit Product' : 'Add New Product'}
+                </h3>
+
+                <div className="space-y-4">
+                    {/* Product Name */}
                     <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Product Name *
+                        </label>
                         <input
                             type="text"
                             value={form.name}
                             onChange={e => setForm({ ...form, name: e.target.value })}
-                            placeholder={t('admin.products.name', { defaultValue: 'Product Name' })}
-                            className="w-full p-3 border border-gray-300 rounded-lg text-sm sm:text-base"
+                            placeholder="Enter product name"
+                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             required
                         />
                     </div>
 
+                    {/* Price and Category */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <input
-                            type="text"
-                            value={form.price}
-                            onChange={e => setForm({ ...form, price: e.target.value })}
-                            placeholder={t('admin.products.price', { defaultValue: 'Price' })}
-                            className="w-full p-3 border border-gray-300 rounded-lg text-sm sm:text-base"
-                            required
-                        />
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Price (AMD) *
+                            </label>
+                            <input
+                                type="number"
+                                value={form.price}
+                                onChange={e => setForm({ ...form, price: e.target.value })}
+                                placeholder="0"
+                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                required
+                            />
+                        </div>
 
-                        <select
-                            value={form.category}
-                            onChange={e => setForm({ ...form, category: e.target.value })}
-                            className="w-full p-3 border border-gray-300 rounded-lg text-sm sm:text-base"
-                            required
-                        >
-                            <option value="">{t('admin.products.selectCategory', { defaultValue: 'Select Category' })}</option>
-                            <option value="necklace">{t('admin.products.necklace', { defaultValue: 'Necklace' })}</option>
-                            <option value="ring">{t('admin.products.ring', { defaultValue: 'Ring' })}</option>
-                            <option value="earring">{t('admin.products.earring', { defaultValue: 'Earring' })}</option>
-                            <option value="bracelet">{t('admin.products.bracelet', { defaultValue: 'Bracelet' })}</option>
-                            <option value="hairclip">{t('admin.products.hairclip', { defaultValue: 'Hairclip' })}</option>
-                        </select>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Category *
+                            </label>
+                            <select
+                                value={form.category}
+                                onChange={e => setForm({ ...form, category: e.target.value })}
+                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                required
+                            >
+                                <option value="">Select Category</option>
+                                <option value="necklace">Necklace</option>
+                                <option value="ring">Ring</option>
+                                <option value="earring">Earring</option>
+                                <option value="bracelet">Bracelet</option>
+                                <option value="hairclip">Hairclip</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <select
-                        value={form.productCollection}
-                        onChange={e => setForm({ ...form, productCollection: e.target.value })}
-                        className="w-full p-3 border border-gray-300 rounded-lg text-sm sm:text-base"
-                    >
-                        <option value="">{t('admin.products.selectCollection', { defaultValue: 'Select Collection' })}</option>
-                        {collections.map(collection => (
-                            <option key={collection} value={collection}>{collection}</option>
-                        ))}
-                    </select>
+                    {/* Collection and Alt Text */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Collection
+                            </label>
+                            <select
+                                value={form.productCollection}
+                                onChange={e => setForm({ ...form, productCollection: e.target.value })}
+                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            >
+                                <option value="">Select Collection</option>
+                                {collections.map(collection => (
+                                    <option key={collection} value={collection}>{collection}</option>
+                                ))}
+                            </select>
+                        </div>
 
-                    <div>
-                        <input
-                            type="text"
-                            value={form.alt}
-                            onChange={e => setForm({ ...form, alt: e.target.value })}
-                            placeholder={t('admin.products.alt', { defaultValue: 'Image Alt Text' })}
-                            className="w-full p-3 border border-gray-300 rounded-lg text-sm sm:text-base"
-                        />
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Image Alt Text
+                            </label>
+                            <input
+                                type="text"
+                                value={form.alt}
+                                onChange={e => setForm({ ...form, alt: e.target.value })}
+                                placeholder="Describe the image"
+                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                        </div>
                     </div>
 
+                    {/* Description */}
                     <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Description
+                        </label>
                         <textarea
                             value={form.description}
                             onChange={e => setForm({ ...form, description: e.target.value })}
-                            placeholder={t('admin.products.description', { defaultValue: 'Description' })}
-                            className="w-full p-3 border border-gray-300 rounded-lg text-sm sm:text-base"
-                            rows="4"
+                            placeholder="Product description"
+                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            rows="3"
                         />
                     </div>
 
+                    {/* Product Details */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                            {t('admin.products.details', { defaultValue: 'Product Details' })}
+                            Product Details
                         </label>
                         {form.details.map((detail, index) => (
-                            <div key={index} className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-2">
-                                <input
-                                    type="text"
-                                    value={detail.material}
-                                    onChange={e => {
-                                        const newDetails = [...form.details];
-                                        newDetails[index].material = e.target.value;
-                                        setForm({ ...form, details: newDetails });
-                                    }}
-                                    placeholder={t('admin.products.material', { defaultValue: 'Material' })}
-                                    className="p-2 border border-gray-300 rounded-lg text-sm"
-                                />
-                                <input
-                                    type="text"
-                                    value={detail.stone}
-                                    onChange={e => {
-                                        const newDetails = [...form.details];
-                                        newDetails[index].stone = e.target.value;
-                                        setForm({ ...form, details: newDetails });
-                                    }}
-                                    placeholder={t('admin.products.stone', { defaultValue: 'Stone' })}
-                                    className="p-2 border border-gray-300 rounded-lg text-sm"
-                                />
-                                <input
-                                    type="text"
-                                    value={detail.finish}
-                                    onChange={e => {
-                                        const newDetails = [...form.details];
-                                        newDetails[index].finish = e.target.value;
-                                        setForm({ ...form, details: newDetails });
-                                    }}
-                                    placeholder={t('admin.products.finish', { defaultValue: 'Finish' })}
-                                    className="p-2 border border-gray-300 rounded-lg text-sm"
-                                />
+                            <div key={index} className="mb-3 p-3 border border-gray-200 rounded-lg">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                    <input
+                                        type="text"
+                                        value={detail.material}
+                                        onChange={e => updateDetailField(index, 'material', e.target.value)}
+                                        placeholder="Material"
+                                        className="p-2 border border-gray-300 rounded text-sm"
+                                    />
+                                    <input
+                                        type="text"
+                                        value={detail.stone}
+                                        onChange={e => updateDetailField(index, 'stone', e.target.value)}
+                                        placeholder="Stone"
+                                        className="p-2 border border-gray-300 rounded text-sm"
+                                    />
+                                    <input
+                                        type="text"
+                                        value={detail.finish}
+                                        onChange={e => updateDetailField(index, 'finish', e.target.value)}
+                                        placeholder="Finish"
+                                        className="p-2 border border-gray-300 rounded text-sm"
+                                    />
+                                    <input
+                                        type="text"
+                                        value={detail.design}
+                                        onChange={e => updateDetailField(index, 'design', e.target.value)}
+                                        placeholder="Design"
+                                        className="p-2 border border-gray-300 rounded text-sm"
+                                    />
+                                    <input
+                                        type="text"
+                                        value={detail.fit}
+                                        onChange={e => updateDetailField(index, 'fit', e.target.value)}
+                                        placeholder="Fit"
+                                        className="p-2 border border-gray-300 rounded text-sm"
+                                    />
+                                </div>
+                                {form.details.length > 1 && (
+                                    <button
+                                        type="button"
+                                        onClick={() => removeDetailField(index)}
+                                        className="mt-2 text-red-600 text-sm hover:underline"
+                                    >
+                                        Remove Detail
+                                    </button>
+                                )}
                             </div>
                         ))}
                         <button
                             type="button"
-                            onClick={() => setForm({ ...form, details: [...form.details, { material: '', stone: '', finish: '', design: '', fit: '' }] })}
-                            className="text-sm text-[#0e0e53] hover:underline"
+                            onClick={addDetailField}
+                            className="text-blue-600 text-sm hover:underline"
                         >
-                            {t('admin.products.addDetail', { defaultValue: 'Add Detail' })}
+                            + Add Detail
                         </button>
                     </div>
 
+                    {/* Main Image Upload */}
                     <div
-                        className={`flex flex-col border-2 ${imageError ? 'border-red-500' : 'border-gray-300'} rounded-lg p-4 hover:border-[#0e0e53] transition-colors`}
+                        className={`border-2 border-dashed rounded-lg p-4 ${imageError ? 'border-red-300' : 'border-gray-300'} hover:border-blue-400 transition-colors`}
                         onDrop={(e) => handleDrop(e, 'main')}
                         onDragOver={handleDragOver}
                     >
-                        <label className="mb-2 text-sm font-medium text-gray-700">
-                            {t('admin.products.mainImage', { defaultValue: 'Main Product Image' })} *
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Main Product Image {!editingId && '*'}
                         </label>
                         <input
                             type="file"
                             accept="image/*"
                             onChange={handleFileChange}
-                            className="p-3 border border-gray-300 rounded-lg text-sm"
+                            className="w-full p-3 border border-gray-300 rounded-lg text-sm"
                         />
                         {imageError && (
-                            <p className="text-red-500 text-xs sm:text-sm mt-2">{imageError}</p>
+                            <p className="text-red-500 text-sm mt-1">{imageError}</p>
                         )}
                         {imagePreview && (
-                            <div className="mt-2">
+                            <div className="mt-3">
                                 <img
                                     src={imagePreview}
                                     alt="Preview"
-                                    className="w-24 h-24 sm:w-32 sm:h-32 object-cover rounded border"
+                                    className="w-20 h-20 lg:w-24 lg:h-24 object-cover rounded border"
                                 />
                             </div>
                         )}
                         {uploading && uploadProgress > 0 && (
-                            <div className="mt-2 w-full bg-gray-200 rounded-full h-2.5">
+                            <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
                                 <div
-                                    className="bg-[#0e0e53] h-2.5 rounded-full transition-all duration-300"
+                                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                                     style={{ width: `${uploadProgress}%` }}
-                                ></div>
+                                />
                             </div>
                         )}
-                        <p className="text-xs sm:text-sm text-gray-500 mt-2">
-                            {t('admin.products.dragDropMain', { defaultValue: 'Drag and drop an image here or click to select (max 100MB, compressed to ~5MB)' })}
+                        <p className="text-sm text-gray-500 mt-2">
+                            Drag and drop an image here, or click to select. Max 100MB.
                         </p>
                     </div>
 
+                    {/* Slider Images Upload */}
                     <div
-                        className="flex flex-col border-2 border-gray-300 rounded-lg p-4 hover:border-[#0e0e53] transition-colors"
+                        className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-blue-400 transition-colors"
                         onDrop={(e) => handleDrop(e, 'slider')}
                         onDragOver={handleDragOver}
                     >
-                        <label className="mb-2 text-sm font-medium text-gray-700">
-                            {t('admin.products.sliderImages', { defaultValue: 'Slider Images (Multiple)' })}
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Additional Images (Slider)
                         </label>
                         <input
                             type="file"
                             accept="image/*"
                             multiple
                             onChange={handleSliderFilesChange}
-                            className="p-3 border border-gray-300 rounded-lg text-sm"
+                            className="w-full p-3 border border-gray-300 rounded-lg text-sm"
                         />
-                        {uploading && uploadProgress > 0 && (
-                            <div className="mt-2 w-full bg-gray-200 rounded-full h-2.5">
-                                <div
-                                    className="bg-[#0e0e53] h-2.5 rounded-full transition-all duration-300"
-                                    style={{ width: `${uploadProgress}%` }}
-                                ></div>
-                            </div>
-                        )}
-                        <p className="text-xs sm:text-sm text-gray-500 mt-2">
-                            {t('admin.products.dragDropSlider', { defaultValue: 'Drag and drop images here or click to select (max 100MB each, compressed to ~5MB)' })}
+                        <p className="text-sm text-gray-500 mt-2">
+                            Select multiple images for the product gallery. Max 100MB each.
                         </p>
                     </div>
-                </div>
 
-                {form.images.length > 0 && (
-                    <div className="mt-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            {t('admin.products.currentSliderImages', { defaultValue: 'Current Slider Images' })} ({form.images.length})
-                        </label>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                            {form.images.map((imagePath, index) => (
-                                <div key={index} className="relative group">
-                                    <img
-                                        src={`${API_URL}${imagePath}`}
-                                        alt={`Slider ${index + 1}`}
-                                        className="w-full h-16 sm:h-20 object-cover rounded border"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => removeExistingSliderImage(imagePath)}
-                                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs"
-                                    >
-                                        ×
-                                    </button>
-                                </div>
-                            ))}
+                    {/* Current Slider Images */}
+                    {form.images && form.images.length > 0 && (
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Current Images ({form.images.length})
+                            </label>
+                            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+                                {form.images.map((imagePath, index) => (
+                                    <div key={index} className="relative group">
+                                        <img
+                                            src={`${API_URL}${imagePath}`}
+                                            alt={`Slider ${index + 1}`}
+                                            className="w-full h-16 sm:h-20 object-cover rounded border"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => removeExistingSliderImage(imagePath)}
+                                            className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs"
+                                        >
+                                            ×
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
-                    </div>
-                )}
+                    )}
 
-                {sliderPreviews.length > 0 && (
-                    <div className="mt-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            {t('admin.products.newSliderImages', { defaultValue: 'New Slider Images' })} ({sliderPreviews.length})
-                        </label>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                            {sliderPreviews.map((preview, index) => (
-                                <div key={index} className="relative group">
-                                    <img
-                                        src={preview.url}
-                                        alt={`New slider ${index + 1}`}
-                                        className="w-full h-16 sm:h-20 object-cover rounded border"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => removeSliderFile(index)}
-                                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs"
-                                    >
-                                        ×
-                                    </button>
-                                </div>
-                            ))}
+                    {/* New Slider Images Preview */}
+                    {sliderPreviews.length > 0 && (
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                New Images to Upload ({sliderPreviews.length})
+                            </label>
+                            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+                                {sliderPreviews.map((preview, index) => (
+                                    <div key={index} className="relative group">
+                                        <img
+                                            src={preview.url}
+                                            alt={`New slider ${index + 1}`}
+                                            className="w-full h-16 sm:h-20 object-cover rounded border"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => removeSliderFile(index)}
+                                            className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs"
+                                        >
+                                            ×
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
-                    </div>
-                )}
+                    )}
 
-                <div className="flex flex-col sm:flex-row gap-4 mt-6">
-                    <button
-                        type="submit"
-                        className="w-full sm:w-auto bg-[#0e0e53] text-white px-6 py-3 rounded-lg hover:bg-[#1a1a7e] transition-colors"
-                        disabled={uploading}
-                    >
-                        {uploading
-                            ? t('admin.products.uploading', { defaultValue: 'Uploading...' })
-                            : editingId
-                                ? t('admin.products.updateProduct', { defaultValue: 'Update Product' })
-                                : t('admin.products.addProduct', { defaultValue: 'Add Product' })}
-                    </button>
-                    <button
-                        type="button"
-                        onClick={resetForm}
-                        className="w-full sm:w-auto bg-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-400 transition-colors"
-                    >
-                        {t('admin.products.clearForm', { defaultValue: 'Clear Form' })}
-                    </button>
+                    {/* Form Actions */}
+                    <div className="flex flex-col sm:flex-row gap-3 pt-4">
+                        <button
+                            type="submit"
+                            className="w-full sm:w-auto bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                            disabled={uploading}
+                        >
+                            {uploading
+                                ? `Uploading... ${uploadProgress}%`
+                                : editingId
+                                    ? 'Update Product'
+                                    : 'Add Product'
+                            }
+                        </button>
+                        <button
+                            type="button"
+                            onClick={resetForm}
+                            className="w-full sm:w-auto bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors"
+                        >
+                            {editingId ? 'Cancel Edit' : 'Clear Form'}
+                        </button>
+                    </div>
                 </div>
             </form>
 
-            <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md">
-                <h3 className="text-lg sm:text-xl font-semibold text-[#0e0e53] mb-4">
-                    {t('admin.products.existingProducts', { defaultValue: 'Existing Products' })}
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {products.map(product => (
-                        <div key={product._id} className="border rounded-lg p-4 relative group">
-                            <img
-                                src={`${API_URL}${product.image}`}
-                                alt={product.alt || product.name}
-                                className="w-full h-32 sm:h-40 object-cover rounded mb-2"
-                            />
-                            <h4 className="text-sm sm:text-base font-medium">{product.name}</h4>
-                            <p className="text-xs sm:text-sm text-gray-600">{product.price} AMD</p>
-                            <p className="text-xs sm:text-sm text-gray-600">{product.category}</p>
-                            <p className="text-xs sm:text-sm text-gray-600">{product.productCollection}</p>
-                            <div className="absolute top-2 right-2 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button
-                                    onClick={() => handleEdit(product)}
-                                    className="bg-[#0e0e53] text-white p-2 rounded hover:bg-[#1a1a7e]"
-                                >
-                                    {t('admin.products.edit', { defaultValue: 'Edit' })}
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(product._id)}
-                                    className="bg-red-500 text-white p-2 rounded hover:bg-red-600"
-                                >
-                                    {t('admin.products.delete', { defaultValue: 'Delete' })}
-                                </button>
-                                <button
-                                    onClick={() => openImageManager(product)}
-                                    className="bg-green-500 text-white p-2 rounded hover:bg-green-600"
-                                >
-                                    {t('admin.products.manageImages', { defaultValue: 'Images' })}
-                                </button>
+            {/* Products List */}
+            <div className="bg-white rounded-lg shadow-md">
+                <div className="p-4 lg:p-6 border-b border-gray-200">
+                    <h3 className="text-lg font-semibold">
+                        Existing Products ({products.length})
+                    </h3>
+                </div>
+
+                {/* Mobile-friendly product cards */}
+                <div className="p-4 lg:p-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        {products.map(product => (
+                            <div key={product._id} className="border rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
+                                <div className="relative group">
+                                    <img
+                                        src={`${API_URL}${product.image}`}
+                                        alt={product.alt || product.name}
+                                        className="w-full h-40 sm:h-48 object-cover"
+                                        onError={(e) => {
+                                            e.target.src = '/placeholder-image.jpg';
+                                        }}
+                                    />
+
+                                    {/* Action buttons overlay */}
+                                    <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <div className="flex space-x-2">
+                                            <button
+                                                onClick={() => handleEdit(product)}
+                                                className="bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 transition-colors"
+                                                title="Edit Product"
+                                            >
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                </svg>
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(product._id)}
+                                                className="bg-red-600 text-white p-2 rounded-full hover:bg-red-700 transition-colors"
+                                                title="Delete Product"
+                                            >
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Image count badge */}
+                                    {product.images && product.images.length > 0 && (
+                                        <div className="absolute top-2 right-2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded">
+                                            +{product.images.length}
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="p-4">
+                                    <h4 className="font-medium text-gray-900 truncate" title={product.name}>
+                                        {product.name}
+                                    </h4>
+                                    <p className="text-lg font-bold text-blue-600">
+                                        {Number(product.price).toLocaleString()} AMD
+                                    </p>
+                                    <p className="text-sm text-gray-600 capitalize">
+                                        {product.category}
+                                    </p>
+                                    {product.productCollection && (
+                                        <p className="text-sm text-gray-500">
+                                            {product.productCollection}
+                                        </p>
+                                    )}
+                                </div>
+
+                                {/* Mobile action buttons */}
+                                <div className="p-3 border-t border-gray-100 sm:hidden">
+                                    <div className="flex space-x-2">
+                                        <button
+                                            onClick={() => handleEdit(product)}
+                                            className="flex-1 bg-blue-600 text-white py-2 px-3 rounded text-sm hover:bg-blue-700 transition-colors"
+                                        >
+                                            Edit
+                                        </button>
+                                        <button
+                                            onClick={() => handleDelete(product._id)}
+                                            className="flex-1 bg-red-600 text-white py-2 px-3 rounded text-sm hover:bg-red-700 transition-colors"
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
+                        ))}
+                    </div>
+
+                    {products.length === 0 && (
+                        <div className="text-center py-12">
+                            <div className="text-gray-500">No products found. Add your first product above.</div>
                         </div>
-                    ))}
+                    )}
                 </div>
             </div>
-
-            {showImageManager && selectedProduct && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white p-4 sm:p-6 rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
-                        <h3 className="text-lg sm:text-xl font-semibold mb-4">
-                            {t('admin.products.imageManager', { defaultValue: 'Manage Images for ' })} {selectedProduct.name}
-                        </h3>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                            {selectedProduct.images.map((image, index) => (
-                                <div key={index} className="relative group">
-                                    <img
-                                        src={`${API_URL}${image}`}
-                                        alt={`Slider ${index + 1}`}
-                                        className="w-full h-24 object-cover rounded"
-                                    />
-                                    <button
-                                        onClick={() => removeExistingSliderImage(image)}
-                                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs"
-                                    >
-                                        ×
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-                        <div className="mt-4">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                {t('admin.products.addNewImages', { defaultValue: 'Add New Images' })}
-                            </label>
-                            <input
-                                type="file"
-                                accept="image/*"
-                                multiple
-                                onChange={handleSliderFilesChange}
-                                className="p-3 border border-gray-300 rounded-lg text-sm"
-                            />
-                        </div>
-                        <div className="flex justify-end gap-4 mt-6">
-                            <button
-                                onClick={closeImageManager}
-                                className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400"
-                            >
-                                {t('admin.products.close', { defaultValue: 'Close' })}
-                            </button>
-                            <button
-                                onClick={async () => {
-                                    const newImages = await uploadSliderImages();
-                                    if (newImages.length > 0) {
-                                        const updatedProduct = {
-                                            ...selectedProduct,
-                                            images: [...selectedProduct.images, ...newImages]
-                                        };
-                                        try {
-                                            await axios.put(`${API_URL}/api/products/${selectedProduct._id}`, updatedProduct, {
-                                                headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
-                                            });
-                                            handleImageManagerUpdate(updatedProduct);
-                                            closeImageManager();
-                                        } catch (error) {
-                                            console.error('Error updating images:', error);
-                                            alert(t('admin.products.errorUpdatingImages', { defaultValue: 'Error updating images: ' }) + error.response?.data?.message);
-                                        }
-                                    }
-                                }}
-                                className="bg-[#0e0e53] text-white px-4 py-2 rounded-lg hover:bg-[#1a1a7e]"
-                                disabled={uploading}
-                            >
-                                {uploading
-                                    ? t('admin.products.uploading', { defaultValue: 'Uploading...' })
-                                    : t('admin.products.saveImages', { defaultValue: 'Save Images' })}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 };

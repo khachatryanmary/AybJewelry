@@ -28,6 +28,7 @@ export const CartProvider = ({ children }) => {
             setCart(cartItems);
             return cartItems;
         } catch (err) {
+            console.error("CartContext addToCart error:", err.response?.data || err.message);
             toast.error(t("cart.fetchFailed", { defaultValue: "Failed to fetch cart" }));
             setCart([]);
             return [];
@@ -68,7 +69,7 @@ export const CartProvider = ({ children }) => {
             // toast.success(t("cart.addSuccess", { defaultValue: "Added to cart successfully" }));
             window.dispatchEvent(new Event("cart-updated"));
         } catch (err) {
-            // console.error("CartContext addToCart error:", err.response?.data || err.message);
+            console.error("CartContext addToCart error:", err.response?.data || err.message);
             toast.error(t("cart.addFailed", { defaultValue: "Failed to add to cart" }));
         }
     }, [user, t, API_URL, fetchCart]);
@@ -90,7 +91,7 @@ export const CartProvider = ({ children }) => {
             // toast.info(t("cart.removeSuccess", { defaultValue: "Removed from cart" }));
             window.dispatchEvent(new Event("cart-updated"));
         } catch (err) {
-            // console.error("CartContext removeFromCart error:", err.response?.data || err.message);
+            console.error("CartContext removeFromCart error:", err.response?.data || err.message);
             toast.error(t("cart.removeFailed", { defaultValue: "Failed to remove from cart" }));
         }
     }, [user, t, API_URL, fetchCart]);
@@ -113,7 +114,7 @@ export const CartProvider = ({ children }) => {
             toast.info(t("cart.updateSuccess", { defaultValue: "Cart updated successfully" }));
             window.dispatchEvent(new Event("cart-updated"));
         } catch (err) {
-            // console.error("CartContext updateCartItem error:", err.response?.data || err.message);
+            console.error("CartContext updateCartItem error:", err.response?.data || err.message);
             toast.error(t("cart.updateFailed", { defaultValue: "Failed to update cart" }));
         }
     }, [user, t, API_URL, fetchCart]);
@@ -129,7 +130,7 @@ export const CartProvider = ({ children }) => {
             toast.success(t("cart.clearSuccess", { defaultValue: "Cart cleared successfully" }));
             window.dispatchEvent(new Event("cart-updated"));
         } catch (err) {
-            // console.error("CartContext clearCart error:", err.response?.data || err.message);
+            console.error("CartContext clearCart error:", err.response?.data || err.message);
             toast.error(t("cart.clearFailed", { defaultValue: "Failed to clear cart" }));
         }
     }, [user, t, API_URL]);

@@ -102,17 +102,30 @@ const Login = () => {
             toast.success(t("login.success") || "Logged in successfully!");
             navigate(`/${lng}`);
         } catch (err) {
-            const errorMessage =
-                err.response?.data?.message ||
-                t("login.error") ||
-                "Login failed. Please check your credentials.";
+            let errorMessage;
+
+            // Handle different types of errors
+            if (err.response?.status === 403) {
+                // This is a ban error
+                errorMessage = err.response.data.message || t("login.accountBanned") || "Your account has been banned. Please contact support.";
+                toast.error(errorMessage, {
+                    autoClose: 8000, // Show longer for ban messages
+                    closeOnClick: true,
+                    pauseOnHover: true
+                });
+            } else {
+                // Regular login error
+                errorMessage = err.response?.data?.message || t("login.error") || "Login failed. Please check your credentials.";
+                toast.error(errorMessage);
+            }
+
             console.error("Login error:", {
                 message: err.message,
                 response: err.response?.data,
                 status: err.response?.status,
             });
+
             setError(errorMessage);
-            toast.error(errorMessage);
         } finally {
             setLoading(false);
         }

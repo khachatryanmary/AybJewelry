@@ -17,7 +17,7 @@ const toastStyles = `
 .Toastify__toast-body {
         padding: 4px;
     }
-.Toastify__close-button {
+.Toastify__toast-close-button {
         font-size: 14px;
     }
 }
@@ -31,7 +31,7 @@ const toastStyles = `
 .Toastify__toast-body {
         padding: 6px;
     }
-.Toastify__close-button {
+.Toastify__toast-close-button {
         font-size: 15px;
     }
 }
@@ -45,7 +45,7 @@ const toastStyles = `
 .Toastify__toast-body {
         padding: 8px;
     }
-.Toastify__close-button {
+.Toastify__toast-close-button {
         font-size: 16px;
     }
 }
@@ -55,7 +55,6 @@ const Cart = () => {
     const { t } = useTranslation();
     const location = useLocation();
     const lng = location.pathname.split("/")[1];
-    const fromPath = location.state?.from || `/${lng}/all-products`;
     const { user } = useContext(UserContext);
     const { cart, setCart, fetchCart } = useContext(CartContext);
     const [loading, setLoading] = useState(true);
@@ -78,7 +77,6 @@ const Cart = () => {
     };
 
     useEffect(() => {
-        // Only fetch if not already loading to prevent redundant calls
         if (loading) {
             fetchCart().then(() => setLoading(false)).catch(() => setLoading(false));
         }
@@ -88,7 +86,6 @@ const Cart = () => {
         (acc, item) => acc + (item.price || 0) * item.quantity,
         0
     );
-    const total = subtotal;
 
     const removeItem = async (productId, size, category) => {
         if (removeLoading) {
@@ -111,7 +108,6 @@ const Cart = () => {
             });
             console.log("Cart.jsx removeItem response:", JSON.stringify(response.data, null, 2));
             await fetchCart();
-            // toast.info(t("cart.removedFromCart", { defaultValue: "Removed from cart" }));
         } catch (err) {
             console.error("Cart.jsx removeItem error:", err.response?.data || err.message);
             toast.error(
@@ -182,19 +178,17 @@ const Cart = () => {
                 {Array.from({ length: 3 }).map((_, i) => (
                     <div
                         key={i}
-                        className="flex flex-row justify-between items-center border border-gray-200 rounded p-[4px] sm:p-[6px] md:p-[8px] animate-pulse gap-[6px] sm:gap-[8px] md:gap-[10px]"
+                        className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-[#efeeee] rounded-[8px] p-[12px] sm:p-[16px] md:p-[20px] gap-[12px] sm:gap-[16px] md:gap-[20px] animate-pulse"
                     >
-                        <div className="w-[100px] sm:w-[120px] md:w-[150px] h-[80px] sm:h-[100px] md:h-[120px] bg-gray-200 rounded" />
-                        <div className="flex flex-col gap-[4px] sm:gap-[6px] md:gap-[8px] w-[80px] sm:w-[100px] md:w-[120px]">
-                            <div className="h-[16px] sm:h-[18px] md:h-[20px] bg-gray-200 rounded" />
-                            <div className="h-[16px] sm:h-[18px] md:h-[20px] bg-gray-200 rounded" />
+                        <div className="flex-shrink-0 w-full sm:w-auto flex justify-center sm:justify-start">
+                            <div className="w-[300px] h-[200px] sm:w-[300px] sm:h-[200px] md:w-[300px] md:h-[200px] bg-gray-200 rounded-[8px]" />
                         </div>
-                        <div className="flex items-center gap-1 sm:gap-2 md:gap-2 w-[80px] sm:w-[90px] md:w-[100px] justify-center">
-                            <div className="w-[24px] sm:w-[26px] md:w-[28px] h-[24px] sm:h-[26px] md:h-[28px] bg-gray-200 rounded" />
-                            <div className="w-[40px] sm:w-[46px] md:w-[48px] h-[24px] sm:h-[26px] md:h-[28px] bg-gray-200 rounded" />
-                            <div className="w-[24px] sm:w-[26px] md:w-[28px] h-[24px] sm:h-[26px] md:h-[28px] bg-gray-200 rounded" />
+                        <div className="flex-grow flex flex-col sm:flex-row items-start sm:items-center gap-[8px] sm:gap-[12px] w-full">
+                            <div className="flex flex-col gap-[4px] sm:gap-[6px] md:gap-[8px] w-full sm:w-auto">
+                                <div className="h-[16px] sm:h-[18px] md:h-[20px] bg-gray-200 rounded" />
+                                <div className="h-[16px] sm:h-[18px] md:h-[20px] bg-gray-200 rounded" />
+                            </div>
                         </div>
-                        <div className="w-[24px] sm:w-[90px] md:w-[100px] h-[24px] sm:h-[28px] md:h-[32px] bg-gray-200 rounded" />
                     </div>
                 ))}
             </div>
@@ -211,7 +205,7 @@ const Cart = () => {
                     </div>
                     <div className="h-[200px] sm:h-[250px] md:h-[300px] flex flex-col items-center justify-center gap-[8px] sm:gap-[12px] md:gap-[16px]">
                         <i className="bi bi-lock text-[30px] sm:text-[40px] md:text-[50px] text-[#0a0a39]" />
-                        <p className="text-[14px] sm:text-[16px] md:text-[18px] text-[#0a0a39]">{t("cart.loginPrompt")}</p>
+                        <p className="text-center text-[14px] sm:text-[16px] md:text-[18px] text-[#0a0a39]">{t("cart.loginPrompt")}</p>
                         <Link to={`/${lng}/login`}>
                             <button className="w-[120px] sm:w-[140px] md:w-[160px] h-[28px] sm:h-[32px] md:h-[36px] bg-[#efeeee] border-none rounded-[10px] text-[#0a0a39] font-semibold transition duration-500 hover:bg-[#0a0a39] hover:text-white text-[12px] sm:text-[13px] md:text-[14px]">
                                 {t("cart.loginButton")}
@@ -222,13 +216,13 @@ const Cart = () => {
             ) : cart.length === 0 ? (
                 <>
                     <div className="w-full text-center border-b border-gray-300 p-[8px] sm:p-[12px] md:p-[16px]">
-                        <h2 className="font-[Against] text-[20px] sm:text-[22px] md:text-[24px] text-[#0a0a39]">{t("cart.cartTitle")}</h2>
+                        <h2 className="font-[Against] text-[30px] sm:text-[22px] md:text-[30px] text-[#0a0a39]">{t("cart.cartTitle")}</h2>
                     </div>
                     <div className="h-[200px] sm:h-[250px] md:h-[300px] flex flex-col items-center justify-center gap-[8px] sm:gap-[12px] md:gap-[16px]">
                         <i className="bi bi-handbag text-[30px] sm:text-[40px] md:text-[50px] text-[#0a0a39]" />
                         <p className="text-[14px] sm:text-[16px] md:text-[18px] text-black font-light">{t("cart.cartEmpty")}</p>
-                        <Link to={fromPath}>
-                            <button className="w-[120px] sm:w-[140px] md:w-[160px] h-[28px] sm:h-[32px] md:h-[36px] mt-[4px] sm:mt-[6px] md:mt-[8px] bg-[#efeeee] border-none rounded-[10px] text-[#0a0a39] font-semibold transition duration-500 hover:bg-[#0a0a39] hover:text-white text-[12px] sm:text-[13px] md:text-[14px]">
+                        <Link to={`/${lng}/all-products`}>
+                            <button className="w-[120px] sm:w-[140px] md:w-[160px] min-h-[40px] mt-[4px] sm:mt-[6px] md:mt-[8px] bg-[#efeeee] border-none rounded-[10px] text-[#0a0a39] font-semibold transition duration-500 hover:bg-[#0a0a39] hover:text-white text-[12px] sm:text-[13px] md:text-[14px]">
                                 {t("cart.returnToShop")}
                             </button>
                         </Link>
@@ -251,82 +245,95 @@ const Cart = () => {
                         </button>
                     </div>
 
-                    <ul className="w-full max-w-[95%] sm:max-w-[90%] md:max-w-[800px] mt-[20px] sm:mt-[30px] md:mt-[35px] flex flex-col gap-[8px] sm:gap-[12px] md:gap-[16px]">
-                        {cart.map((item, i) => {
+                    <ul className="w-full max-w-[95%] sm:max-w-[90%] md:max-w-[800px] flex flex-col gap-[12px] sm:gap-[16px] md:gap-[20px] py-[30px]">
+                        {cart.map((item) => {
                             const category = item.category?.toLowerCase();
                             const pathCategory = categoryPathMap[category] || `${category}s`;
 
                             return (
-                                <li key={`${item.id}-${item.size || ''}`} className="flex flex-row justify-between items-center border border-gray-300 rounded p-[4px] sm:p-[6px] md:p-[8px] gap-[6px] sm:gap-[8px] md:gap-[10px]">
-                                    <Link to={`/${lng}/${pathCategory}/${item.id}`}>
-                                        <img
-                                            src={`${API_URL}${item.image}`}
-                                            alt={item.name}
-                                            className="w-[100px] sm:w-[120px] md:w-[150px] h-[80px] sm:h-[100px] md:h-[120px] object-contain"
-                                        />
-                                    </Link>
-
-                                    <div className="flex flex-col gap-[4px] sm:gap-[6px] md:gap-[8px] min-w-[80px] sm:min-w-[100px] md:min-w-[120px]">
-                                        <span className="text-[12px] sm:text-[14px] md:text-[16px] font-semibold min-h-[20px] sm:min-h-[24px] md:min-h-[28px] flex items-center">
-                                            {item.name} {item.size && `${t("cart.size")}: ${item.size}`}
-                                        </span>
-                                        <span className="text-[12px] sm:text-[14px] md:text-[16px]">
-                                            {numberFormatter.format(item.price * item.quantity)} {t("checkout.currency", { defaultValue: "AMD" })}
-                                        </span>
-                                    </div>
-
-                                    <div className="flex items-center gap-1 sm:gap-2 md:gap-2 w-[80px] sm:w-[90px] md:w-[100px] justify-center">
-                                        <button
-                                            onClick={() => updateQuantity(item.id, item.size, item.quantity - 1, item.category)}
-                                            className="w-[24px] sm:w-[26px] md:w-[28px] h-[24px] sm:h-[26px] md:h-[28px] flex items-center justify-center bg-[#f7f7f7] rounded hover:bg-[#0a0a39] hover:text-white transition text-[12px] sm:text-[13px] md:text-[14px]"
-                                            disabled={removeLoading === item.id}
-                                        >
-                                            -
-                                        </button>
-                                        <input
-                                            type="number"
-                                            value={item.quantity}
-                                            readOnly
-                                            className="w-[40px] sm:w-[46px] md:w-[48px] h-[24px] sm:h-[26px] md:h-[28px] text-center rounded bg-[#f7f7f7] text-[12px] sm:text-[13px] md:text-[14px]"
-                                        />
-                                        <button
-                                            onClick={() => updateQuantity(item.id, item.size, item.quantity + 1, item.category)}
-                                            className="w-[24px] sm:w-[26px] md:w-[28px] h-[24px] sm:h-[26px] md:h-[28px] flex items-center justify-center bg-[#f7f7f7] rounded hover:bg-[#0a0a39] hover:text-white transition text-[12px] sm:text-[13px] md:text-[14px]"
-                                            disabled={removeLoading === item.id}
-                                        >
-                                            +
-                                        </button>
-                                    </div>
-
+                                <li
+                                    key={`${item.id}-${item.size || ''}`}
+                                    className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between bg-[#efeeee] rounded-[8px] p-[12px] sm:p-[16px] md:p-[20px] gap-[12px] sm:gap-[16px] md:gap-[20px]"
+                                >
                                     <button
                                         onClick={() => removeItem(item.id, item.size, item.category)}
-                                        className="text-[#0a0a39] w-[24px] sm:w-[90px] h-[40px] sm:h-[28px] font-semibold hover:text-gray-400 transition flex items-center justify-center text-[12px] sm:text-[13px] md:text-[14px]"
+                                        className=" absolute top-2 right-2 sm:absolute sm:top-2 sm:right-2 sm:px-4 sm:py-2 text-[#0e0e53] hover:bg-[#0a0a39] hover:text-white font-semibold text-[12px] sm:text-[13px] md:text-[14px] px-3 py-1 rounded-[8px] transition duration-300 z-10 disabled:opacity-50 disabled:cursor-not sm:absolute relative self-end mt-1 sm:mt-0"
                                         disabled={removeLoading === item.id}
                                     >
                                         {removeLoading === item.id ? (
                                             <div className="w-[16px] sm:w-[18px] md:w-[20px] h-[16px] sm:h-[18px] md:h-[20px] border-4 border-[#0e0e53] border-t-transparent rounded-full animate-spin"></div>
                                         ) : (
-                                            <span className="block"><i className="bi bi-x text-[20px]"></i></span>
+
+                                            <span>Remove</span>
                                         )}
                                     </button>
+
+                                    <Link to={`/${lng}/${pathCategory}/${item.id}`} className=" flex-shrink-0 w-full sm:w-auto flex justify-center sm:justify-start">
+                                        <img
+                                            src={`${item.image}`}
+                                            alt={item.name}
+                                            className="w-[300px] h-[200px] sm:w-[300px] sm:h-[200px] md:w-[300px] md:h-[200px] rounded-[8px] object-cover"
+                                        />
+                                    </Link>
+
+                                    <div className="flex-grow flex flex-col sm:flex-row items-start sm:items-center gap-[8px] sm:gap-[12px] w-full">
+                                        <div className="flex flex-col gap-[4px] sm:gap-[6px] md:gap-[8px] w-full sm:w-auto">
+                                            <span className="text-[16px] sm:text-[14px] md:text-[16px] font-semibold text-[#0e0e53] break-words">
+                                                {item.name}
+                                            </span>
+                                            {item.size && (
+                                                <span className="text-[14px] sm:text-[13px] md:text-[14px] text-[#0e0e53]">
+                                                    {t("cart.size", { defaultValue: "Size" })}: {item.size}
+                                                </span>
+                                            )}
+                                            <span className="text-[14px] sm:text-[13px] md:text-[14px] text-[#0e0e53]">
+                                                {t("cart.quantity", { defaultValue: "Quantity" })}: {item.quantity}
+                                            </span>
+                                            <span className="text-[16px] sm:text-[14px] md:text-[16px] font-semibold text-[#0e0e53] whitespace-nowrap">
+                                                {numberFormatter.format(item.price * item.quantity)} {t("checkout.currency", { defaultValue: "AMD" })}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-start gap-1 sm:gap-2 md:gap-2 w-full sm:w-auto justify-start sm:justify-start">
+                                            <button
+                                                onClick={() => updateQuantity(item.id, item.size, item.quantity - 1, item.category)}
+                                                className="w-[24px] sm:w-[26px] md:w-[28px] h-[24px] sm:h-[26px] md:h-[28px] text-center bg-[#f7f7f7] rounded hover:bg-[#0a0a39] hover:text-white transition text-[12px] sm:text-[13px] md:text-[14px]"
+                                                disabled={removeLoading === item.id}
+                                            >
+                                                -
+                                            </button>
+                                            <input
+                                                type="number"
+                                                value={item.quantity}
+                                                readOnly
+                                                className="w-[40px] sm:w-[46px] md:w-[48px] h-[24px] sm:h-[26px] md:h-[28px] text-center rounded bg-[#f7f7f7] text-[12px] sm:text-[13px] md:text-[14px]"
+                                            />
+                                            <button
+                                                onClick={() => updateQuantity(item.id, item.size, item.quantity + 1, item.category)}
+                                                className="w-[24px] sm:w-[26px] md:w-[28px] h-[24px] sm:h-[26px] md:h-[28px] bg-[#f7f7f7] rounded hover:bg-[#0a0a39] hover:text-white transition text-[12px] sm:text-[13px] md:text-[14px]"
+                                                disabled={removeLoading === item.id}
+                                            >
+                                                +
+                                            </button>
+                                        </div>
+                                    </div>
                                 </li>
                             );
                         })}
                     </ul>
 
-                    <div className="w-full max-w-[95%] sm:max-w-[90%] md:max-w-[800px] flex flex-col gap-[4px] sm:gap-[6px] md:gap-[8px] mt-[12px] sm:mt-[16px] md:mt-[20px] p-[8px] sm:p-[12px] md:p-[16px] border-b border-gray-500">
-                        <div className="flex justify-between">
-                            <span className="text-[12px] sm:text-[14px] md:text-[16px] text-gray-500">
+                    <div className="w-full max-w-[95%] sm:max-w-[90%] md:max-w-[800px] flex flex-col gap-[8px] sm:gap-[10px] md:gap-[12px] mt-[16px] sm:mt-[20px] md:mt-[24px] p-[12px] sm:p-[16px] md:p-[20px] border-b border-gray-500">
+                        <div className="flex justify-between items-center flex-wrap gap-2">
+                            <span className="text-[16px] sm:text-[18px] md:text-[20px] text-gray-500">
                                 {t("cart.subtotal", { defaultValue: "Subtotal" })}
                             </span>
-                            <span className="text-[12px] sm:text-[14px] md:text-[16px] text-gray-500">
+                            <span className="text-[16px] sm:text-[18px] md:text-[20px] text-gray-500 whitespace-nowrap">
                                 {numberFormatter.format(subtotal)} {t("checkout.currency", { defaultValue: "AMD" })}
                             </span>
                         </div>
                     </div>
 
-                    <Link to={fromPath}>
-                        <button className="text-[#0a0a39] hover:text-white w-[140px] sm:w-[160px] md:w-[180px] h-[28px] sm:h-[32px] md:h-[36px] rounded-[10px] bg-[#efeeee] mt-[12px] sm:mt-[16px] md:mt-[20px] font-semibold hover:bg-[#0a0a39] transition text-[12px] sm:text-[13px] md:text-[14px]">
+                    <Link to={`/${lng}/all-products`}>
+                        <button className="text-[#0a0a39] hover:text-white h-[28px] sm:h-[32px] md:h-[36px] rounded-[10px] bg-[#efeeee] mt-[12px] sm:mt-[16px] md:mt-[20px] font-semibold hover:bg-[#0a0a39] transition text-[12px] sm:text-[13px] md:text-[14px] px-4 sm:px-5 md:px-6">
                             {t("cart.continueShopping")}
                         </button>
                     </Link>

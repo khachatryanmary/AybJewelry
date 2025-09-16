@@ -91,7 +91,7 @@ const Contact = () => {
             <style>{toastStyles}</style>
             <div className="text-center font-[Against]">
                 <h2 className="text-[24px] sm:text-[28px] md:text-[32px] text-[#0a0a39]">
-                    {t('contactTitle', { defaultValue: 'Contact Us' })}
+                    {t('contact.contactTitle', { defaultValue: 'Contact Us' })}
                 </h2>
             </div>
 

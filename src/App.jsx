@@ -3,45 +3,56 @@ import './index.css';
 import 'react-toastify/dist/ReactToastify.css';
 import './styles/fonts.css';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { Navigate, useRoutes, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
+import { ToastContainer } from 'react-toastify';
 
+// Static imports for lightweight components
 import Header from './components/Header.jsx';
 import Footer from './components/Footer.jsx';
 import Search from './components/Search.jsx';
-import HomePage from './components/HomePage.jsx';
-import SectionAboutUs from './components/SectionAboutUs.jsx';
-import SectionGallery from './components/SectionGallery.jsx';
-import NecklaceGallery from './components/NecklaceGallery.jsx';
-import NecklaceDetail from './components/NecklaceDetail.jsx';
-import RingsGallery from './components/RingsGallery.jsx';
-import EarringsGallery from './components/EarringsGallery.jsx';
-import BraceletsGallery from './components/BraceletsGallery.jsx';
-import HairclipsGallery from './components/HairclipsGallery.jsx';
-import Contact from './components/Contact.jsx';
-import Login from './components/Login.jsx';
-import Cart from './components/Cart.jsx';
-import Wishlist from './components/Wishlist.jsx';
-import Register from './components/Register.jsx';
-import Profile from './components/Profile.jsx';
-import RingDetail from './components/RingDetail.jsx';
-import EarringsDetail from './components/EarringsDetail.jsx';
-import BraceletsDetail from './components/BraceletsDetail.jsx';
-import HairclipsDetail from './components/HairclipsDetail.jsx';
-import AllProducts from './components/AllProducts.jsx';
-import { ToastContainer } from 'react-toastify';
-import CheckOut from './components/CheckOut.jsx';
-import ForgotPassword from './components/ForgotPassword.jsx';
-import ResetPassword from './components/ResetPassword.jsx';
-import CheckoutSuccess from './components/CheckoutSuccess.jsx';
-import FeaturedCollection from './components/FeaturedCollection.jsx';
-import AdminLogin from './components/admin/AdminLogin';
-import AdminDashboard from './components/admin/AdminDashboard';
-import ManageProducts from './components/admin/ManageProducts';
-import ManageHomepageAssets from './components/admin/ManageHomepageAssets';
-import ProtectedRoute from './components/admin/ProtectedRoute';
+
+// Lazy-load heavy components
+const HomePage = React.lazy(() => import('./components/HomePage.jsx'));
+const SectionAboutUs = React.lazy(() => import('./components/SectionAboutUs.jsx'));
+const SectionGallery = React.lazy(() => import('./components/SectionGallery.jsx'));
+const NecklaceGallery = React.lazy(() => import('./components/NecklaceGallery.jsx'));
+const NecklaceDetail = React.lazy(() => import('./components/NecklaceDetail.jsx'));
+const RingsGallery = React.lazy(() => import('./components/RingsGallery.jsx'));
+const RingDetail = React.lazy(() => import('./components/RingDetail.jsx'));
+const EarringsGallery = React.lazy(() => import('./components/EarringsGallery.jsx'));
+const EarringsDetail = React.lazy(() => import('./components/EarringsDetail.jsx'));
+const BraceletsGallery = React.lazy(() => import('./components/BraceletsGallery.jsx'));
+const BraceletsDetail = React.lazy(() => import('./components/BraceletsDetail.jsx'));
+const HairclipsGallery = React.lazy(() => import('./components/HairclipsGallery.jsx'));
+const HairclipsDetail = React.lazy(() => import('./components/HairclipsDetail.jsx'));
+const AllProducts = React.lazy(() => import('./components/AllProducts.jsx'));
+const Contact = React.lazy(() => import('./components/Contact.jsx'));
+const Login = React.lazy(() => import('./components/Login.jsx'));
+const Cart = React.lazy(() => import('./components/Cart.jsx'));
+const Wishlist = React.lazy(() => import('./components/Wishlist.jsx'));
+const Register = React.lazy(() => import('./components/Register.jsx'));
+const Profile = React.lazy(() => import('./components/Profile.jsx'));
+const CheckOut = React.lazy(() => import('./components/CheckOut.jsx'));
+const ForgotPassword = React.lazy(() => import('./components/ForgotPassword.jsx'));
+const ResetPassword = React.lazy(() => import('./components/ResetPassword.jsx'));
+const CheckoutSuccess = React.lazy(() => import('./components/CheckoutSuccess.jsx'));
+const FeaturedCollection = React.lazy(() => import('./components/FeaturedCollection.jsx'));
+const AdminLogin = React.lazy(() => import('./components/admin/AdminLogin.jsx'));
+const AdminDashboard = React.lazy(() => import('./components/admin/AdminDashboard.jsx'));
+const AdminOverview = React.lazy(() => import('./components/admin/AdminOverview.jsx'));
+const ManageProducts = React.lazy(() => import('./components/admin/ManageProducts.jsx'));
+const ManageCategories = React.lazy(() => import('./components/admin/ManageCategories.jsx'));
+const ManageCollections = React.lazy(() => import('./components/admin/ManageCollections.jsx'));
+const ManageOrders = React.lazy(() => import('./components/admin/ManageOrders.jsx'));
+const ManageCustomers = React.lazy(() => import('./components/admin/ManageCustomers.jsx'));
+// FIXED: Changed from ManageAnalytics to AdminAnalytics to match actual file name
+const AdminAnalytics = React.lazy(() => import('./components/admin/AdminAnalytics.jsx'));
+const ManageHomepageAssets = React.lazy(() => import('./components/admin/ManageHomepageAssets.jsx'));
+const ManageUsers = React.lazy(() => import('./components/admin/ManageUsers.jsx'));
+const ProtectedRoute = React.lazy(() => import('./components/admin/ProtectedRoute.jsx'));
 
 function App() {
     const [searchActive, setSearchActive] = useState(false);
@@ -50,13 +61,17 @@ function App() {
     const [collectionSlug, setCollectionSlug] = useState('spring-2025');
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-    const lng = location.pathname.split('/')[1] || 'am';
+    const lng = location.pathname.split('/')[1] || 'en';
 
     useEffect(() => {
-        if (['am', 'en', 'ru'].includes(lng)) {
-            i18n.changeLanguage(lng);
+        const firstSegment = location.pathname.split('/')[1];
+        if (!['am', 'en', 'ru'].includes(firstSegment) && firstSegment !== 'admin') {
+            const newPath = `/en${location.pathname}`;
+            window.location.replace(newPath);
+        } else if (['am', 'en', 'ru'].includes(firstSegment)) {
+            i18n.changeLanguage(firstSegment);
         }
-    }, [lng, i18n]);
+    }, [location.pathname, i18n]);
 
     useEffect(() => {
         const fetchCollectionName = async () => {
@@ -125,8 +140,6 @@ function App() {
                 { path: 'forgot-password', element: <ForgotPassword /> },
                 { path: 'reset-password/:token', element: <ResetPassword /> },
                 { path: 'checkout/success', element: <CheckoutSuccess /> },
-
-                // MOVE ADMIN ROUTES BEFORE THE COLLECTION SLUG ROUTE
                 {
                     path: 'admin',
                     children: [
@@ -138,79 +151,40 @@ function App() {
                                     path: '',
                                     element: <AdminDashboard />,
                                     children: [
-                                        {
-                                            index: true,
-                                            element: (
-                                                <div className="text-center">
-                                                    <h1 className="text-3xl font-semibold text-[#0e0e53] mb-4">
-                                                        Welcome to Admin Dashboard
-                                                    </h1>
-                                                    <p className="text-gray-600">
-                                                        Select an option from the sidebar to manage your jewelry website.
-                                                    </p>
-                                                </div>
-                                            )
-                                        },
+                                        { index: true, element: <Navigate to="overview" replace /> },
+                                        { path: 'overview', element: <AdminOverview /> },
                                         { path: 'products', element: <ManageProducts /> },
+                                        { path: 'categories', element: <ManageCategories /> },
+                                        { path: 'collections', element: <ManageCollections /> },
+                                        { path: 'orders', element: <ManageOrders /> },
+                                        { path: 'customers', element: <ManageCustomers /> },
+                                        { path: 'analytics', element: <AdminAnalytics /> },
                                         { path: 'homepage-assets', element: <ManageHomepageAssets /> },
+                                        { path: 'users', element: <ManageUsers /> },
                                     ],
                                 },
                             ],
                         },
                     ],
                 },
-
-                // Collection slug route MUST come AFTER admin routes
                 { path: ':collectionSlug', element: <FeaturedCollection /> },
             ],
         },
-        // Admin routes without language prefix (fallback)
-        {
-            path: 'admin',
-            children: [
-                { path: 'login', element: <AdminLogin /> },
-                {
-                    element: <ProtectedRoute />,
-                    children: [
-                        {
-                            path: '',
-                            element: <AdminDashboard />,
-                            children: [
-                                {
-                                    index: true,
-                                    element: (
-                                        <div className="text-center">
-                                            <h1 className="text-3xl font-semibold text-[#0e0e53] mb-4">
-                                                Welcome to Admin Dashboard
-                                            </h1>
-                                            <p className="text-gray-600">
-                                                Select an option from the sidebar to manage your jewelry website.
-                                            </p>
-                                        </div>
-                                    )
-                                },
-                                { path: 'products', element: <ManageProducts /> },
-                                { path: 'homepage-assets', element: <ManageHomepageAssets /> },
-                            ],
-                        },
-                    ],
-                },
-            ],
-        },
-        {
-            path: '*',
-            element: <Navigate to='/en' />,
-        },
+        { path: 'admin/*', element: <Navigate to="/en/admin/login" replace /> },
+        { path: '*', element: <Navigate to="/en" replace /> },
     ]);
 
-    // Check if current route is admin-related to hide header/footer
-    const isAdminRoute = location.pathname.includes('/admin');
+    const isAdminRoute = location.pathname.includes('/admin') && ['am', 'en', 'ru'].includes(lng);
 
     return (
         <div className="w-full min-h-screen flex flex-col">
             {!isAdminRoute && <Header setSearchActive={setSearchActive} />}
             {!isAdminRoute && <Search searchActive={searchActive} setSearchActive={setSearchActive} lng={lng} />}
-            <main className="flex-grow">{router}</main>
+            <main className="flex-grow">
+                <Suspense fallback={<div className="text-center py-10">Loading...</div>}>
+                    {router}
+                </Suspense>
+            </main>
             {!isAdminRoute && <Footer />}
             <ToastContainer
                 position="top-right"

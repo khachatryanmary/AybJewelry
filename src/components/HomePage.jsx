@@ -123,10 +123,15 @@ export default function HomePage() {
                         />
                         <Link
                             to={`/${lng}/${collectionSlug}`}
-                            className="flex w-[200px] justify-center items-center absolute bottom-4 sm:bottom-6 md:bottom-8 left-1/2 transform -translate-x-1/2 bg-transparent border border-white px-6 py-3 rounded-md font-semibold text-[20px] sm:text-[22px] md:text-[18px] text-white hover:text-[#0e0e53] hover:bg-white hover:bg-opacity-80 transition-all duration-300 z-10"
+                            className="absolute bottom-4 sm:bottom-6 md:bottom-8 left-1/2 -translate-x-1/2
+                                    px-4 py-2
+                                    border border-white rounded-md
+                                    text-center text-white text-[12px] sm:text-base md:text-lg font-semibold
+                                    hover:bg-white hover:text-[#0e0e53]"
                         >
-                            {t('featuredCollection.exploreCollection', { defaultValue: `Explore ${collectionName}` })}
+                            {t('featuredCollection.exploreCollection', { defaultValue: `Explore Collection` })}
                         </Link>
+
                     </>
                 )}
             </motion.div>

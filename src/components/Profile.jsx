@@ -109,7 +109,7 @@ const Profile = () => {
             if (err.response?.status === 401) {
                 localStorage.removeItem("loggedInUser");
                 navigate(`/${lng}/login`);
-                toast.error(t("sessionExpired") || "Session expired. Please log in again.");
+                toast.error(t("profile.sessionExpired") || "Session expired. Please log in again.");
             } else {
                 setProfileError(errorMessage);
                 toast.error(errorMessage);
@@ -258,7 +258,7 @@ const Profile = () => {
                                 to={`/${lng}/all-products`}
                                 className="bg-white text-[#0e0e53] hover:bg-[#0a0a39] hover:text-white transition-colors duration-300 rounded-[8px] px-[12px] sm:px-[16px] md:px-[20px] py-[6px] sm:py-[7px] md:py-[8px] text-[14px] sm:text-[15px] md:text-[16px]"
                             >
-                                {t("returnToShop")}
+                                {t("profile.returnToShop")}
                             </Link>
                         </div>
                     ) : (

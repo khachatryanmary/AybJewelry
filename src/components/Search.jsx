@@ -21,6 +21,18 @@ function Search({ searchActive, setSearchActive, lng }) {
         maximumFractionDigits: 0,
     });
 
+    // Set CSS custom property for viewport height
+    useEffect(() => {
+        const updateViewportHeight = () => {
+            const vh = window.innerHeight;
+            document.documentElement.style.setProperty('--viewport-height', `${vh}px`);
+            console.log('Search.jsx: Viewport height set to', vh); // Debug
+        };
+        updateViewportHeight();
+        window.addEventListener('resize', updateViewportHeight);
+        return () => window.removeEventListener('resize', updateViewportHeight);
+    }, []);
+
     // Fetch products once on mount
     useEffect(() => {
         setLoading(true);
@@ -38,9 +50,9 @@ function Search({ searchActive, setSearchActive, lng }) {
             });
     }, [API_URL]);
 
+    // Handle scroll lock and scrollbar width
     useEffect(() => {
         if (searchActive) {
-            // Calculate scrollbar width
             const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
             document.documentElement.style.setProperty('--scrollbar-width', `${scrollbarWidth}px`);
             document.body.classList.add('no-scroll');
@@ -152,7 +164,7 @@ function Search({ searchActive, setSearchActive, lng }) {
                     initial="hidden"
                     animate="visible"
                     exit="hidden"
-                    className="fixed inset-0 w-full h-full bg-white z-50 flex justify-center items-start"
+                    className="fixed inset-0 w-full min-h-[calc(100vh+env(safe-area-inset-bottom))] bg-white z-50 flex justify-center items-start"
                     style={{ willChange: 'transform, opacity' }}
                 >
                     <button
@@ -163,9 +175,9 @@ function Search({ searchActive, setSearchActive, lng }) {
                     </button>
                     <div
                         ref={searchRef}
-                        className="w-full pt-[40px] sm:pt-[50px] md:pt-[60px] pb-4 sm:pb-5 md:pb-6 flex flex-col items-center space-y-4 sm:space-y-5 md:space-y-6"
+                        className="w-full pt-[40px] sm:pt-[50px] md:pt-[60px] pb-[max(50px,env(safe-area-inset-bottom))] sm:pb-[max(50px,env(safe-area-inset-bottom))] md:pb-[max(50px,env(safe-area-inset-bottom))] flex flex-col items-center space-y-4 sm:space-y-5 md:space-y-6"
                     >
-                        <h2 className="font-[Against] text-[20px] sm:text-[22px] md:text-[25px] text-[#0e0e53]">
+                        <h2 className="text-center  font-[Against] font-semibold text-[16px] sm:text-[18px] md:text-[20px] text-[#0e0e53]">
                             {t('search.title')}
                         </h2>
 
@@ -185,7 +197,7 @@ function Search({ searchActive, setSearchActive, lng }) {
                         )}
 
                         {!loading && search.trim() !== '' && (
-                            <ul className="w-full max-w-[90%] sm:max-w-[80%] md:max-w-[600px] flex flex-col gap-[16px] sm:gap-[18px] md:gap-[20px] h-[calc(100vh-120px)] sm:h-[calc(100vh-130px)] md:h-[calc(100vh-140px)] overflow-y-auto pb-[16px] sm:pb-[18px] md:pb-[20px] scroll-pb-[16px] sm:scroll-pb-[18px] md:scroll-pb-[20px]">
+                            <ul className="w-full max-w-[90%] sm:max-w-[80%] md:max-w-[600px] flex flex-col gap-[16px] sm:gap-[18px] md:gap-[20px] max-h-[calc(var(--viewport-height)-120px-env(safe-area-inset-bottom))] sm:max-h-[calc(var(--viewport-height)-130px-env(safe-area-inset-bottom))] md:max-h-[calc(var(--viewport-height)-140px-env(safe-area-inset-bottom))] overflow-y-auto pb-[max(50px,env(safe-area-inset-bottom))] sm:pb-[max(50px,env(safe-area-inset-bottom))] md:pb-[max(50px,env(safe-area-inset-bottom))] scroll-pb-[max(50px,env(safe-area-inset-bottom))] sm:scroll-pb-[max(50px,env(safe-area-inset-bottom))] md:scroll-pb-[max(50px,env(safe-area-inset-bottom))]">
                                 {filteredProducts.length > 0 ? (
                                     filteredProducts.map((item) => (
                                         <Link
@@ -201,14 +213,14 @@ function Search({ searchActive, setSearchActive, lng }) {
                                                     </div>
                                                 )}
                                                 <img
-                                                    src={`${API_URL}${item.image}`}
+                                                    src={`${item.image}`}
                                                     alt={item.alt || item.name}
                                                     className={`w-full h-full object-cover rounded ${imageLoadingStates[item._id] ? 'opacity-0' : 'opacity-100'}`}
                                                     onLoad={() => handleImageLoad(item._id)}
                                                 />
                                             </div>
                                             <div className="text-left pl-[16px] sm:pl-[18px] md:pl-[20px]">
-                                                <span className="block font-Against text-[16px] sm:text-[17px] md:text-[18px] font-semibold">
+                                                <span className="block font-Against text-[#213547] text-[16px] sm:text-[17px] md:text-[18px] font-semibold">
                                                     {item.name}
                                                 </span>
                                                 <span className="block text-[14px] sm:text-[15px] md:text-[16px] text-gray-400">

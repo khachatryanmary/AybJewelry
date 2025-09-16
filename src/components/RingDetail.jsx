@@ -237,7 +237,7 @@ const RingDetail = () => {
             await toggleWishlist({ _id: ring._id, name: ring.name, price: ring.price, category: ring.category, image: ring.image });
         } catch (error) {
             console.error("RingDetail.jsx handleWishlistToggle error:", error.message);
-            toast.error(t('ringDetail.wishlistError', { defaultValue: "Error updating wishlist" }));
+            toast.error(t('productsDetail.wishlistError', { defaultValue: "Error updating wishlist" }));
         }
     };
 
@@ -255,17 +255,17 @@ const RingDetail = () => {
             setCartLoading(true);
             if (isCartItem(ring._id)) {
                 await removeFromCart(ring._id, selectedSize);
-                toast.info(t('ringDetail.removedFromCart', { defaultValue: `${ring.name} removed from cart` }));
+                toast.info(t('productsDetail.removedFromCart', { defaultValue: `${ring.name} removed from cart` }));
                 setSelectedSize("");
             } else {
                 await addToCart(ring._id, quantity, selectedSize);
-                toast.success(t('ringDetail.addedToCart', { defaultValue: `${ring.name} added to cart!` }));
+                toast.success(t('productsDetail.addedToCart', { defaultValue: `${ring.name} added to cart!` }));
                 setShowSizeModal(false);
                 setSelectedSize("");
             }
         } catch (error) {
             console.error("RingDetail.jsx handleCartToggle error:", error.message);
-            toast.error(t('ringDetail.cartError', { defaultValue: "Error updating cart" }));
+            toast.error(t('productsDetail.cartError', { defaultValue: "Error updating cart" }));
         } finally {
             setCartLoading(false);
         }
@@ -276,8 +276,8 @@ const RingDetail = () => {
     };
 
     const images = ring.image
-        ? [`${API_URL}${ring.image}`, ...(ring.images || []).map(img => `${API_URL}${img}`)]
-        : (ring.images || []).map(img => `${API_URL}${img}`);
+        ? [`${ring.image}`, ...(ring.images || []).map(img => `${img}`)]
+        : (ring.images || []).map(img => `${img}`);
 
     return (
         <div className="flex flex-col sm:flex-row w-[90%] mx-auto pt-[20px] sm:pt-[30px] md:pt-[40px] mt-[10px] sm:mt-[15px] md:mt-[20px] min-h-[400px] sm:min-h-[450px] md:min-h-[500px] bg-[#f5f5f5] justify-center items-start gap-[20px] sm:gap-[30px] md:gap-[40px] pb-[20px]">
@@ -312,7 +312,7 @@ const RingDetail = () => {
                     <>
                         <Link to={from}>
                             <button className="bg-white text-[#0a0a39] transition duration-300 border-none cursor-pointer py-[8px] sm:py-[9px] md:py-[10px] px-[12px] sm:px-[15px] md:px-[18px] font-semibold rounded-[6px] text-[14px] sm:text-[15px] md:text-[16px] hover:bg-[#0a0a39] hover:text-white">
-                                {t('ringDetail.backToSelection')}
+                                {t('productsDetail.backToSelection')}
                             </button>
                         </Link>
 
@@ -322,7 +322,7 @@ const RingDetail = () => {
                                 <span
                                     onClick={handleWishlistToggle}
                                     className={`text-[20px] sm:text-[24px] md:text-[28px] cursor-pointer transition-all duration-300 ${isWishlistItem(ring._id) ? 'text-[#0a0a39]' : 'text-gray-400'}`}
-                                    title={t('ringDetail.addToWishlist')}
+                                    title={t('productsDetail.addToWishlist')}
                                 >
                                     <i className={`bi ${isWishlistItem(ring._id) ? 'bi-heart-fill' : 'bi-heart'}`}></i>
                                 </span>
@@ -368,9 +368,9 @@ const RingDetail = () => {
                                 {cartLoading ? (
                                     <div className="w-[20px] sm:w-[22px] md:w-[24px] h-[20px] sm:h-[22px] md:h-[24px] border-4 border-[#0a0a39] border-t-transparent rounded-full animate-spin"></div>
                                 ) : isCartItem(ring._id) ? (
-                                    t('ringDetail.addedToCart')
+                                    t('productsDetail.addedToCart')
                                 ) : (
-                                    t('ringDetail.add')
+                                    t('productsDetail.add')
                                 )}
                             </button>
 
@@ -381,7 +381,7 @@ const RingDetail = () => {
                                     }`}
                                     onClick={() => setOpenDetails(!openDetails)}
                                 >
-                                    <span>{t('ringDetail.details')}</span>
+                                    <span>{t('productsDetail.details')}</span>
                                     <i className={`bi bi-chevron-double-down transition-transform duration-300 text-[#0a0a39] ${openDetails ? 'rotate-180' : ''}`}></i>
                                 </div>
 
@@ -409,23 +409,23 @@ const RingDetail = () => {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.3 }}
-                        className="fixed inset-0 flex items-center justify-center z-50"
+                        className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
                     >
                         <div className="bg-white rounded-[8px] p-[10px] sm:p-[15px] md:p-[20px] w-[280px] sm:w-[400px] md:w-[500px] flex flex-col items-center justify-center gap-[10px] sm:gap-[15px] md:gap-[20px] shadow-sm sm:shadow-md">
-                            <i className="bi bi-lock text-[30px] sm:text-[35px] md:text-[40px] text-[#0a0a39]" />
-                            <h2 className="text-[18px] sm:text-[22px] md:text-[25px] text-[#0a0a39]">
-                                {t(`ringDetail.loginPrompt.${loginPromptType}`)}
+                            <i className="bi bi-lock text-[30px] sm:text-[35px] md:text-[40px] text-[#0e0e53]" />
+                            <h2 className="text-center text-[18px] sm:text-[22px] md:text-[25px] text-[#0e0e53]">
+                                {t(`productsGallery.loginPrompt.${loginPromptType}`)}
                             </h2>
                             <Link to={`/${lng}/login`}>
-                                <button className="w-[140px] sm:w-[180px] md:w-[200px] h-[30px] sm:h-[35px] md:h-[40px] bg-[#f7f7f7] border-none rounded-[6px] text-[#0a0a39] font-semibold transition duration-300 hover:bg-[#0a0a39] hover:text-white text-[14px] sm:text-[15px] md:text-[16px]">
-                                    {t('ringDetail.loginButton')}
+                                <button className="w-[140px] sm:w-[180px] md:w-[200px] h-[30px] sm:h-[35px] md:h-[40px] bg-[#f7f7f7] border-none rounded-[6px] text-[#0e0e53] font-semibold transition duration-300 hover:bg-[#0e0e53] hover:text-white text-[14px] sm:text-[15px] md:text-[16px]">
+                                    {t('productsGallery.loginButton')}
                                 </button>
                             </Link>
                             <button
                                 onClick={() => setIsLoginPromptOpen(false)}
-                                className="text-[#0a0a39] hover:text-[#213547] text-[14px] sm:text-[15px] md:text-[16px]"
+                                className="text-[#0e0e53] hover:text-[#213547] text-[14px] sm:text-[15px] md:text-[16px]"
                             >
-                                {t('ringDetail.cancel')}
+                                {t('productsGallery.cancel')}
                             </button>
                         </div>
                     </motion.div>
@@ -439,9 +439,9 @@ const RingDetail = () => {
                         transition={{ duration: 0.3 }}
                         className="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50"
                     >
-                        <div className="bg-white rounded-[8px] p-[10px] sm:p-[15px] md:p-[20px] w-[280px] sm:w-[400px] md:w-[500px] flex items-center justify-center flex-col gap-[10px] sm:gap-[15px] md:gap-[20px] shadow-sm sm:shadow-md">
-                            <h3 className="text-[18px] sm:text-[22px] md:text-[24px] font-semibold text-[#0a0a39]">
-                                {t('ringDetail.selectSize')} - {ring.name}
+                        <div className="bg-[#efeeee] rounded-[8px] p-[10px] sm:p-[15px] md:p-[20px] w-[280px] sm:w-[400px] md:w-[500px] flex items-center justify-center flex-col gap-[10px] sm:gap-[15px] md:gap-[20px] shadow-sm sm:shadow-md">
+                            <h3 className="text-center text-[18px] sm:text-[22px] md:text-[24px] font-semibold text-[#0a0a39]">
+                                {t('ringDetail.selectRingSize')} - {ring.name}
                             </h3>
                             <div className="flex flex-wrap gap-[8px] sm:gap-[10px] md:gap-[12px] items-center justify-center">
                                 {ringSizes.map((sizeObj) => (
@@ -473,7 +473,7 @@ const RingDetail = () => {
                                     {cartLoading ? (
                                         <div className="w-[20px] sm:w-[22px] md:w-[24px] h-[20px] sm:h-[22px] md:h-[24px] border-4 border-white border-t-transparent rounded-full animate-spin"></div>
                                     ) : (
-                                        t('ringDetail.addToCart')
+                                        t('productsGallery.addToCart')
                                     )}
                                 </button>
                                 <button
@@ -483,7 +483,7 @@ const RingDetail = () => {
                                     }}
                                     className="w-[120px] sm:w-[140px] md:w-[150px] h-[30px] sm:h-[35px] md:h-[40px] bg-white text-[#0a0a39] rounded-[6px] font-semibold hover:bg-[#f7f7f7] transition text-[14px] sm:text-[15px] md:text-[16px]"
                                 >
-                                    {t('ringDetail.cancel')}
+                                    {t('productsGallery.cancel')}
                                 </button>
                             </div>
                         </div>

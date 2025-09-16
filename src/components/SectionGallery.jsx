@@ -17,6 +17,7 @@ const SectionGallery = () => {
     });
     const [loading, setLoading] = useState(true);
     const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+    const [isMuted, setIsMuted] = useState(true); // ✅ mute by default
     const videoRef = useRef(null);
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -25,7 +26,6 @@ const SectionGallery = () => {
             try {
                 setLoading(true);
                 const response = await axios.get(`${API_URL}/api/homepage-assets`);
-                console.log('SectionGallery.jsx API response:', JSON.stringify(response.data, null, 2));
                 setAssets({
                     collectionName: response.data.collectionName || 'Spring 2025',
                     imageUrl: response.data.imageUrl || '/Uploads/homePage/modelImg.jpg',
@@ -42,13 +42,13 @@ const SectionGallery = () => {
                 console.error('SectionGallery.jsx fetchAssets error:', error.message);
                 setAssets({
                     collectionName: 'Spring 2025',
-                    imageUrl: '/Uploads/homePage/modelImg.jpg',
+                    imageUrl: '/uploads/homePage/modelImg.jpg',
                     videoUrls: [
                         'https://res.cloudinary.com/dc6a3ofls/video/upload/v1755694298/new-collection_uvph1b.mp4',
                         'https://res.cloudinary.com/dc6a3ofls/video/upload/v1755694483/C8699_nriprv.mp4'
                     ],
                     title: t('featuredCollection.title', { defaultValue: 'Spring 2025' }),
-                    description: t('featuredCollection.description', { defaultValue: 'Explore our latest collection.' }),
+                    description: t('sectionGallery.description', { defaultValue: 'Explore our latest collection.' }),
                 });
             } finally {
                 setLoading(false);
@@ -79,13 +79,20 @@ const SectionGallery = () => {
         );
     };
 
+    const toggleMute = () => {
+        setIsMuted((prev) => !prev);
+        if (videoRef.current) {
+            videoRef.current.muted = !videoRef.current.muted;
+        }
+    };
+
     const collectionSlug = assets.collectionName.toLowerCase().replace(/\s+/g, '-');
 
     return (
         <div className="w-full">
             <div className="w-full mx-auto flex flex-col items-center justify-center px-4 sm:px-6 md:px-8">
                 <h2 className="font-[Against] text-[25px] sm:text-[30px] md:text-[30px] text-[#0e0e53] text-center mb-[10px] sm:mb-[15px] md:mb-[20px]">
-                    {t('featuredCollection.title', { defaultValue: assets.title })}
+                    {assets.title}
                 </h2>
                 <p className="text-[14px] sm:text-[15px] md:text-[16px] text-gray-600 text-center mb-[10px] sm:mb-[15px] md:mb-[20px]">
                     {t('featuredCollection.description', { defaultValue: assets.description })}
@@ -100,11 +107,10 @@ const SectionGallery = () => {
                                 src={assets.videoUrls[currentVideoIndex]}
                                 autoPlay
                                 loop
-                                muted
+                                muted={isMuted} // ✅ controlled by state
                                 playsInline
                                 className={`w-full h-full object-cover rounded-md ${loading ? 'opacity-0' : 'opacity-100'}`}
                                 onLoadedData={() => {
-                                    console.log('Video loaded:', assets.videoUrls[currentVideoIndex]);
                                     setLoading(false);
                                 }}
                                 onError={(e) => {
@@ -114,12 +120,22 @@ const SectionGallery = () => {
                                     }
                                 }}
                             />
-                            <Link
-                                to={`/${lng}/${collectionSlug}`}
-                                className="w-[200px] flex justify-center items-center absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-transparent border border-white px-4 py-2 rounded-md font-semibold text-[12px] sm:text-[18px] md:text-[15px] text-white hover:text-[#0e0e53] hover:bg-white hover:bg-opacity-80 transition-all duration-300 z-10"
+                            {/* 🔈 Mute/Unmute Button */}
+                            <button
+                                onClick={toggleMute}
+                                className="absolute top-4 right-4 bg-black/50 text-white text-sm sm:text-base px-2 py-1 rounded-md z-20 hover:bg-black/70 transition"
                             >
-                                {t('featuredCollection.exploreCollection', { defaultValue: `Explore ${assets.collectionName}` })}
+                                {isMuted ? 'Unmute' : 'Mute'}
+                            </button>
+
+                            <Link
+                                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 py-2 min-w-[150px] sm:min-w-[180px] md:min-w-[200px] text-center border border-white rounded-md font-semibold text-white text-[12px] sm:text-[16px] md:text-[18px] bg-transparent hover:bg-white hover:bg-opacity-80 hover:text-[#0e0e53] transition-all duration-300 z-10 flex justify-center items-center"
+                                to={`/${lng}/${collectionSlug}`}
+                            >
+                                {t('sectionGallery.exploreCollection', { defaultValue: `Explore ${assets.collectionName}` })}
                             </Link>
+
+
                             {assets.videoUrls.length > 1 && (
                                 <>
                                     <button

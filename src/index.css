@@ -8,7 +8,7 @@
 /* src/index.css */
 @font-face {
     font-family: 'Against';
-    src: url('./assets/fonts/against-regular.ttf') format('truetype');
+    src: url('/fonts/against-regular.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
 }

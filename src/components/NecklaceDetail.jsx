@@ -104,7 +104,7 @@ const NecklaceDetail = () => {
         }
       } catch (error) {
         console.error("NecklaceDetail.jsx fetch data error:", error.message);
-        toast.error(t('necklaceDetail.fetchError', { defaultValue: "Error fetching necklace details" }));
+        toast.error(t('productsDetail.fetchError', { defaultValue: "Error fetching necklace details" }));
       } finally {
         setLoading(false);
       }
@@ -168,14 +168,14 @@ const NecklaceDetail = () => {
       setCartLoading(true);
       if (isCartItem(necklace._id)) {
         await removeFromCart(necklace._id);
-        toast.info(t('necklaceDetail.removedFromCart', { defaultValue: `${necklace.name} removed from cart` }));
+        toast.info(t('productsDetail.removedFromCart', { defaultValue: `${necklace.name} removed from cart` }));
       } else {
         await addToCart(necklace._id, quantity);
-        toast.success(t('necklaceDetail.addedToCart', { defaultValue: `${necklace.name} added to cart!` }));
+        toast.success(t('productsDetail.addedToCart', { defaultValue: `${necklace.name} added to cart!` }));
       }
     } catch (error) {
       console.error("NecklaceDetail.jsx handleCartToggle error:", error.message);
-      toast.error(t('necklaceDetail.cartError', { defaultValue: "Error updating cart" }));
+      toast.error(t('productsDetail.cartError', { defaultValue: "Error updating cart" }));
     } finally {
       setCartLoading(false);
     }
@@ -191,13 +191,13 @@ const NecklaceDetail = () => {
       await toggleWishlist({ _id: necklace._id, name: necklace.name, price: necklace.price, category: necklace.category, image: necklace.image });
     } catch (error) {
       console.error("NecklaceDetail.jsx handleWishlistToggle error:", error.message);
-      toast.error(t('necklaceDetail.wishlistError', { defaultValue: "Error updating wishlist" }));
+      toast.error(t('productsDetail.wishlistError', { defaultValue: "Error updating wishlist" }));
     }
   };
 
   const images = necklace.image
-      ? [`${API_URL}${necklace.image}`, ...(necklace.images || []).map(img => `${API_URL}${img}`)]
-      : (necklace.images || []).map(img => `${API_URL}${img}`);
+      ? [`${necklace.image}`, ...(necklace.images || []).map(img => `${img}`)]
+      : (necklace.images || []).map(img => `${img}`);
 
   return (
       <div className="flex flex-col sm:flex-row w-[90%] mx-auto pt-[20px] sm:pt-[30px] md:pt-[40px] mt-[10px] sm:mt-[15px] md:mt-[20px] min-h-[400px] sm:min-h-[450px] md:min-h-[500px] bg-[#f5f5f5] justify-center items-start gap-[20px] sm:gap-[30px] md:gap-[40px] pb-[20px]">
@@ -233,7 +233,7 @@ const NecklaceDetail = () => {
               <>
                 <Link to={from}>
                   <button className="bg-white text-[#0a0a39] transition duration-300 border-none cursor-pointer py-[8px] sm:py-[9px] md:py-[10px] px-[12px] sm:px-[15px] md:px-[18px] font-semibold rounded-[6px] text-[14px] sm:text-[15px] md:text-[16px] hover:bg-[#0a0a39] hover:text-white">
-                    {t('necklaceDetail.backToSelection')}
+                    {t('productsDetail.backToSelection')}
                   </button>
                 </Link>
 
@@ -243,7 +243,7 @@ const NecklaceDetail = () => {
                     <span
                         onClick={handleWishlistToggle}
                         className={`text-[20px] sm:text-[24px] md:text-[28px] cursor-pointer transition-all duration-300 ${isWishlistItem(necklace._id) ? 'text-[#0a0a39]' : 'text-gray-400'}`}
-                        title={t('necklaceDetail.addToWishlist')}
+                        title={t('productsDetail.addToWishlist')}
                     >
                                     <i className={`bi ${isWishlistItem(necklace._id) ? 'bi-heart-fill' : 'bi-heart'}`}></i>
                                 </span>
@@ -289,9 +289,9 @@ const NecklaceDetail = () => {
                     {cartLoading ? (
                         <div className="w-[20px] sm:w-[22px] md:w-[24px] h-[20px] sm:h-[22px] md:h-[24px] border-4 border-[#0a0a39] border-t-transparent rounded-full animate-spin"></div>
                     ) : isCartItem(necklace._id) ? (
-                        t('necklaceDetail.addedToCart')
+                        t('productsDetail.addedToCart')
                     ) : (
-                        t('necklaceDetail.add')
+                        t('productsDetail.add')
                     )}
                   </button>
 
@@ -302,7 +302,7 @@ const NecklaceDetail = () => {
                         }`}
                         onClick={() => setOpenDetails(!openDetails)}
                     >
-                      <span>{t('necklaceDetail.details')}</span>
+                      <span>{t('productsDetail.details')}</span>
                       <i className={`bi bi-chevron-double-down transition-transform duration-300 text-[#0a0a39] ${openDetails ? 'rotate-180' : ''}`}></i>
                     </div>
 
@@ -332,20 +332,20 @@ const NecklaceDetail = () => {
                   className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
               >
                 <div className="bg-white rounded-[8px] p-[10px] sm:p-[15px] md:p-[20px] w-[280px] sm:w-[400px] md:w-[500px] flex flex-col items-center justify-center gap-[10px] sm:gap-[15px] md:gap-[20px] shadow-sm sm:shadow-md">
-                  <i className="bi bi-lock text-[30px] sm:text-[35px] md:text-[40px] text-[#0a0a39]" />
-                  <h2 className="text-[18px] sm:text-[22px] md:text-[25px] text-[#0a0a39]">
-                    {t(`necklaceDetail.loginPrompt.${loginPromptType}`)}
+                  <i className="bi bi-lock text-[30px] sm:text-[35px] md:text-[40px] text-[#0e0e53]" />
+                  <h2 className="text-center text-[18px] sm:text-[22px] md:text-[25px] text-[#0e0e53]">
+                    {t(`productsGallery.loginPrompt.${loginPromptType}`)}
                   </h2>
                   <Link to={`/${lng}/login`}>
-                    <button className="w-[140px] sm:w-[180px] md:w-[200px] h-[30px] sm:h-[35px] md:h-[40px] bg-[#f7f7f7] border-none rounded-[6px] text-[#0a0a39] font-semibold transition duration-300 hover:bg-[#0a0a39] hover:text-white text-[14px] sm:text-[15px] md:text-[16px]">
-                      {t('necklaceDetail.loginButton')}
+                    <button className="w-[140px] sm:w-[180px] md:w-[200px] h-[30px] sm:h-[35px] md:h-[40px] bg-[#f7f7f7] border-none rounded-[6px] text-[#0e0e53] font-semibold transition duration-300 hover:bg-[#0e0e53] hover:text-white text-[14px] sm:text-[15px] md:text-[16px]">
+                      {t('productsGallery.loginButton')}
                     </button>
                   </Link>
                   <button
                       onClick={() => setIsLoginPromptOpen(false)}
-                      className="text-[#0a0a39] hover:text-[#213547] text-[14px] sm:text-[15px] md:text-[16px]"
+                      className="text-[#0e0e53] hover:text-[#213547] text-[14px] sm:text-[15px] md:text-[16px]"
                   >
-                    {t('necklaceDetail.cancel')}
+                    {t('productsGallery.cancel')}
                   </button>
                 </div>
               </motion.div>

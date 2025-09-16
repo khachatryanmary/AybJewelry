@@ -273,21 +273,21 @@ const RingGallery = () => {
                     delete newState[product._id];
                     return newState;
                 });
-                toast.info(t('ringGallery.removedFromCart', { defaultValue: `${product.name} removed from cart` }));
+                toast.info(t('productsGallery.removedFromCart', { defaultValue: `${product.name} removed from cart` }));
             } else {
                 await addToCart(product._id, 1, selectedSize);
                 setAddedToCart(prev => ({
                     ...prev,
                     [product._id]: [{ size: selectedSize, quantity: 1 }],
                 }));
-                toast.success(t('ringGallery.addedToCart', { defaultValue: `${product.name} added to cart!` }));
+                toast.success(t('productsGallery.addedToCart', { defaultValue: `${product.name} added to cart!` }));
                 setShowAddSizeModal(false);
                 setSelectedSize("");
                 setSelectedProduct(null);
             }
         } catch (error) {
             console.error("RingGallery.jsx handleCartToggle error:", error.message);
-            toast.error(t('ringGallery.cartError', { defaultValue: "Error updating cart" }));
+            toast.error(t('productsGallery.cartError', { defaultValue: "Error updating cart" }));
         } finally {
             setCartLoading(null);
         }
@@ -305,13 +305,13 @@ const RingGallery = () => {
                 }
                 return newState;
             });
-            toast.info(t('ringGallery.removedFromCart', { defaultValue: `${product.name} (Size ${size}) removed from cart` }));
+            toast.info(t('productsGallery.removedFromCart', { defaultValue: `${product.name} (Size ${size}) removed from cart` }));
             setShowRemoveSizeModal(false);
             setSelectedSize("");
             setSelectedProduct(null);
         } catch (error) {
             console.error("RingGallery.jsx handleRemoveSize error:", error.message);
-            toast.error(t('ringGallery.cartError', { defaultValue: "Error updating cart" }));
+            toast.error(t('productsGallery.cartError', { defaultValue: "Error updating cart" }));
         } finally {
             setCartLoading(null);
         }
@@ -328,7 +328,7 @@ const RingGallery = () => {
             setIsWished(prev => ({ ...prev, [product._id]: !isWishlistItem(product._id) }));
         } catch (error) {
             console.error("RingGallery.jsx handleWishlistToggle error:", error.message);
-            toast.error(t('ringGallery.wishlistError', { defaultValue: "Error updating wishlist" }));
+            toast.error(t('productsGallery.wishlistError', { defaultValue: "Error updating wishlist" }));
         }
     };
 
@@ -389,7 +389,7 @@ const RingGallery = () => {
                                     state={{ from: `/${lng}/rings` }}
                                 >
                                     <img
-                                        src={`${API_URL}${image}`}
+                                        src={`${image}`}
                                         alt={name || 'image'}
                                         className="w-[280px] h-[180px] object-cover rounded-md"
                                     />
@@ -406,7 +406,7 @@ const RingGallery = () => {
                                         <span
                                             onClick={() => handleCartToggle({ _id, name, price, category })}
                                             className="text-[20px] cursor-pointer transition-all duration-300"
-                                            title={isCartItem(_id) ? t('ringGallery.removeFromCart') : t('ringGallery.addToCart')}
+                                            title={isCartItem(_id) ? t('productsGallery.removeFromCart') : t('productsGallery.addToCart')}
                                         >
                                             {cartLoading === _id ? (
                                                 <div className="w-[20px] h-[20px] border-4 border-[#0e0e53] border-t-transparent rounded-full animate-spin"></div>
@@ -417,7 +417,7 @@ const RingGallery = () => {
                                         <span
                                             onClick={() => handleWishlistToggle({ _id, name, price, category, image })}
                                             className={`text-[20px] cursor-pointer transition-all duration-300 ${isWishlistItem(_id) ? 'text-[#0e0e53]' : 'text-gray-400'}`}
-                                            title={t('ringGallery.addToWishlist')}
+                                            title={t('productsGallery.addToWishlist')}
                                         >
                                             <i className={`bi ${isWishlistItem(_id) ? 'bi-heart-fill' : 'bi-heart text-gray-400 hover:text-gray-200 transition-all'}`}></i>
                                         </span>
@@ -433,7 +433,7 @@ const RingGallery = () => {
                         onClick={handleLoadMore}
                         className="mb-[50px] px-6 py-2 border border-[#0e0e53] text-[#0e0e53] hover:bg-[#0e0e53] hover:text-white transition-all rounded"
                     >
-                        {t('ringGallery.loadMore') || 'Load More'}
+                        {t('productsGallery.loadMore') || 'Load More'}
                     </button>
                 )}
             </div>
@@ -446,23 +446,23 @@ const RingGallery = () => {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.3 }}
-                        className="fixed inset-0 flex items-center justify-center z-50"
+                        className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
                     >
-                        <div className="bg-white rounded-[10px] p-[20px] w-[500px] flex flex-col items-center justify-center gap-[20px]">
-                            <i className="bi bi-lock text-[40px] text-[#0e0e53]" />
-                            <h2 className="text-[25px] text-[#0e0e53]">
-                                {t(`ringGallery.loginPrompt.${loginPromptType}`)}
+                        <div className="bg-white rounded-[8px] p-[10px] sm:p-[15px] md:p-[20px] w-[280px] sm:w-[400px] md:w-[500px] flex flex-col items-center justify-center gap-[10px] sm:gap-[15px] md:gap-[20px] shadow-sm sm:shadow-md">
+                            <i className="bi bi-lock text-[30px] sm:text-[35px] md:text-[40px] text-[#0e0e53]" />
+                            <h2 className="text-center text-[18px] sm:text-[22px] md:text-[25px] text-[#0e0e53]">
+                                {t(`productsGallery.loginPrompt.${loginPromptType}`)}
                             </h2>
                             <Link to={`/${lng}/login`}>
-                                <button className="w-[200px] h-[40px] bg-[#efeeee] border-none rounded-[10px] text-[#0e0e53] font-semibold transition duration-500 hover:bg-[#0e0e53] hover:text-white">
-                                    {t('ringGallery.loginButton')}
+                                <button className="w-[140px] sm:w-[180px] md:w-[200px] h-[30px] sm:h-[35px] md:h-[40px] bg-[#f7f7f7] border-none rounded-[6px] text-[#0e0e53] font-semibold transition duration-300 hover:bg-[#0e0e53] hover:text-white text-[14px] sm:text-[15px] md:text-[16px]">
+                                    {t('productsGallery.loginButton')}
                                 </button>
                             </Link>
                             <button
                                 onClick={() => setIsLoginPromptOpen(false)}
-                                className="text-[#0e0e53] hover:text-[#213547] text-[16px]"
+                                className="text-[#0e0e53] hover:text-[#213547] text-[14px] sm:text-[15px] md:text-[16px]"
                             >
-                                {t('ringGallery.cancel')}
+                                {t('productsGallery.cancel')}
                             </button>
                         </div>
                     </motion.div>
@@ -477,8 +477,8 @@ const RingGallery = () => {
                         className="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50"
                     >
                         <div className="bg-[#efeeee] rounded-[10px] p-[10px] sm:p-[15px] md:p-[20px] w-[280px] sm:w-[400px] md:w-[500px] flex items-center justify-center flex-col gap-[10px] sm:gap-[15px] md:gap-[20px]">
-                            <h3 className="text-[18px] sm:text-[22px] md:text-[24px] font-semibold text-[#0a0a39]">
-                                {t('ringGallery.selectRingSize')} - {selectedProduct.name}
+                            <h3 className="text-center text-[18px] sm:text-[22px] md:text-[24px] font-semibold text-[#0a0a39]">
+                                {t('ringDetail.selectRingSize')} - {selectedProduct.name}
                             </h3>
                             <div className="flex flex-wrap gap-[8px] sm:gap-[10px] md:gap-[12px] items-center justify-center">
                                 {ringSizes.map((sizeObj) => (
@@ -499,7 +499,7 @@ const RingGallery = () => {
                                 onClick={() => setIsSizeGuideOpen(true)}
                                 className="font-bold text-left text-[#0a0a39] underline hover:text-[#213547] transition text-[14px] sm:text-[15px] md:text-[16px]"
                             >
-                                {t('ringGallery.sizeGuide')}
+                                {t('ringDetail.sizeGuide')}
                             </button>
                             <div className="flex gap-[8px] sm:gap-[10px] md:gap-[12px]">
                                 <button
@@ -510,14 +510,14 @@ const RingGallery = () => {
                                     {cartLoading === selectedProduct._id ? (
                                         <div className="w-[20px] sm:w-[22px] md:w-[24px] h-[20px] sm:h-[22px] md:h-[24px] border-4 border-[#efeeee] border-t-transparent rounded-full animate-spin"></div>
                                     ) : (
-                                        t('ringGallery.addToCart')
+                                        t('productsGallery.addToCart')
                                     )}
                                 </button>
                                 <button
                                     onClick={handleAddModalClose}
                                     className="w-[120px] sm:w-[140px] md:w-[150px] h-[30px] sm:h-[35px] md:h-[40px] bg-white text-[#0a0a39] rounded-[6px] font-semibold hover:bg-[#efeeee] transition text-[14px] sm:text-[15px] md:text-[16px]"
                                 >
-                                    {t('ringGallery.cancel')}
+                                    {t('productsGallery.cancel')}
                                 </button>
                             </div>
                         </div>
@@ -534,7 +534,7 @@ const RingGallery = () => {
                     >
                         <div className="bg-[#efeeee] rounded-[10px] p-[10px] sm:p-[15px] md:p-[20px] w-[280px] sm:w-[400px] md:w-[500px] flex items-center justify-center flex-col gap-[10px] sm:gap-[15px] md:gap-[20px]">
                             <h3 className="text-[18px] sm:text-[22px] md:text-[24px] font-semibold text-[#0a0a39]">
-                                {t('ringGallery.selectRemoveSize')} - {selectedProduct.name}
+                                {t('ringDetail.selectRemoveSize')} - {selectedProduct.name}
                             </h3>
                             <div className="flex flex-wrap gap-[8px] sm:gap-[10px] md:gap-[12px] items-center justify-center">
                                 {addedToCart[selectedProduct._id].map((item, index) => (
@@ -551,7 +551,7 @@ const RingGallery = () => {
                                 onClick={handleRemoveModalClose}
                                 className="w-[120px] sm:w-[140px] md:w-[150px] h-[30px] sm:h-[35px] md:h-[40px] bg-white text-[#0a0a39] rounded-[6px] font-semibold hover:bg-[#efeeee] transition text-[14px] sm:text-[15px] md:text-[16px]"
                             >
-                                {t('ringGallery.cancel')}
+                                {t('productsGallery.cancel')}
                             </button>
                         </div>
                     </motion.div>

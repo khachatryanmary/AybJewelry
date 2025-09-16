@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Link, useLocation } from "react-router-dom";
+import React, { useState, useEffect, useRef, useContext } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import LocaleSwitcher from "./LocaleSwitcher.jsx";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
-import { useContext } from "react";
 import { UserContext } from "../Providers/UserContext";
+import { CartContext } from "../Providers/CartContext";
 
 const toastStyles = `
   @media (max-width: 639px) {
@@ -58,17 +58,105 @@ const globalStyles = `
   .no-scroll {
     overflow: hidden; /* Prevent scrolling when mobile menu is open */
   }
+  @media (max-width: 767px) {
+    .burger-menu {
+      overflow-y: auto; /* Enable scrolling for mobile menu */
+      max-height: calc(100dvh - 60px); /* Use dynamic viewport height */
+      overscroll-behavior: contain; /* Prevent overscroll */
+    }
+  }
+  .cart-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background-color: #efeeee;
+    color: #0e0e53;
+    font-family: 'Against', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  .cart-icon-container:hover .cart-badge {
+    background-color: #0a0a39;
+    color: white;
+  }
+  @media (min-width: 768px) {
+    .cart-badge {
+      font-size: 12px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+  /* Smooth scrolling for all devices */
+  html {
+    scroll-behavior: smooth;
+  }
 `;
 
 function Header({ setSearchActive }) {
     const location = useLocation();
+    const navigate = useNavigate();
     const currentPath = location.pathname;
     const lng = location.pathname.split("/")[1];
     const { t, ready } = useTranslation();
     const { user, setUser } = useContext(UserContext);
+    const { cart } = useContext(CartContext);
     const [shopOpen, setShopOpen] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const shopRef = useRef(null);
+
+    // Calculate total cart items (sum of quantities)
+    const cartItemCount = cart.reduce((acc, item) => acc + (item.quantity || 0), 0);
+
+    // Improved scroll function that works better on mobile
+    const scrollToSection = (sectionId) => {
+        // Close mobile menu first
+        setIsMenuOpen(false);
+
+        // If we're not on the home page, navigate there first
+        if (currentPath !== `/${lng}` && currentPath !== `/${lng}/`) {
+            navigate(`/${lng}`);
+            // Wait for navigation to complete, then scroll
+            setTimeout(() => {
+                performScroll(sectionId);
+            }, 100);
+        } else {
+            performScroll(sectionId);
+        }
+    };
+
+    const performScroll = (sectionId) => {
+        const element = document.getElementById(sectionId);
+        if (element) {
+            // Calculate offset to account for fixed header
+            const headerHeight = 60; // Your header height
+            const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+            const offsetPosition = elementPosition - headerHeight - 20; // Extra 20px for better spacing
+
+            // Use native scrollTo for better mobile compatibility
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: 'smooth'
+            });
+
+            // Fallback for older browsers or if smooth scrolling doesn't work
+            setTimeout(() => {
+                if (Math.abs(window.pageYOffset - offsetPosition) > 50) {
+                    element.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start',
+                        inline: 'nearest'
+                    });
+                }
+            }, 50);
+        }
+    };
 
     // Update user state when localStorage changes
     useEffect(() => {
@@ -164,12 +252,16 @@ function Header({ setSearchActive }) {
                                 className="bi bi-search text-[20px] text-[#0e0e53] cursor-pointer hover:text-[white] transition"
                                 onClick={() => setSearchActive(true)}
                             ></li>
-                            <li>
+
+                            <li className="relative cart-icon-container">
                                 <Link
                                     to={`/${lng}/cart`}
                                     state={{ from: currentPath }}
                                     className="bi bi-handbag text-[20px] text-[#0e0e53] hover:text-[white] transition"
                                 />
+                                {cartItemCount > 0 && (
+                                    <span className="cart-badge">{cartItemCount}</span>
+                                )}
                             </li>
                         </ul>
                     )}
@@ -239,20 +331,20 @@ function Header({ setSearchActive }) {
                                         </AnimatePresence>
                                     </li>
                                     <li>
-                                        <a
-                                            href={`/${lng}#about`}
-                                            className="text-[#0e0e53] text-[18px] sm:text-[16px] xs:text-[14px] font-[Against] hover:text-[white] transition"
+                                        <button
+                                            onClick={() => scrollToSection('about')}
+                                            className="text-[#0e0e53] text-[18px] sm:text-[16px] xs:text-[14px] font-[Against] hover:text-[white] transition bg-transparent border-none cursor-pointer"
                                         >
                                             {t("nav.about")}
-                                        </a>
+                                        </button>
                                     </li>
                                     <li>
-                                        <a
-                                            href={`/${lng}#gallery`}
-                                            className="text-[#0e0e53] text-[18px] sm:text-[16px] xs:text-[14px] font-[Against] hover:text-[white] transition"
+                                        <button
+                                            onClick={() => scrollToSection('gallery')}
+                                            className="text-[#0e0e53] text-[18px] sm:text-[16px] xs:text-[14px] font-[Against] hover:text-[white] transition bg-transparent border-none cursor-pointer"
                                         >
                                             {t("nav.newReleases")}
-                                        </a>
+                                        </button>
                                     </li>
                                     <li>
                                         <Link
@@ -307,12 +399,15 @@ function Header({ setSearchActive }) {
                                 />
                             )}
                         </li>
-                        <li>
+                        <li className="relative cart-icon-container">
                             <Link
                                 to={`/${lng}/cart`}
                                 state={{ from: currentPath }}
                                 className="bi bi-handbag text-[20px] text-[#0e0e53] hover:text-[white] transition"
                             />
+                            {cartItemCount > 0 && (
+                                <span className="cart-badge">{cartItemCount}</span>
+                            )}
                         </li>
                         <li>
                             <Link
@@ -335,7 +430,7 @@ function Header({ setSearchActive }) {
                         initial="hidden"
                         animate="visible"
                         exit="hidden"
-                        className="block md:hidden fixed top-[60px] left-0 w-screen h-[calc(100vh-60px)] bg-[#efeeee] z-50 burger-menu overflow-y-auto"
+                        className="block md:hidden fixed top-[60px] left-0 w-screen h-[calc(100dvh-60px)] bg-[#efeeee] z-50 burger-menu overflow-y-auto overscroll-contain"
                     >
                         <ul className="flex flex-col items-start gap-4 px-6 py-4">
                             {ready ? (
@@ -404,31 +499,12 @@ function Header({ setSearchActive }) {
                                         </AnimatePresence>
                                     </li>
                                     <li>
-                                        <a
-                                            href={`/${lng}#about`}
-                                            className="text-[#0e0e53] text-[18px] font-semibold hover:text-[white] transition block w-full py-2"
-                                            onClick={handleMenuItemClick}
-                                        >
-                                            {t("nav.about")}
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a
-                                            href={`/${lng}#gallery`}
-                                            className="text-[#0e0e53] text-[18px] font-semibold hover:text-[white] transition block w-full py-2"
-                                            onClick={handleMenuItemClick}
+                                        <button
+                                            onClick={() => scrollToSection('gallery')}
+                                            className="text-[#0e0e53] text-[18px] font-semibold hover:text-[white] transition block w-full py-2 text-left bg-transparent border-none cursor-pointer"
                                         >
                                             {t("nav.newReleases")}
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <Link
-                                            to={`/${lng}/contact`}
-                                            className="text-[#0e0e53] text-[18px] font-semibold hover:text-[white] transition block w-full py-2"
-                                            onClick={handleMenuItemClick}
-                                        >
-                                            {t("nav.contact")}
-                                        </Link>
+                                        </button>
                                     </li>
                                     <li>
                                         <div
@@ -442,14 +518,21 @@ function Header({ setSearchActive }) {
                                             {t("nav.search") || "Search"}
                                         </div>
                                     </li>
-                                    <li>
+                                    <li className="relative cart-icon-container">
                                         <Link
                                             to={`/${lng}/cart`}
                                             state={{ from: currentPath }}
-                                            className="text-[#0e0e53] text-[18px] font-semibold hover:text-[white] transition block w-full py-2"
+                                            className="text-[#0e0e53] text-[18px] font-semibold hover:text-[white] transition block w-full py-2 flex items-center"
                                             onClick={handleMenuItemClick}
                                         >
-                                            <i className="bi bi-handbag mr-2"></i>{" "}
+                                            <div className="relative inline-flex items-center">
+                                                <i className="bi bi-handbag text-[24px] mr-2"></i>
+                                                {cartItemCount > 0 && (
+                                                    <span className="cart-badge absolute -top-2 -right-2 bg-[#df7a7a] text-white text-[12px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                                                {cartItemCount}
+                                                     </span>
+                                                )}
+                                            </div>
                                             {t("nav.cart") || "Cart"}
                                         </Link>
                                     </li>
@@ -462,6 +545,23 @@ function Header({ setSearchActive }) {
                                             <i className="bi bi-heart mr-2"></i>{" "}
                                             {t("nav.wishlist") || "Wishlist"}
                                         </Link>
+                                    </li>
+                                    <li>
+                                        <Link
+                                            to={`/${lng}/contact`}
+                                            className="text-[#0e0e53] text-[18px] font-semibold hover:text-[white] transition block w-full py-2"
+                                            onClick={handleMenuItemClick}
+                                        >
+                                            {t("nav.contact")}
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <button
+                                            onClick={() => scrollToSection('about')}
+                                            className="text-[#0e0e53] text-[18px] font-semibold hover:text-[white] transition block w-full py-2 text-left bg-transparent border-none cursor-pointer"
+                                        >
+                                            {t("nav.about")}
+                                        </button>
                                     </li>
                                     <li className="w-full py-2">
                                         <LocaleSwitcher />
