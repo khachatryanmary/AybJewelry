@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import Compressor from 'compressorjs';
-import { toast } from "react-toastify";
+import { toast } from 'react-toastify';
 
 const toastStyles = `
   @media (max-width: 639px) {
@@ -49,7 +48,6 @@ const toastStyles = `
   }
 `;
 
-
 const ManageHomepageAssets = () => {
     const { t } = useTranslation();
     const [form, setForm] = useState({
@@ -60,12 +58,14 @@ const ManageHomepageAssets = () => {
         description: '',
     });
     const [imageFile, setImageFile] = useState(null);
+    const [videoFiles, setVideoFiles] = useState([]);
     const [imagePreview, setImagePreview] = useState(null);
     const [uploading, setUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
     const [imageError, setImageError] = useState('');
-    const API_URL = import.meta.env.VITE_API_URL;
-
+    const [videoError, setVideoError] = useState('');
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const PLACEHOLDER_IMAGE = 'https://res.cloudinary.com/dnies3wxf/image/upload/v1757759096/modelImg_1_kmmtnc.jpg';
     useEffect(() => {
         const fetchAssets = async () => {
             try {
@@ -74,15 +74,28 @@ const ManageHomepageAssets = () => {
                     headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
                 });
                 console.log('Response:', res.data);
-                setForm({
+                const fetchedData = {
                     collectionName: res.data.collectionName || 'Spring 2025',
                     imageUrl: res.data.imageUrl || '',
                     videoUrls: res.data.videoUrls.length > 0 ? res.data.videoUrls : [''],
                     title: res.data.title || '',
                     description: res.data.description || '',
-                });
-                if (res.data.imageUrl) {
-                    setImagePreview(`${API_URL}${res.data.imageUrl}`);
+                };
+                setForm(fetchedData);
+
+                // Preload the hero image for preview
+                if (fetchedData.imageUrl) {
+                    const img = new Image();
+                    img.src = fetchedData.imageUrl;
+                    img.onload = () => {
+                        setImagePreview(fetchedData.imageUrl);
+                        console.log('Hero image preloaded successfully:', fetchedData.imageUrl);
+                    };
+                    img.onerror = () => {
+                        setImagePreview(PLACEHOLDER_IMAGE);
+                        setImageError(t('admin.homepageAssets.previewError', { defaultValue: 'Failed to load hero image preview' }));
+                        console.error('Error preloading hero image:', fetchedData.imageUrl);
+                    };
                 }
             } catch (error) {
                 console.error('Error fetching homepage assets:', {
@@ -92,15 +105,13 @@ const ManageHomepageAssets = () => {
                 });
                 if (error.response?.status === 401) {
                     toast.error('Unauthorized: Please log in again');
-                    // Optionally redirect to login page
-                    // window.location.href = '/admin/login';
                 }
             }
         };
         fetchAssets();
-    }, [API_URL]);
+    }, [API_URL, t]);
 
-    const handleFileChange = (e) => {
+    const handleImageFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
             if (file.size > 100 * 1024 * 1024) {
@@ -111,26 +122,43 @@ const ManageHomepageAssets = () => {
                 setImageError(t('admin.homepageAssets.imageTypeError', { defaultValue: 'Please select an image file' }));
                 return;
             }
-            new Compressor(file, {
-                quality: 0.7,
-                maxWidth: 1920,
-                success(compressedFile) {
-                    setImageError('');
-                    setImageFile(compressedFile);
-                    console.log(`Compressed hero image: ${(compressedFile.size / 1024 / 1024).toFixed(2)}MB`);
-                    const reader = new FileReader();
-                    reader.onload = (e) => setImagePreview(e.target.result);
-                    reader.readAsDataURL(compressedFile);
-                },
-                error(err) {
-                    console.error('Compression error:', err);
-                    setImageError(t('admin.homepageAssets.compressionError', { defaultValue: 'Failed to compress image' }));
-                }
-            });
+
+            setImageError('');
+            setImageFile(file);
+            console.log(`Selected hero image: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                setImagePreview(e.target.result);
+                console.log('Image preview set from file input');
+            };
+            reader.onerror = () => {
+                setImageError(t('admin.homepageAssets.previewError', { defaultValue: 'Failed to load image preview' }));
+            };
+            reader.readAsDataURL(file);
         }
     };
 
-    const handleDrop = (e) => {
+    const handleVideoFileChange = (e) => {
+        const files = Array.from(e.target.files);
+        const validFiles = files.filter(file => {
+            if (file.size > 100 * 1024 * 1024) {
+                setVideoError(t('admin.homepageAssets.videoSizeError', { defaultValue: 'Video size should be less than 100MB' }));
+                return false;
+            }
+            if (!file.type.startsWith('video/')) {
+                setVideoError(t('admin.homepageAssets.videoTypeError', { defaultValue: 'Please select a video file' }));
+                return false;
+            }
+            return true;
+        });
+
+        setVideoError('');
+        setVideoFiles([...videoFiles, ...validFiles]);
+        console.log(`Selected videos: ${validFiles.length}`);
+    };
+
+    const handleImageDrop = (e) => {
         e.preventDefault();
         e.stopPropagation();
         e.dataTransfer.dropEffect = 'copy';
@@ -151,22 +179,19 @@ const ManageHomepageAssets = () => {
             return;
         }
 
-        new Compressor(file, {
-            quality: 0.7,
-            maxWidth: 1920,
-            success(compressedFile) {
-                setImageError('');
-                setImageFile(compressedFile);
-                console.log(`Compressed dropped hero image: ${(compressedFile.size / 1024 / 1024).toFixed(2)}MB`);
-                const reader = new FileReader();
-                reader.onload = (e) => setImagePreview(e.target.result);
-                reader.readAsDataURL(compressedFile);
-            },
-            error(err) {
-                console.error('Compression error:', err);
-                setImageError(t('admin.homepageAssets.compressionError', { defaultValue: 'Failed to compress image' }));
-            }
-        });
+        setImageError('');
+        setImageFile(file);
+        console.log(`Dropped hero image: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            setImagePreview(e.target.result);
+            console.log('Image preview set from drag and drop');
+        };
+        reader.onerror = () => {
+            setImageError(t('admin.homepageAssets.previewError', { defaultValue: 'Failed to load image preview' }));
+        };
+        reader.readAsDataURL(file);
     };
 
     const handleDragOver = (e) => {
@@ -175,17 +200,19 @@ const ManageHomepageAssets = () => {
         e.dataTransfer.dropEffect = 'copy';
     };
 
-    const uploadImage = async () => {
-        if (!imageFile) return null;
+    const uploadToCloudinary = async (file, assetType, folder) => {
+        if (!file) return null;
+
         const formData = new FormData();
-        formData.append('image', imageFile);
-        formData.append('category', 'homepage');
-        formData.append('productId', 'homepage-hero');
+        formData.append('image', file); // Using 'image' key for both images and videos
+        formData.append('folder', folder);
+        formData.append('assetType', assetType);
 
         try {
             setUploading(true);
             setUploadProgress(0);
-            const response = await axios.post(`${API_URL}/api/upload/single`, formData, {
+
+            const response = await axios.post(`${API_URL}/api/upload/cloudinary`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     Authorization: `Bearer ${localStorage.getItem('adminToken')}`,
@@ -194,16 +221,24 @@ const ManageHomepageAssets = () => {
                     const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
                     setUploadProgress(percentCompleted);
                 },
-                timeout: 300000 // 5 minutes timeout
+                timeout: 300000,
             });
-            console.log('Hero image upload response:', response.data);
-            return response.data.imagePath;
+
+            console.log('Cloudinary upload response:', response.data);
+            if (!response.data.secure_url) {
+                throw new Error('No secure_url in Cloudinary response');
+            }
+            return response.data.secure_url;
         } catch (error) {
-            console.error('Error uploading hero image:', error.message, error.response?.data);
+            console.error(`Error uploading ${assetType} to Cloudinary:`, error.message, error.response?.data);
             const errorMsg = error.response?.status === 500
-                ? t('admin.homepageAssets.serverError', { defaultValue: 'Server error uploading image. Check server logs or file size.' })
-                : t('admin.homepageAssets.imageUploadFailed', { defaultValue: 'Error uploading image: ' }) + (error.response?.data?.error || error.message);
-            setImageError(errorMsg);
+                ? t('admin.homepageAssets.serverError', { defaultValue: 'Server error uploading file. Check server logs or file size.' })
+                : t('admin.homepageAssets.uploadFailed', { defaultValue: `Error uploading ${assetType}: ` }) + (error.response?.data?.error || error.message);
+            if (assetType === 'image') {
+                setImageError(errorMsg);
+            } else {
+                setVideoError(errorMsg);
+            }
             return null;
         } finally {
             setUploading(false);
@@ -225,26 +260,44 @@ const ManageHomepageAssets = () => {
         setForm({ ...form, videoUrls: form.videoUrls.filter((_, i) => i !== index) });
     };
 
+    const removeVideoFile = (index) => {
+        setVideoFiles(videoFiles.filter((_, i) => i !== index));
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         try {
             setUploading(true);
             let imageUrl = form.imageUrl;
+            let videoUrls = [...form.videoUrls].filter(url => url.trim() !== '');
 
-            // Upload new image if one was selected
+            // Upload image to Cloudinary (homepageHeroImage folder)
             if (imageFile) {
-                imageUrl = await uploadImage();
-                if (!imageUrl) {
-                    setImageError(t('admin.homepageAssets.imageUploadFailed', { defaultValue: 'Failed to upload hero image' }));
+                const cloudinaryUrl = await uploadToCloudinary(imageFile, 'image', 'homepageHeroImage');
+                if (!cloudinaryUrl) {
+                    setImageError(t('admin.homepageAssets.imageUploadFailed', { defaultValue: 'Failed to upload hero image to Cloudinary' }));
                     return;
+                }
+                imageUrl = cloudinaryUrl;
+            }
+
+            // Upload videos to Cloudinary (videos folder in second account)
+            if (videoFiles.length > 0) {
+                const uploadedVideoUrls = await Promise.all(
+                    videoFiles.map(file => uploadToCloudinary(file, 'video', 'videos'))
+                );
+                const validVideoUrls = uploadedVideoUrls.filter(url => url !== null);
+                videoUrls = [...videoUrls, ...validVideoUrls];
+                if (validVideoUrls.length < videoFiles.length) {
+                    setVideoError(t('admin.homepageAssets.someVideosFailed', { defaultValue: 'Some videos failed to upload' }));
                 }
             }
 
             const assetsData = {
                 ...form,
-                imageUrl: imageUrl,
-                videoUrls: form.videoUrls.filter(url => url.trim() !== ''), // Remove empty URLs
+                imageUrl,
+                videoUrls,
             };
 
             console.log('Submitting homepage assets:', assetsData);
@@ -255,7 +308,11 @@ const ManageHomepageAssets = () => {
 
             toast.success(t('admin.homepageAssets.success', { defaultValue: 'Homepage assets updated successfully!' }));
             setImageFile(null);
+            setVideoFiles([]);
             setImageError('');
+            setVideoError('');
+            setForm(prev => ({ ...prev, imageUrl, videoUrls }));
+            setImagePreview(imageUrl); // Update preview after successful upload
         } catch (error) {
             console.error('Error updating homepage assets:', error);
             toast.error(t('admin.homepageAssets.error', { defaultValue: 'Error updating homepage assets: ' }) + (error.response?.data?.message || error.message));
@@ -284,7 +341,7 @@ const ManageHomepageAssets = () => {
 
                     <div
                         className={`flex flex-col border-2 ${imageError ? 'border-red-500' : 'border-gray-300'} rounded-lg p-4 hover:border-[#0e0e53] transition-colors`}
-                        onDrop={handleDrop}
+                        onDrop={handleImageDrop}
                         onDragOver={handleDragOver}
                     >
                         <label className="mb-2 text-sm font-medium text-gray-700">
@@ -293,7 +350,7 @@ const ManageHomepageAssets = () => {
                         <input
                             type="file"
                             accept="image/*"
-                            onChange={handleFileChange}
+                            onChange={handleImageFileChange}
                             className="p-3 border border-gray-300 rounded-lg text-sm"
                         />
                         {imageError && (
@@ -305,7 +362,16 @@ const ManageHomepageAssets = () => {
                                     src={imagePreview}
                                     alt="Hero Preview"
                                     className="w-32 h-32 object-cover rounded border"
+                                    onError={() => {
+                                        setImagePreview(PLACEHOLDER_IMAGE);
+                                        setImageError(t('admin.homepageAssets.previewError', { defaultValue: 'Failed to load image preview' }));
+                                    }}
                                 />
+                                {form.imageUrl.startsWith('http') && (
+                                    <p className="text-xs text-green-600 mt-1">
+                                        {t('admin.homepageAssets.usingCloudinary', { defaultValue: 'Currently using Cloudinary image' })}
+                                    </p>
+                                )}
                             </div>
                         )}
                         {uploading && uploadProgress > 0 && (
@@ -317,7 +383,43 @@ const ManageHomepageAssets = () => {
                             </div>
                         )}
                         <p className="text-xs sm:text-sm text-gray-500 mt-2">
-                            {t('admin.homepageAssets.dragDropHero', { defaultValue: 'Drag and drop an image here or click to select (max 100MB, compressed to ~5MB)' })}
+                            {t('admin.homepageAssets.dragDropHero', { defaultValue: 'Drag and drop an image here or click to select (max 100MB, will be uploaded to Cloudinary)' })}
+                        </p>
+                    </div>
+
+                    <div className={`flex flex-col border-2 ${videoError ? 'border-red-500' : 'border-gray-300'} rounded-lg p-4 hover:border-[#0e0e53] transition-colors`}>
+                        <label className="mb-2 text-sm font-medium text-gray-700">
+                            {t('admin.homepageAssets.videos', { defaultValue: 'Featured Videos' })}
+                        </label>
+                        <input
+                            type="file"
+                            accept="video/*"
+                            multiple
+                            onChange={handleVideoFileChange}
+                            className="p-3 border border-gray-300 rounded-lg text-sm"
+                        />
+                        {videoError && (
+                            <p className="text-red-500 text-xs sm:text-sm mt-2">{videoError}</p>
+                        )}
+                        {videoFiles.length > 0 && (
+                            <div className="mt-2">
+                                <p className="text-sm font-medium">{t('admin.homepageAssets.selectedVideos', { defaultValue: 'Selected Videos:' })}</p>
+                                {videoFiles.map((file, index) => (
+                                    <div key={index} className="flex items-center gap-2">
+                                        <span className="text-xs">{file.name}</span>
+                                        <button
+                                            type="button"
+                                            onClick={() => removeVideoFile(index)}
+                                            className="text-red-500 hover:text-red-600"
+                                        >
+                                            {t('admin.homepageAssets.remove', { defaultValue: 'Remove' })}
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                        <p className="text-xs sm:text-sm text-gray-500 mt-2">
+                            {t('admin.homepageAssets.dragDropVideo', { defaultValue: 'Select videos to upload (max 100MB each, will be uploaded to Cloudinary)' })}
                         </p>
                     </div>
 
@@ -346,7 +448,7 @@ const ManageHomepageAssets = () => {
                         onClick={addVideoUrlField}
                         className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
                     >
-                        {t('admin.homepageAssets.addVideo', { defaultValue: 'Add Video URL' })}
+                        {t('admin.homepageAssets.addVideoUrl', { defaultValue: 'Add Video URL' })}
                     </button>
                     <input
                         type="text"

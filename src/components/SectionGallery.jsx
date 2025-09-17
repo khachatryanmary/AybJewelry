@@ -32,7 +32,6 @@ const SectionGallery = () => {
                     videoUrls: Array.isArray(response.data.videoUrls) && response.data.videoUrls.length > 0
                         ? response.data.videoUrls
                         : [
-                            'https://res.cloudinary.com/dc6a3ofls/video/upload/v1755694298/new-collection_uvph1b.mp4',
                             'https://res.cloudinary.com/dc6a3ofls/video/upload/v1755694483/C8699_nriprv.mp4'
                         ],
                     title: response.data.title || t('featuredCollection.title', { defaultValue: 'Spring 2025' }),
@@ -44,7 +43,6 @@ const SectionGallery = () => {
                     collectionName: 'Spring 2025',
                     imageUrl: '/uploads/homePage/modelImg.jpg',
                     videoUrls: [
-                        'https://res.cloudinary.com/dc6a3ofls/video/upload/v1755694298/new-collection_uvph1b.mp4',
                         'https://res.cloudinary.com/dc6a3ofls/video/upload/v1755694483/C8699_nriprv.mp4'
                     ],
                     title: t('featuredCollection.title', { defaultValue: 'Spring 2025' }),

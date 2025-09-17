@@ -34,26 +34,26 @@ export default function HomePage() {
                 console.log("HomePage.jsx API response:", JSON.stringify(response.data, null, 2));
                 const imageUrl = response.data.imageUrl
                     ? `${response.data.imageUrl}?t=${new Date().getTime()}`
-                    : "/Uploads/homePage/modelImg.jpg";
+                    : "https://res.cloudinary.com/dnies3wxf/image/upload/v1757759096/modelImg_1_kmmtnc.jpg";
 
                 setCollectionName(response.data.collectionName || "Spring 2025");
 
                 // Preload the image
                 const img = new Image();
-                img.src = `${API_URL}${imageUrl}`;
+                img.src = imageUrl;
                 img.onload = () => {
                     setHeroImage(imageUrl);
                     setImageLoaded(true);
                     setIsLoading(false);
                 };
                 img.onerror = () => {
-                    setHeroImage("/Uploads/homePage/modelImg.jpg");
+                    setHeroImage("https://res.cloudinary.com/dnies3wxf/image/upload/v1757759096/modelImg_1_kmmtnc.jpg");
                     setImageLoaded(true);
                     setIsLoading(false);
                 };
             } catch (error) {
                 console.error("HomePage.jsx fetchAssets error:", error.message);
-                setHeroImage("/Uploads/homePage/modelImg.jpg");
+                setHeroImage("https://res.cloudinary.com/dnies3wxf/image/upload/v1757759096/modelImg_1_kmmtnc.jpg");
                 setCollectionName("Spring 2025");
                 setImageLoaded(true);
                 setIsLoading(false);
@@ -112,12 +112,12 @@ export default function HomePage() {
                 ) : (
                     <>
                         <img
-                            src={`${API_URL}${heroImage}`}
+                            src={heroImage}
                             alt="Hero Image"
                             className="w-full h-full sm:aspect-[16/9] md:aspect-[16/9] object-cover object-[center_20%]"
                             onLoad={handleImageLoad}
                             onError={() => {
-                                setHeroImage("/Uploads/homePage/modelImg.jpg");
+                                setHeroImage("https://res.cloudinary.com/dnies3wxf/image/upload/v1757759096/modelImg_1_kmmtnc.jpg");
                                 handleImageLoad();
                             }}
                         />
@@ -131,7 +131,6 @@ export default function HomePage() {
                         >
                             {t('featuredCollection.exploreCollection', { defaultValue: `Explore Collection` })}
                         </Link>
-
                     </>
                 )}
             </motion.div>

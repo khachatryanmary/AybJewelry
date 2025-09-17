@@ -51,18 +51,13 @@ const ManageProducts = () => {
                 }),
                 axios.get(`${API_URL}/api/homepage-assets`, {
                     headers: { Authorization: `Bearer ${token}` },
-                }).catch(() => ({ data: { collectionName: 'Spring 2025' } })) // Fallback if endpoint doesn't exist
+                }).catch(() => ({ data: { collectionName: 'Spring 2025' } }))
             ]);
 
             setProducts(productsRes.data || []);
 
-            // Get featured collection from homepage assets
             const featuredCollection = assetsRes.data.collectionName || 'Spring 2025';
-
-            // Get unique collections from existing products
             const existingCollections = [...new Set(productsRes.data.map(product => product.productCollection).filter(Boolean))];
-
-            // Combine featured collection with existing collections and Classic
             const allCollections = [...new Set([featuredCollection, 'Classic', ...existingCollections])];
 
             setCollections(allCollections);
@@ -178,16 +173,18 @@ const ManageProducts = () => {
         setSliderPreviews(sliderPreviews.filter(preview => preview.file !== fileToRemove.name));
     };
 
-    const removeExistingSliderImage = async (imagePath) => {
+    const removeExistingSliderImage = async (imageUrl) => {
         try {
-            await axios.delete(`${API_URL}/api/upload/delete`, {
-                data: { imagePath },
+            const publicId = imageUrl.split('/').slice(-2).join('/').split('.')[0];
+            await axios.delete(`${API_URL}/api/upload/cloudinary`, {
+                data: { public_id: publicId },
                 headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
             });
             setForm(prev => ({
                 ...prev,
-                images: prev.images.filter(img => img !== imagePath)
+                images: prev.images.filter(img => img !== imageUrl)
             }));
+            alert(t('admin.products.deleteSuccess', { defaultValue: 'Image deleted successfully!' }));
         } catch (error) {
             console.error('Error deleting slider image:', error);
             alert(t('admin.products.errorDeletingImage', { defaultValue: 'Error deleting image: ' }) + (error.response?.data?.message || error.message));
@@ -198,13 +195,13 @@ const ManageProducts = () => {
         if (!imageFile) return null;
         const formData = new FormData();
         formData.append('image', imageFile);
-        formData.append('category', form.category ? form.category + 's' : 'general');
-        formData.append('productId', editingId || Date.now());
+        formData.append('folder', form.category ? `${form.category}s` : 'general');
+        formData.append('public_id', `hero-${editingId || Date.now()}`);
 
         try {
             setUploading(true);
             setUploadProgress(0);
-            const response = await axios.post(`${API_URL}/api/upload/single`, formData, {
+            const response = await axios.post(`${API_URL}/api/upload/cloudinary`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     Authorization: `Bearer ${localStorage.getItem('adminToken')}`,
@@ -213,15 +210,13 @@ const ManageProducts = () => {
                     const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
                     setUploadProgress(percentCompleted);
                 },
-                timeout: 300000
+                timeout: 300000,
             });
-            return response.data.imagePath;
+
+            return response.data.secure_url;
         } catch (error) {
             console.error('Error uploading image:', error);
-            const errorMsg = error.response?.status === 500
-                ? t('admin.products.serverError', { defaultValue: 'Server error uploading image. Check server logs or file size.' })
-                : t('admin.products.imageUploadFailed', { defaultValue: 'Error uploading image: ' }) + (error.response?.data?.error || error.message);
-            setImageError(errorMsg);
+            setImageError('Error uploading image: ' + (error.response?.data?.error || error.message));
             return null;
         } finally {
             setUploading(false);
@@ -232,15 +227,15 @@ const ManageProducts = () => {
     const uploadSliderImages = async () => {
         if (sliderFiles.length === 0) return [];
         const formData = new FormData();
-        sliderFiles.forEach(file => {
+        sliderFiles.forEach((file, index) => {
             formData.append('images', file);
         });
-        formData.append('category', form.category ? form.category + 's' : 'general');
+        formData.append('folder', form.category ? `${form.category}sDetails` : 'generalDetails');
         formData.append('productId', editingId || Date.now());
 
         try {
             setUploading(true);
-            const response = await axios.post(`${API_URL}/api/upload/multiple`, formData, {
+            const response = await axios.post(`${API_URL}/api/upload/cloudinary`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     Authorization: `Bearer ${localStorage.getItem('adminToken')}`,
@@ -251,7 +246,7 @@ const ManageProducts = () => {
                 },
                 timeout: 300000
             });
-            return response.data.images.map(img => img.path);
+            return response.data.images ? response.data.images.map(img => img.secure_url) : [];
         } catch (error) {
             console.error('Error uploading slider images:', error);
             const errorMsg = error.response?.status === 500
@@ -282,7 +277,6 @@ const ManageProducts = () => {
             let imagePath = form.image;
             let sliderImagePaths = [...form.images];
 
-            // Upload main image if provided
             if (imageFile) {
                 imagePath = await uploadImage();
                 if (!imagePath) {
@@ -290,13 +284,11 @@ const ManageProducts = () => {
                 }
             }
 
-            // Upload slider images if provided
             if (sliderFiles.length > 0) {
                 const newSliderPaths = await uploadSliderImages();
                 sliderImagePaths = [...sliderImagePaths, ...newSliderPaths];
             }
 
-            // Clean details
             const cleanDetails = form.details.map(detail => {
                 const cleanDetail = {};
                 Object.keys(detail).forEach(key => {
@@ -372,12 +364,11 @@ const ManageProducts = () => {
             details: product.details || [{ material: '', stone: '', finish: '', design: '', fit: '' }],
         });
         setEditingId(product._id);
-        setImagePreview(product.image ? `${API_URL}${product.image}` : null);
+        setImagePreview(product.image || null);
         setImageFile(null);
         setSliderFiles([]);
         setSliderPreviews([]);
         setImageError('');
-        // Scroll to form on mobile
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
@@ -385,6 +376,26 @@ const ManageProducts = () => {
         if (!confirm(t('admin.products.confirmDelete', { defaultValue: 'Are you sure you want to delete this product?' }))) return;
 
         try {
+            const product = products.find(p => p._id === id);
+            if (product) {
+                if (product.image) {
+                    const publicId = product.image.split('/').slice(-2).join('/').split('.')[0];
+                    await axios.delete(`${API_URL}/api/upload/cloudinary`, {
+                        data: { public_id: publicId },
+                        headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
+                    });
+                }
+                if (product.images && product.images.length > 0) {
+                    for (const imageUrl of product.images) {
+                        const publicId = imageUrl.split('/').slice(-2).join('/').split('.')[0];
+                        await axios.delete(`${API_URL}/api/upload/cloudinary`, {
+                            data: { public_id: publicId },
+                            headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
+                        });
+                    }
+                }
+            }
+
             await axios.delete(`${API_URL}/api/products/${id}`, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
             });
@@ -432,7 +443,6 @@ const ManageProducts = () => {
                 </div>
             )}
 
-            {/* Header */}
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                 <h2 className="text-xl lg:text-2xl font-semibold text-[#0e0e53]">
                     {t('admin.products.title', { defaultValue: 'Manage Products' })}
@@ -443,14 +453,12 @@ const ManageProducts = () => {
                 </div>
             </div>
 
-            {/* Product Form */}
             <form onSubmit={handleSubmit} className="bg-white p-4 lg:p-6 rounded-lg shadow-md">
                 <h3 className="text-lg font-semibold mb-4">
                     {editingId ? 'Edit Product' : 'Add New Product'}
                 </h3>
 
                 <div className="space-y-4">
-                    {/* Product Name */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                             Product Name *
@@ -465,7 +473,6 @@ const ManageProducts = () => {
                         />
                     </div>
 
-                    {/* Price and Category */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -501,7 +508,6 @@ const ManageProducts = () => {
                         </div>
                     </div>
 
-                    {/* Collection and Alt Text */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -533,7 +539,6 @@ const ManageProducts = () => {
                         </div>
                     </div>
 
-                    {/* Description */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                             Description
@@ -547,7 +552,6 @@ const ManageProducts = () => {
                         />
                     </div>
 
-                    {/* Product Details */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                             Product Details
@@ -611,7 +615,6 @@ const ManageProducts = () => {
                         </button>
                     </div>
 
-                    {/* Main Image Upload */}
                     <div
                         className={`border-2 border-dashed rounded-lg p-4 ${imageError ? 'border-red-300' : 'border-gray-300'} hover:border-blue-400 transition-colors`}
                         onDrop={(e) => handleDrop(e, 'main')}
@@ -651,7 +654,6 @@ const ManageProducts = () => {
                         </p>
                     </div>
 
-                    {/* Slider Images Upload */}
                     <div
                         className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-blue-400 transition-colors"
                         onDrop={(e) => handleDrop(e, 'slider')}
@@ -672,7 +674,6 @@ const ManageProducts = () => {
                         </p>
                     </div>
 
-                    {/* Current Slider Images */}
                     {form.images && form.images.length > 0 && (
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -682,7 +683,7 @@ const ManageProducts = () => {
                                 {form.images.map((imagePath, index) => (
                                     <div key={index} className="relative group">
                                         <img
-                                            src={`${API_URL}${imagePath}`}
+                                            src={imagePath}
                                             alt={`Slider ${index + 1}`}
                                             className="w-full h-16 sm:h-20 object-cover rounded border"
                                         />
@@ -699,7 +700,6 @@ const ManageProducts = () => {
                         </div>
                     )}
 
-                    {/* New Slider Images Preview */}
                     {sliderPreviews.length > 0 && (
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -726,7 +726,6 @@ const ManageProducts = () => {
                         </div>
                     )}
 
-                    {/* Form Actions */}
                     <div className="flex flex-col sm:flex-row gap-3 pt-4">
                         <button
                             type="submit"
@@ -751,7 +750,6 @@ const ManageProducts = () => {
                 </div>
             </form>
 
-            {/* Products List */}
             <div className="bg-white rounded-lg shadow-md">
                 <div className="p-4 lg:p-6 border-b border-gray-200">
                     <h3 className="text-lg font-semibold">
@@ -759,14 +757,13 @@ const ManageProducts = () => {
                     </h3>
                 </div>
 
-                {/* Mobile-friendly product cards */}
                 <div className="p-4 lg:p-6">
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         {products.map(product => (
                             <div key={product._id} className="border rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
                                 <div className="relative group">
                                     <img
-                                        src={`${API_URL}${product.image}`}
+                                        src={product.image}
                                         alt={product.alt || product.name}
                                         className="w-full h-40 sm:h-48 object-cover"
                                         onError={(e) => {
@@ -774,7 +771,6 @@ const ManageProducts = () => {
                                         }}
                                     />
 
-                                    {/* Action buttons overlay */}
                                     <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                         <div className="flex space-x-2">
                                             <button
@@ -798,7 +794,6 @@ const ManageProducts = () => {
                                         </div>
                                     </div>
 
-                                    {/* Image count badge */}
                                     {product.images && product.images.length > 0 && (
                                         <div className="absolute top-2 right-2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded">
                                             +{product.images.length}
@@ -823,7 +818,6 @@ const ManageProducts = () => {
                                     )}
                                 </div>
 
-                                {/* Mobile action buttons */}
                                 <div className="p-3 border-t border-gray-100 sm:hidden">
                                     <div className="flex space-x-2">
                                         <button

@@ -5,7 +5,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { calculateDeliveryFeeByRegion, getDeliveryInfo } from "../utils/DeliveryCalculator.js";
+import { calculateDeliveryFeeByRegion, getDeliveryInfo } from "../utils/deliveryCalculator.js";
 
 const ARMENIAN_REGIONS = [
     "Երևան", "Արմավիր", "Արագածոտն", "Արարատ", "Կոտայք", "Շիրակ",
