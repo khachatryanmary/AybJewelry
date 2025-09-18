@@ -4,30 +4,30 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  base: './', // ← This ensures static assets are loaded correctly
+  base: '/',
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom', 'axios', 'react-toastify'],
-          galleries: [
-            './src/components/RingsGallery.jsx',
-            './src/components/NecklaceGallery.jsx',
-            './src/components/EarringsGallery.jsx',
-            './src/components/BraceletsGallery.jsx',
-            './src/components/HairclipsGallery.jsx',
-          ],
-          admin: [
-            './src/components/admin/AdminDashboard.jsx',
-            './src/components/admin/ManageProducts.jsx',
-            './src/components/admin/ManageCategories.jsx',
-            './src/components/admin/ManageCollections.jsx',
-            './src/components/admin/ManageOrders.jsx',
-            './src/components/admin/ManageCustomers.jsx',
-            './src/components/admin/ManageHomepageAssets.jsx',
-            './src/components/admin/ManageUsers.jsx',
-            './src/components/admin/AdminAnalytics.jsx',
-          ],
+        manualChunks: (id) => {
+          // Vendor chunk for node_modules
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
+              return 'vendor';
+            }
+            if (id.includes('axios') || id.includes('react-toastify')) {
+              return 'vendor';
+            }
+          }
+
+          // Gallery components chunk
+          if (id.includes('Gallery.jsx')) {
+            return 'galleries';
+          }
+
+          // Admin components chunk
+          if (id.includes('/admin/')) {
+            return 'admin';
+          }
         },
       },
     },

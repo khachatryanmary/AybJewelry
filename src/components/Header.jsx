@@ -112,7 +112,7 @@ function Header({ setSearchActive }) {
     const shopRef = useRef(null);
 
     // Calculate total cart items (sum of quantities)
-    const cartItemCount = cart.reduce((acc, item) => acc + (item.quantity || 0), 0);
+    const cartItemCount = (cart && Array.isArray(cart)) ? cart.reduce((acc, item) => acc + (item.quantity || 0), 0) : 0;
 
     // Improved scroll function that works better on mobile
     const scrollToSection = (sectionId) => {
