@@ -46,7 +46,7 @@ const SectionNav = () => {
     };
 
     return (
-        <div className="h-[80vh] flex flex-col gap-[40px] justify-center items-center">
+        <div className="h-[60vh] flex flex-col gap-[40px] justify-center items-center">
             <div className="container w-[90%]">
 
                 {/* Section title */}
@@ -66,12 +66,12 @@ const SectionNav = () => {
                             <Link
                                 key={to}
                                 to={`/${lng}/${to}`}
-                                className="group relative w-[250px] h-[200px] flex items-center justify-center text-[white] mx-auto"
+                                className="group rounded-lg relative w-[250px] h-[200px] flex items-center justify-center text-[white] mx-auto"
                             >
                                 <img
                                     src={img}
                                     alt={alt}
-                                    className="object-contain w-full h-full rounded-[10px] transition-transform duration-800 ease-in-out group-hover:rounded-lg group-hover:opacity-50 group-hover:scale-[1.02] cursor-pointer absolute"
+                                    className="object-contain w-full h-full rounded-lg transition-transform duration-800 ease-in-out group-hover:rounded-lg group-hover:opacity-50 group-hover:scale-[1.02] cursor-pointer absolute"
                                 />
                                 <p className="text-white flex text-center opacity-70 font-[Against] italic text-[25px] z-10 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                                     {text}

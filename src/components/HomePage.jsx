@@ -90,6 +90,7 @@ export default function HomePage() {
 
     const [navRef, navInView] = useInView({ triggerOnce: true, threshold: 0.2 });
     const [galleryRef, galleryInView] = useInView({ triggerOnce: true, threshold: 0.2 });
+    const [collectionRef, collectionInView] = useInView({ triggerOnce: true, threshold: 0.2 });
     const [aboutRef, aboutInView] = useInView({ triggerOnce: true, threshold: 0.2 });
 
     const collectionSlug = collectionName.toLowerCase().replace(/\s+/g, '-');
@@ -198,7 +199,30 @@ export default function HomePage() {
                 )}
             </motion.div>
 
-            <CollectionSection />
+            <motion.div
+                id="collections"
+                ref={collectionRef}
+                variants={sectionVariants}
+                initial="hidden"
+                animate={collectionInView ? "visible" : "hidden"}
+                className="w-full sm:w-[90%] mx-auto py-4 sm:py-6 md:py-8 px-4 sm:px-0"
+            >
+                {isLoading ? (
+                    <div className="h-[400px] bg-[#efeeee] overflow-hidden">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            {Array(4).fill(null).map((_, index) => (
+                                <Skeleton
+                                    key={index}
+                                    height={300}
+                                    className="rounded-[20px] w-full"
+                                />
+                            ))}
+                        </div>
+                    </div>
+                ) : (
+                    <CollectionSection />
+                )}
+            </motion.div>
 
             <motion.div
                 id="about"

@@ -199,7 +199,7 @@ const CollectionSection = () => {
                                 <Link
                                     key={collection.name}
                                     to={`/${lng}/collection/${collectionSlug}`}
-                                    className="group relative w-[250px] h-[350px] flex items-center justify-center text-white mx-auto"
+                                    className="group relative w-[180px] h-[590px] flex items-center justify-center text-white mx-auto"
                                 >
                                     <img
                                         src={collection.coverImage}
@@ -207,10 +207,11 @@ const CollectionSection = () => {
                                         className="object-cover w-full h-full transition-transform duration-800 ease-in-out group-hover:opacity-50 group-hover:scale-[1.02] cursor-pointer absolute rounded-lg"
                                         onError={(e) => { e.target.src = '/placeholder-image.jpg'; }}
                                     />
-                                    <p className="text-white flex text-center opacity-70 font-[Against] italic text-[25px] z-10 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                                    <p className="text-white flex text-center opacity-70 font-[Against] italic text-[22px] z-10 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                                         {collection.name.toUpperCase()}
                                     </p>
                                 </Link>
+
                             );
                         })}
                     </Slider>
