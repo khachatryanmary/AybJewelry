@@ -133,7 +133,7 @@ export const WishlistProvider = ({ children }) => {
                     headers: { Authorization: `Bearer ${user.token}` },
                 });
                 setWishlist((prev) => prev.filter((item) => item._id !== product._id));
-                toast.info(t("allProductsGallery.removedFromWishlist", { defaultValue: `${product.name} removed from wishlist` }));
+                toast.info(t("allProductsGallery.removedFromWishlist", { defaultValue: `Removed from wishlist` }));
             } else {
                 await axios.post(
                     `${API_URL}/api/wishlist/${user.id}`,
@@ -141,7 +141,7 @@ export const WishlistProvider = ({ children }) => {
                     { headers: { Authorization: `Bearer ${user.token}` } }
                 );
                 setWishlist((prev) => [...prev, { _id: product._id, name: product.name, price: product.price, category: product.category, image: product.image }]);
-                toast.success(t("allProductsGallery.addedToWishlist", { defaultValue: `${product.name} added to wishlist` }));
+                toast.success(t("allProductsGallery.addedToWishlist", { defaultValue: `Added to wishlist` }));
             }
             window.dispatchEvent(new Event("wishlist-updated"));
         } catch (err) {

@@ -59,10 +59,15 @@ const Login = () => {
     const [form, setForm] = useState({ email: "", password: "" });
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const user = JSON.parse(localStorage.getItem("loggedInUser")) || null;
 
     const handleChange = (e) =>
         setForm((prev) => ({ ...prev, [e.target.name]: e.target.value.trim() }));
+
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword);
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -163,16 +168,28 @@ const Login = () => {
                         autoComplete="email"
                         required
                     />
-                    <input
-                        type="password"
-                        name="password"
-                        placeholder={t("login.password")}
-                        className="p-[8px] sm:p-[10px] md:p-[12px] h-[36px] sm:h-[40px] md:h-[44px] w-full border border-[gray] rounded-[8px] text-[14px] sm:text-[15px] md:text-[16px] focus:outline-none focus:border-[#0e0e53]"
-                        value={form.password}
-                        onChange={handleChange}
-                        autoComplete="current-password"
-                        required
-                    />
+
+                    {/* Password input with eye toggle */}
+                    <div className="relative w-full">
+                        <input
+                            type={showPassword ? "text" : "password"}
+                            name="password"
+                            placeholder={t("login.password")}
+                            className="p-[8px] sm:p-[10px] md:p-[12px] h-[36px] sm:h-[40px] md:h-[44px] w-full border border-[gray] rounded-[8px] text-[14px] sm:text-[15px] md:text-[16px] focus:outline-none focus:border-[#0e0e53] pr-[40px]"
+                            value={form.password}
+                            onChange={handleChange}
+                            autoComplete="current-password"
+                            required
+                        />
+                        <button
+                            type="button"
+                            onClick={togglePasswordVisibility}
+                            className="absolute right-[8px] sm:right-[10px] md:right-[12px] top-1/2 transform -translate-y-1/2 text-[#666] hover:text-[#0e0e53] transition-colors duration-200 focus:outline-none"
+                        >
+                            <i className={`bi ${showPassword ? 'bi-eye-slash' : 'bi-eye'} text-[16px] sm:text-[18px]`}></i>
+                        </button>
+                    </div>
+
                     <div className="flex w-full items-center justify-around text-center text-[12px] sm:text-[13px] md:text-[14px] text-[#0e0e53]">
                         <div className="flex items-center justify-center gap-[8px]">
                             <input

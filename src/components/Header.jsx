@@ -478,12 +478,12 @@ function Header({ setSearchActive }) {
                                                     initial="hidden"
                                                     animate="visible"
                                                     exit="hidden"
-                                                    className="bg-[#efeeee] border border-gray-300 rounded shadow-lg w-full mt-1 ml-4"
+                                                    className="bg-[#efeeee] w-full mt-1 ml-4"
                                                 >
                                                     {shopItems.map(({ key, label }) => (
                                                         <li
                                                             key={key}
-                                                            className="px-4 py-2 hover:bg-[#0a0a39] hover:text-white transition"
+                                                            className="px-4 py-2 hover:bg-[#0a0a39] hover:text-white color-[#0e0e53] transition"
                                                         >
                                                             <Link
                                                                 to={`/${lng}/${key}`}

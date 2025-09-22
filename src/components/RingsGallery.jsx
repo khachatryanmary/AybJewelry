@@ -273,14 +273,14 @@ const RingGallery = () => {
                     delete newState[product._id];
                     return newState;
                 });
-                toast.info(t('productsGallery.removedFromCart', { defaultValue: `${product.name} removed from cart` }));
+                toast.info(t('productsGallery.removedFromCart', { defaultValue: `Removed from cart` }));
             } else {
                 await addToCart(product._id, 1, selectedSize);
                 setAddedToCart(prev => ({
                     ...prev,
                     [product._id]: [{ size: selectedSize, quantity: 1 }],
                 }));
-                toast.success(t('productsGallery.addedToCart', { defaultValue: `${product.name} added to cart!` }));
+                toast.success(t('productsGallery.addedToCart', { defaultValue: `Added to cart!` }));
                 setShowAddSizeModal(false);
                 setSelectedSize("");
                 setSelectedProduct(null);

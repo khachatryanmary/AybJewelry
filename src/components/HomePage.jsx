@@ -10,6 +10,7 @@ import SectionAboutUs from "./SectionAboutUs.jsx";
 import axios from "axios";
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import CollectionSection from "./CollectionSection.jsx";
 
 export default function HomePage() {
     const location = useLocation();
@@ -141,18 +142,18 @@ export default function HomePage() {
                 variants={sectionVariants}
                 initial="hidden"
                 animate={navInView ? "visible" : "hidden"}
-                className="w-full mx-auto py-4 sm:py-6 md:py-8"
+                className="w-full mx-auto py-4 sm:py-6 md:py-8 px-4 sm:px-0"
             >
                 {isLoading ? (
                     <div className="h-[50vh] flex flex-col justify-center items-center">
-                        <Skeleton width={{ base: 200, sm: 250, md: 300 }} height={40} />
-                        <div className="flex flex-col sm:flex-row flex-nowrap justify-center items-center gap-4 sm:gap-6 md:gap-[50px]">
+                        <Skeleton width={200} height={40} className="mb-4" />
+                        <div className="flex flex-col sm:flex-row flex-nowrap justify-center items-center gap-4 sm:gap-6 md:gap-[50px] overflow-hidden">
                             {[...Array(5)].map((_, i) => (
                                 <Skeleton
                                     key={i}
-                                    width={{ base: 150, sm: 180, md: 200 }}
-                                    height={{ base: 150, sm: 180, md: 200 }}
-                                    className="rounded-[20px]"
+                                    width={150}
+                                    height={150}
+                                    className="rounded-[20px] flex-shrink-0"
                                 />
                             ))}
                         </div>
@@ -168,24 +169,24 @@ export default function HomePage() {
                 variants={sectionVariants}
                 initial="hidden"
                 animate={galleryInView ? "visible" : "hidden"}
-                className="w-full sm:w-[90%] mx-auto py-4 sm:py-6 md:py-8"
+                className="w-full sm:w-[90%] mx-auto py-4 sm:py-6 md:py-8 px-4 sm:px-0"
             >
                 {isLoading ? (
-                    <div className="h-[400px] sm:h-[500px] md:h-[558px] bg-[#efeeee]">
-                        <div className="max-w-[1200px] mx-auto grid grid-cols-1 sm:grid-cols-[1fr_2fr] h-full">
+                    <div className="h-[400px] sm:h-[500px] md:h-[558px] bg-[#efeeee] overflow-hidden">
+                        <div className="max-w-[1200px] mx-auto grid grid-cols-1 sm:grid-cols-[1fr_2fr] h-full gap-4">
                             <Skeleton
-                                height={{ base: 300, sm: 400, md: 558 }}
-                                className="rounded-[20px]"
+                                height={300}
+                                className="rounded-[20px] w-full"
                             />
-                            <div className="mt-4 sm:mt-6 md:mt-[50px] w-full sm:w-[80%] px-4 sm:px-6 space-y-4">
+                            <div className="mt-4 sm:mt-6 md:mt-[50px] w-full px-4 sm:px-6 space-y-4 overflow-hidden">
                                 <Skeleton
-                                    width={{ base: 200, sm: 220, md: 250 }}
+                                    width={200}
                                     height={30}
                                     className="rounded-[20px]"
                                 />
                                 <Skeleton count={4} height={20} className="rounded-[20px]" />
                                 <Skeleton
-                                    width={{ base: 100, sm: 120, md: 150 }}
+                                    width={100}
                                     height={40}
                                     className="rounded-[20px]"
                                 />
@@ -197,28 +198,30 @@ export default function HomePage() {
                 )}
             </motion.div>
 
+            <CollectionSection />
+
             <motion.div
                 id="about"
                 ref={aboutRef}
                 variants={sectionVariants}
                 initial="hidden"
                 animate={aboutInView ? "visible" : "hidden"}
-                className="w-full sm:w-[90%] mx-auto py-4 sm:py-6 md:py-8"
+                className="w-full sm:w-[90%] mx-auto py-4 sm:py-6 md:py-8 px-4 sm:px-0"
             >
                 {isLoading ? (
-                    <div className="mt-4 sm:mt-6 md:mt-[50px] h-[400px] sm:h-[500px] md:h-[600px] bg-[#efeeee]">
-                        <div className="grid grid-cols-1 sm:grid-cols-[2fr_1fr] h-full">
-                            <div className="m-auto w-full sm:w-[80%] space-y-4 px-4 sm:px-0">
+                    <div className="mt-4 sm:mt-6 md:mt-[50px] h-[400px] sm:h-[500px] md:h-[600px] bg-[#efeeee] overflow-hidden">
+                        <div className="grid grid-cols-1 sm:grid-cols-[2fr_1fr] h-full gap-4">
+                            <div className="m-auto w-full space-y-4 px-4 sm:px-0 overflow-hidden">
                                 <Skeleton
-                                    width={{ base: 200, sm: 250, md: 300 }}
+                                    width={200}
                                     height={40}
                                     className="rounded-[20px]"
                                 />
                                 <Skeleton count={5} height={20} className="rounded-[20px]" />
                             </div>
                             <Skeleton
-                                height={{ base: 300, sm: 400, md: 600 }}
-                                className="rounded-[20px]"
+                                height={300}
+                                className="rounded-[20px] w-full"
                             />
                         </div>
                     </div>

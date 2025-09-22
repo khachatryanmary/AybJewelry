@@ -157,7 +157,8 @@
     "exploreCollection": "Explore Collection"
   },
   "sectionNav": {
-    "heading": "Shop by Type",
+    "title": "Select by Type",
+    "subtitle": "Choose your favorite category",
     "necklaces": "NECKLACES",
     "necklacesAlt": "Necklaces",
     "rings": "RINGS",
@@ -645,5 +646,9 @@
       },
       "loginButton": "Login",
       "cancel": "Cancel"
-    }
+    },
+  "collections": {
+    "title": "Our Collections",
+    "subtitle": "Discover our curated collections"
   }
+}

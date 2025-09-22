@@ -47,7 +47,19 @@ const SectionNav = () => {
 
     return (
         <div className="h-[80vh] flex flex-col gap-[40px] justify-center items-center">
-            <div className="container w-[90%] ">
+            <div className="container w-[90%]">
+
+                {/* Section title */}
+                <div className="text-center mb-[40px]">
+                    <h2 className="font-[Against] text-[30px] text-[#0e0e53] mb-2">
+                        {t('sectionNav.title', { defaultValue: 'Select by Type' })}
+                    </h2>
+                    <p className="text-[16px] text-gray-600">
+                        {t('sectionNav.subtitle', { defaultValue: 'Choose your favorite category' })}
+                    </p>
+                </div>
+
+                {/* Mobile slider */}
                 <div className="md:hidden">
                     <Slider {...sliderSettings}>
                         {categories.map(({ to, img, alt, text }) => (
@@ -59,15 +71,17 @@ const SectionNav = () => {
                                 <img
                                     src={img}
                                     alt={alt}
-                                    className="object-contain w-full h-full transition-transform duration-800 ease-in-out group-hover:opacity-50 group-hover:scale-110 cursor-pointer absolute"
+                                    className="object-contain w-full h-full rounded-[10px] transition-transform duration-800 ease-in-out group-hover:rounded-lg group-hover:opacity-50 group-hover:scale-[1.02] cursor-pointer absolute"
                                 />
-                                <p className="text-white opacity-70 font-[Against] italic text-[25px] z-10 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                                <p className="text-white flex text-center opacity-70 font-[Against] italic text-[25px] z-10 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                                     {text}
                                 </p>
                             </Link>
                         ))}
                     </Slider>
                 </div>
+
+                {/* Desktop grid */}
                 <div className="hidden md:flex justify-center items-center gap-[50px] w-full h-[200px] flex-wrap">
                     {categories.map(({ to, img, alt, text }) => (
                         <Link

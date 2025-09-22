@@ -13,6 +13,7 @@ import { ToastContainer } from 'react-toastify';
 import Header from './components/Header.jsx';
 import Footer from './components/Footer.jsx';
 import Search from './components/Search.jsx';
+import CollectionPage from "./components/CollectionPage.jsx";
 
 // Lazy-load heavy components
 const HomePage = React.lazy(() => import('./components/HomePage.jsx'));
@@ -93,6 +94,7 @@ function App() {
             children: [
                 { index: true, element: <HomePage /> },
                 { path: 'aboutUs', element: <SectionAboutUs /> },
+                { path: 'collection/:collectionSlug', element: <CollectionPage /> },
                 { path: 'sectionGallery', element: <SectionGallery /> },
                 {
                     path: 'necklaces',

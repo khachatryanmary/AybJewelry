@@ -257,14 +257,14 @@ const Cart = () => {
                                 >
                                     <button
                                         onClick={() => removeItem(item.id, item.size, item.category)}
-                                        className=" absolute top-2 right-2 sm:absolute sm:top-2 sm:right-2 sm:px-4 sm:py-2 text-[#0e0e53] hover:bg-[#0a0a39] hover:text-white font-semibold text-[12px] sm:text-[13px] md:text-[14px] px-3 py-1 rounded-[8px] transition duration-300 z-10 disabled:opacity-50 disabled:cursor-not sm:absolute relative self-end mt-1 sm:mt-0"
+                                        className=" top-2 right-2  text-[15px] sm:top-2 sm:right-2 sm:px-4 sm:py-2 text-[#0e0e53]  hover:text-white font-semibold sm:text-[13px] md:text-[14px] px-3 py-1 rounded-[8px] transition duration-300 z-10 disabled:opacity-50 disabled:cursor-not sm:absolute self-end mt-1 sm:mt-0"
                                         disabled={removeLoading === item.id}
                                     >
                                         {removeLoading === item.id ? (
                                             <div className="w-[16px] sm:w-[18px] md:w-[20px] h-[16px] sm:h-[18px] md:h-[20px] border-4 border-[#0e0e53] border-t-transparent rounded-full animate-spin"></div>
                                         ) : (
 
-                                            <span>Remove</span>
+                                            <i className="bi bi-x-lg"></i>
                                         )}
                                     </button>
 

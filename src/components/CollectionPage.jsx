@@ -1,111 +1,92 @@
 import React, { useEffect, useState, useRef, useContext } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import Filter from './Filter.jsx';
-import { useFilteredProduct } from './useFilteredProduct.jsx';
-import { useTranslation } from 'react-i18next';
-import { toast } from 'react-toastify';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Link, useLocation, useParams } from "react-router-dom";
+import Filter from "./Filter.jsx";
+import { useFilteredProduct } from "./useFilteredProduct.jsx";
+import { useTranslation } from "react-i18next";
+import { toast } from "react-toastify";
+import { motion, AnimatePresence } from "framer-motion";
 import { UserContext } from '../Providers/UserContext';
 import { CartContext } from '../Providers/CartContext';
 import { WishlistContext } from '../Providers/WishlistContext';
 
 const toastStyles = `
-  @media (max-width: 639px) {
+@media (max-width: 639px) {
     .Toastify__toast {
-      width: 280px;
-      font-size: 14px;
-      padding: 8px 12px;
-      line-height: 1.4;
+        width: 280px;
+        font-size: 14px;
+        padding: 8px 12px;
+        line-height: 1.4;
     }
     .Toastify__toast-body {
-      padding: 4px;
+        padding: 4px;
     }
     .Toastify__close-button {
-      font-size: 14px;
+        font-size: 14px;
     }
-  }
-  @media (min-width: 640px) and (max-width: 767px) {
+}
+@media (min-width: 640px) and (max-width: 767px) {
     .Toastify__toast {
-      width: 320px;
-      font-size: 15px;
-      padding: 10px 14px;
-      line-height: 1.5;
+        width: 320px;
+        font-size: 15px;
+        padding: 10px 14px;
+        line-height: 1.5;
     }
     .Toastify__toast-body {
-      padding: 6px;
+        padding: 6px;
     }
     .Toastify__close-button {
-      font-size: 15px;
+        font-size: 15px;
     }
-  }
-  @media (min-width: 768px) {
+}
+@media (min-width: 768px) {
     .Toastify__toast {
-      width: 360px;
-      font-size: 16px;
-      padding: 12px 16px;
-      line-height: 1.5;
+        width: 360px;
+        font-size: 16px;
+        padding: 12px 16px;
+        line-height: 1.5;
     }
     .Toastify__toast-body {
-      padding: 8px;
+        padding: 8px;
     }
     .Toastify__close-button {
-      font-size: 16px;
+        font-size: 16px;
     }
-  }
+}
 `;
 
-const categoryPathMap = {
-    ring: 'rings',
-    bracelet: 'bracelets',
-    earring: 'earrings',
-    hairclip: 'hairclips',
-    necklace: 'necklaces',
-};
-
-function interleaveByCategory(products, categories) {
-    const grouped = {};
-    categories.forEach((cat) => {
-        grouped[cat] = products.filter((p) => p.category === cat);
-    });
-
-    const maxLength = Math.max(...Object.values(grouped).map((arr) => arr.length));
-    const interleaved = [];
-
-    for (let i = 0; i < maxLength; i++) {
-        for (let cat of categories) {
-            if (grouped[cat][i]) {
-                interleaved.push(grouped[cat][i]);
-            }
-        }
-    }
-
-    return interleaved;
-}
-
-const AllProductsGallery = () => {
+const CollectionPage = () => {
     const location = useLocation();
-    const lng = location.pathname.split('/')[1];
+    const { collectionSlug } = useParams();
+    const lng = location.pathname.split("/")[1];
     const { t } = useTranslation();
     const { setProduct, filteredProduct } = useFilteredProduct();
     const { user } = useContext(UserContext);
     const { addToCart, removeFromCart, isCartItem, fetchCart, cart } = useContext(CartContext);
     const { toggleWishlist, isWishlistItem, fetchWishlist } = useContext(WishlistContext);
     const [loading, setLoading] = useState(true);
+    const [collectionName, setCollectionName] = useState("");
     const [visibleCount, setVisibleCount] = useState(15);
     const [addedToCart, setAddedToCart] = useState({});
     const [isLoginPromptOpen, setIsLoginPromptOpen] = useState(false);
-    const [loginPromptType, setLoginPromptType] = useState('');
+    const [loginPromptType, setLoginPromptType] = useState("");
     const [showSizeModal, setShowSizeModal] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [selectedSize, setSelectedSize] = useState('');
     const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
     const [cartLoading, setCartLoading] = useState(null);
+    const [notFound, setNotFound] = useState(false);
     const API_URL = import.meta.env.VITE_API_URL;
     const loginPromptRef = useRef(null);
     const sizeGuideRef = useRef(null);
     const sizeModalRef = useRef(null);
 
-    const CATEGORIES = ['necklace', 'ring', 'earring', 'hairclip', 'bracelet'];
+    // Number formatter for locale-specific price display
+    const numberFormatter = new Intl.NumberFormat(lng === "ru" ? "ru-RU" : lng === "am" ? "hy-AM" : "en-US", {
+        style: "decimal",
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+    });
+
     const skeletons = Array(8).fill(null);
 
     const ringSizes = [
@@ -174,26 +155,47 @@ const AllProductsGallery = () => {
         },
     ];
 
-    const numberFormatter = new Intl.NumberFormat(lng === "ru" ? "ru-RU" : lng === "am" ? "hy-AM" : "en-US", {
-        style: "decimal",
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-    });
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }, [collectionSlug]);
 
     useEffect(() => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, []);
+        const getCollectionProducts = async () => {
+            if (!collectionSlug) return;
 
-    useEffect(() => {
-        const getAllProducts = async () => {
             try {
                 setLoading(true);
+                setNotFound(false);
+
                 const response = await fetch(`${API_URL}/api/products`);
+
                 if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
+                    throw new Error(`Products API error! Status: ${response.status}`);
                 }
-                const data = await response.json();
-                setProduct(data);
+
+                const productsData = await response.json();
+
+                // Convert slug back to collection name (replace dashes with spaces and capitalize)
+                const collectionFromSlug = collectionSlug
+                    .split('-')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(' ');
+
+                // Filter products by collection name (case-insensitive)
+                const collectionProducts = productsData.filter(product =>
+                    product.productCollection &&
+                    product.productCollection.trim().toLowerCase() === collectionFromSlug.toLowerCase()
+                );
+
+                if (collectionProducts.length === 0) {
+                    setNotFound(true);
+                    setProduct([]);
+                    setCollectionName(collectionFromSlug);
+                } else {
+                    // Use the actual collection name from the first product
+                    setCollectionName(collectionProducts[0].productCollection.trim());
+                    setProduct(collectionProducts);
+                }
 
                 if (user?.id) {
                     const [cartItems] = await Promise.all([fetchCart(), fetchWishlist()]);
@@ -202,16 +204,18 @@ const AllProductsGallery = () => {
                     setAddedToCart({});
                 }
             } catch (error) {
-                console.error('AllProducts.jsx getAllProducts error:', error.message);
-                toast.error(t('allProductsGallery.fetchError', { defaultValue: 'Error fetching products' }));
+                console.error("CollectionPage.jsx getCollectionProducts error:", error.message);
+                toast.error(t('collection.loadError', { defaultValue: "Error fetching collection products" }));
+                setProduct([]);
+                setNotFound(true);
                 setAddedToCart({});
             } finally {
                 setLoading(false);
             }
         };
 
-        getAllProducts();
-    }, [setProduct, user, API_URL, t, fetchCart, fetchWishlist]);
+        getCollectionProducts();
+    }, [collectionSlug, setProduct, user, API_URL, t, fetchCart, fetchWishlist]);
 
     useEffect(() => {
         const handleCartUpdate = async () => {
@@ -272,16 +276,14 @@ const AllProductsGallery = () => {
 
     const handleCartToggle = async (product) => {
         if (!user?.id) {
-            setLoginPromptType('cart');
+            setLoginPromptType("cart");
             setIsLoginPromptOpen(true);
             return;
         }
 
-        // Check if item is already in cart
         const existingCartItem = cart.find(item => item.id === product._id);
 
         if (product.category === 'ring' && !selectedSize && !existingCartItem) {
-            // Opening modal for adding new ring item
             setSelectedProduct(product);
             setShowSizeModal(true);
             return;
@@ -290,24 +292,22 @@ const AllProductsGallery = () => {
         try {
             setCartLoading(product._id);
             if (existingCartItem) {
-                // Removing existing item - use the size from the cart item
                 const sizeToRemove = product.category === 'ring' ? existingCartItem.size : undefined;
                 await removeFromCart(product._id, sizeToRemove);
                 setAddedToCart((prev) => ({ ...prev, [product._id]: false }));
-                toast.info(t('productsGallery.removedFromCart', { defaultValue: `Removed from cart` }));
+                toast.info(t('allProductsGallery.removedFromCart', { defaultValue: `Removed from cart` }));
             } else {
-                // Adding new item
                 const sizeToAdd = product.category === 'ring' ? selectedSize : undefined;
                 await addToCart(product._id, 1, sizeToAdd);
                 setAddedToCart((prev) => ({ ...prev, [product._id]: true }));
                 setShowSizeModal(false);
                 setSelectedSize('');
                 setSelectedProduct(null);
-                toast.success(t('productsGallery.addedToCart', { defaultValue: `Added to cart!` }));
+                toast.success(t('allProductsGallery.addedToCart', { defaultValue: `Added to cart!` }));
             }
         } catch (error) {
-            console.error('AllProducts.jsx handleCartToggle error:', error.message);
-            toast.error(t('productsGallery.cartError', { defaultValue: 'Error updating cart' }));
+            console.error('CollectionPage.jsx handleCartToggle error:', error.message);
+            toast.error(t('productsGallery.cartError', { defaultValue: "Error updating cart" }));
         } finally {
             setCartLoading(null);
         }
@@ -315,15 +315,15 @@ const AllProductsGallery = () => {
 
     const handleWishlistToggle = async (product) => {
         if (!user?.id) {
-            setLoginPromptType('wishlist');
+            setLoginPromptType("wishlist");
             setIsLoginPromptOpen(true);
             return;
         }
         try {
             await toggleWishlist(product);
         } catch (error) {
-            console.error('AllProducts.jsx handleWishlistToggle error:', error.message);
-            toast.error(t('productsGallery.wishlistError', { defaultValue: 'Error updating wishlist' }));
+            console.error('CollectionPage.jsx handleWishlistToggle error:', error.message);
+            toast.error(t('productsGallery.wishlistError', { defaultValue: "Error updating wishlist" }));
         }
     };
 
@@ -337,15 +337,47 @@ const AllProductsGallery = () => {
         setSelectedProduct(null);
     };
 
-    const interleavedProducts = interleaveByCategory(filteredProduct || [], CATEGORIES);
-    const visibleProducts = interleavedProducts.slice(0, visibleCount);
+    const visibleProducts = filteredProduct.slice(0, visibleCount);
+
+    const handleLoadMore = () => {
+        setVisibleCount(prev => prev + 15);
+    };
+
+    if (notFound && !loading) {
+        return (
+            <div className="w-full">
+                <div className="w-[90%] mx-auto py-[100px] text-center">
+                    <h2 className="font-[Against] text-[30px] text-[#0e0e53] mb-4">
+                        {t('collection.notFound', { defaultValue: 'Collection Not Found' })}
+                    </h2>
+                    <p className="text-gray-600 mb-8">
+                        {t('collection.notFoundMessage', {
+                            defaultValue: `The collection "${collectionName}" was not found or has no products.`
+                        })}
+                    </p>
+                    <Link
+                        to={`/${lng}`}
+                        className="inline-block px-6 py-3 bg-[#0e0e53] text-white rounded-lg hover:bg-[#213547] transition-colors"
+                    >
+                        {t('collection.backToHome', { defaultValue: 'Back to Home' })}
+                    </Link>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="w-full">
             <style>{toastStyles}</style>
             <div className="w-[90%] flex flex-col justify-center items-center mx-auto">
                 <div className="my-[30px] flex flex-col justify-center items-center text-[#0e0e53] text-center font-[Against] font-light">
-                    <h2 className="text-[30px]">{t('allProductsGallery.title')}</h2>
+                    {loading ? (
+                        <div className="h-[36px] w-[200px] bg-gray-300 rounded-md animate-pulse"></div>
+                    ) : (
+                        <h2 className="font-[Against] text-[30px]">
+                            {collectionName.toUpperCase()}
+                        </h2>
+                    )}
                 </div>
 
                 <Filter />
@@ -353,24 +385,31 @@ const AllProductsGallery = () => {
                 <div className="mt-[50px] mb-[30px] w-full flex justify-center items-center flex-wrap gap-[50px]">
                     {loading ? (
                         skeletons.map((_, index) => (
-                            <div key={`skeleton-${index}`} className="w-[280px] h-[280px] flex flex-col items-center animate-pulse">
+                            <div
+                                key={`skeleton-${index}`}
+                                className="w-[280px] h-[280px] flex flex-col items-center animate-pulse"
+                            >
                                 <div className="w-[280px] h-[180px] bg-gray-300 rounded-md"></div>
                                 <div className="w-full flex flex-col items-start justify-start pl-[30px] mt-2">
                                     <div className="h-[20px] w-[150px] bg-gray-300 rounded mb-2"></div>
-                                    <div className="h-[15px] w-[80px] bg-gray-300 rounded mb-1"></div>
-                                    <div className="h-[13px] w-[60px] bg-gray-300 rounded"></div>
+                                    <div className="h-[15px] w-[80px] bg-gray-300 rounded"></div>
                                 </div>
                             </div>
                         ))
                     ) : (
-                        visibleProducts.map(({ _id, image, name, price, category }, i) => {
-                            const pathCategory = categoryPathMap[category] || `${category}s`;
+                        visibleProducts.map(({ _id, image, name, price, category, productCollection }, i) => {
                             const isInCart = isCartItem(_id);
                             const isInWishlist = isWishlistItem(_id);
 
                             return (
-                                <div key={`${_id}-${i}`} className="w-[280px] h-[280px] flex flex-col items-center relative">
-                                    <Link to={`/${lng}/${pathCategory}/${_id}`} state={{ from: `/${lng}/all-products` }}>
+                                <div
+                                    key={`${_id}-${i}`}
+                                    className="w-[280px] h-[280px] flex flex-col items-center relative"
+                                >
+                                    <Link
+                                        to={`/${lng}/${category ? (category.toLowerCase() === 'ring' ? 'rings' : `${category.toLowerCase()}s`) : 'products'}/${_id}`}
+                                        state={{ from: `/${lng}/collection/${collectionSlug}` }}
+                                    >
                                         <img
                                             src={`${image}`}
                                             alt={name || 'image'}
@@ -381,7 +420,7 @@ const AllProductsGallery = () => {
                                         <div className="w-full flex flex-col text-left mt-2">
                                             <span className="text-[20px] font-bold text-[#213547]">{name}</span>
                                             <span className="text-[15px] text-gray-600">
-                                                {numberFormatter.format(price)} {t("checkout.currency", { defaultValue: "AMD" })}
+                                                {numberFormatter.format(Number(price))} {t("collection.currency", { defaultValue: "AMD" })}
                                             </span>
                                             <span className="text-[13px] text-gray-500 italic">{category}</span>
                                         </div>
@@ -394,9 +433,7 @@ const AllProductsGallery = () => {
                                                 {cartLoading === _id ? (
                                                     <div className="w-[20px] h-[20px] border-4 border-[#0e0e53] border-t-transparent rounded-full animate-spin"></div>
                                                 ) : (
-                                                    <i
-                                                        className={`bi ${isInCart ? 'bi-cart-check-fill text-[#0e0e53]' : 'bi-cart text-gray-400'} text-[20px] hover:text-gray-200 transition-all`}
-                                                    ></i>
+                                                    <i className={`bi ${isInCart ? 'bi-cart-check-fill text-[#0e0e53]' : 'bi-cart text-gray-400'} text-[20px] hover:text-gray-200 transition-all`}></i>
                                                 )}
                                             </span>
                                             <span
@@ -414,15 +451,16 @@ const AllProductsGallery = () => {
                     )}
                 </div>
 
-                {!loading && visibleCount < interleavedProducts.length && (
+                {!loading && visibleCount < filteredProduct.length && (
                     <button
-                        onClick={() => setVisibleCount((prev) => prev + 15)}
+                        onClick={handleLoadMore}
                         className="mb-[50px] px-6 py-2 border border-[#0e0e53] text-[#0e0e53] hover:bg-[#0e0e53] hover:text-white transition-all rounded"
                     >
-                        {t('productsGallery.loadMore') || 'Load More'}
+                        {t('productsGallery.loadMore', { defaultValue: 'Load More' })}
                     </button>
                 )}
 
+                {/* Login Prompt Modal */}
                 <AnimatePresence>
                     {isLoginPromptOpen && (
                         <motion.div
@@ -436,22 +474,24 @@ const AllProductsGallery = () => {
                             <div className="bg-white rounded-[8px] p-[10px] sm:p-[15px] md:p-[20px] w-[280px] sm:w-[400px] md:w-[500px] flex flex-col items-center justify-center gap-[10px] sm:gap-[15px] md:gap-[20px] shadow-sm sm:shadow-md">
                                 <i className="bi bi-lock text-[30px] sm:text-[35px] md:text-[40px] text-[#0e0e53]" />
                                 <h2 className="text-[18px] sm:text-[22px] md:text-[25px] text-[#0e0e53]">
-                                    {t(`productsGallery.loginPrompt.${loginPromptType}`)}
+                                    {t(`productsGallery.loginPrompt.${loginPromptType}`, { defaultValue: loginPromptType === 'cart' ? 'Please login to add to cart' : 'Please login to add to wishlist' })}
                                 </h2>
                                 <Link to={`/${lng}/login`}>
                                     <button className="w-[140px] sm:w-[180px] md:w-[200px] h-[30px] sm:h-[35px] md:h-[40px] bg-[#f7f7f7] border-none rounded-[6px] text-[#0e0e53] font-semibold transition duration-300 hover:bg-[#0e0e53] hover:text-white text-[14px] sm:text-[15px] md:text-[16px]">
-                                        {t('productsGallery.loginButton')}
+                                        {t('productsGallery.loginButton', { defaultValue: 'Login' })}
                                     </button>
                                 </Link>
                                 <button
                                     onClick={() => setIsLoginPromptOpen(false)}
                                     className="text-[#0e0e53] hover:text-[#213547] text-[14px] sm:text-[15px] md:text-[16px]"
                                 >
-                                    {t('productsGallery.cancel')}
+                                    {t('productsGallery.cancel', { defaultValue: 'Cancel' })}
                                 </button>
                             </div>
                         </motion.div>
                     )}
+
+                    {/* Size Selection Modal */}
                     {showSizeModal && selectedProduct && (
                         <motion.div
                             ref={sizeModalRef}
@@ -461,9 +501,7 @@ const AllProductsGallery = () => {
                             transition={{ duration: 0.3 }}
                             className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
                         >
-                            <div
-                                className="bg-[#efeeee] rounded-[8px] p-[10px] sm:p-[15px] md:p-[20px] w-[280px] sm:w-[400px] md:w-[500px] flex items-center justify-center flex-col gap-[10px] sm:gap-[15px] md:gap-[20px] shadow-sm sm:shadow-md"
-                            >
+                            <div className="bg-[#efeeee] rounded-[8px] p-[10px] sm:p-[15px] md:p-[20px] w-[280px] sm:w-[400px] md:w-[500px] flex items-center justify-center flex-col gap-[10px] sm:gap-[15px] md:gap-[20px] shadow-sm sm:shadow-md">
                                 <h3 className="text-center text-[18px] sm:text-[22px] md:text-[25px] font-semibold text-[#0a0a39]">
                                     {t('wishlist.selectRingSize')} - {selectedProduct.name}
                                 </h3>
@@ -510,6 +548,8 @@ const AllProductsGallery = () => {
                             </div>
                         </motion.div>
                     )}
+
+                    {/* Size Guide Modal */}
                     {isSizeGuideOpen && (
                         <motion.div
                             key="size-guide"
@@ -523,7 +563,6 @@ const AllProductsGallery = () => {
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    console.log('AllProducts.jsx size guide closing');
                                     setIsSizeGuideOpen(false);
                                 }}
                                 className="text-[20px] sm:text-[22px] md:text-[24px] w-full text-right text-[#0a0a39] hover:text-[#213547] mb-[10px] sm:mb-[15px] md:mb-[20px]"
@@ -587,4 +626,4 @@ const AllProductsGallery = () => {
     );
 };
 
-export default AllProductsGallery;
+export default CollectionPage;

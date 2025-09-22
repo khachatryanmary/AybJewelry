@@ -293,7 +293,7 @@
                     const sizeToRemove = product.category === 'ring' ? existingCartItem.size : undefined;
                     await removeFromCart(product._id, sizeToRemove);
                     setAddedToCart((prev) => ({ ...prev, [product._id]: false }));
-                    toast.info(t('allProductsGallery.removedFromCart', { defaultValue: `${product.name} removed from cart` }));
+                    toast.info(t('allProductsGallery.removedFromCart', { defaultValue: `Removed from cart` }));
                 } else {
                     const sizeToAdd = product.category === 'ring' ? selectedSize : undefined;
                     await addToCart(product._id, 1, sizeToAdd);
@@ -301,7 +301,7 @@
                     setShowSizeModal(false);
                     setSelectedSize('');
                     setSelectedProduct(null);
-                    toast.success(t('allProductsGallery.addedToCart', { defaultValue: `${product.name} added to cart!` }));
+                    toast.success(t('allProductsGallery.addedToCart', { defaultValue: `Added to cart!` }));
                 }
             } catch (error) {
                 console.error('FeaturedCollection.jsx handleCartToggle error:', error.message);

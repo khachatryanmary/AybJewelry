@@ -87,6 +87,8 @@ const NecklaceGallery = () => {
     }, []);
 
     useEffect(() => {
+        // Update the getNecklaces function in NecklaceGallery.jsx:
+
         const getNecklaces = async () => {
             try {
                 setLoading(true);
@@ -95,7 +97,14 @@ const NecklaceGallery = () => {
                     throw new Error(`HTTP error! Status: ${res.status}`);
                 }
                 const data = await res.json();
-                setProduct(data);
+
+                // Sort to ensure newest products appear first (same as admin panel)
+                const sortedData = data.sort((a, b) => {
+                    // Using _id comparison (works with MongoDB ObjectIds)
+                    return b._id.localeCompare(a._id);
+                });
+
+                setProduct(sortedData);
 
                 if (user?.id) {
                     console.log("NecklaceGallery.jsx current user:", user);
@@ -115,8 +124,7 @@ const NecklaceGallery = () => {
                 setLoading(false);
             }
         };
-
-        getNecklaces();
+        getNecklaces()
     }, [setProduct, user, API_URL, t, fetchCart, fetchWishlist]);
 
     useEffect(() => {
@@ -173,11 +181,11 @@ const NecklaceGallery = () => {
             if (isCartItem(product._id)) {
                 await removeFromCart(product._id);
                 setAddedToCart(prev => ({ ...prev, [product._id]: false }));
-                toast.info(t('productsGallery.removedFromCart', { defaultValue: `${product.name} removed from cart` }));
+                toast.info(t('productsGallery.removedFromCart', { defaultValue: `Removed from cart` }));
             } else {
                 await addToCart(product._id, 1);
                 setAddedToCart(prev => ({ ...prev, [product._id]: true }));
-                toast.success(t('productsGallery.addedToCart', { defaultValue: `${product.name} added to cart!` }));
+                toast.success(t('productsGallery.addedToCart', { defaultValue: `Added to cart!` }));
             }
         } catch (error) {
             console.error("NecklaceGallery.jsx handleCartToggle error:", error.message);

@@ -178,10 +178,10 @@ const HairclipDetail = () => {
             setCartLoading(true);
             if (isCartItem(hairclip._id)) {
                 await removeFromCart(hairclip._id, null);
-                toast.info(t('productsDetail.removedFromCart', { defaultValue: `${hairclip.name} removed from cart` }));
+                toast.info(t('productsDetail.removedFromCart', { defaultValue: `Removed from cart` }));
             } else {
                 await addToCart(hairclip._id, quantity, null);
-                toast.success(t('productsDetail.addedToCart', { defaultValue: `${hairclip.name} added to cart!` }));
+                toast.success(t('productsDetail.addedToCart', { defaultValue: `Added to cart!` }));
             }
         } catch (error) {
             console.error("HairclipDetail.jsx handleCartToggle error:", error.message);

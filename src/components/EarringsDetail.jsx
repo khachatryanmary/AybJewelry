@@ -178,10 +178,10 @@ const EarringDetail = () => {
             setCartLoading(true);
             if (isCartItem(earring._id)) {
                 await removeFromCart(earring._id, null);
-                toast.info(t('productsDetail.removedFromCart', { defaultValue: `${earring.name} removed from cart` }));
+                toast.info(t('productsDetail.removedFromCart', { defaultValue: `Removed from cart` }));
             } else {
                 await addToCart(earring._id, quantity, null);
-                toast.success(t('earringproductsDetailDetail.addedToCart', { defaultValue: `${earring.name} added to cart!` }));
+                toast.success(t('productsDetail.addedToCart', { defaultValue: `Added to cart!` }));
             }
         } catch (error) {
             console.error("EarringDetail.jsx handleCartToggle error:", error.message);

@@ -178,10 +178,10 @@ const BraceletDetail = () => {
             setCartLoading(true);
             if (isCartItem(bracelet._id)) {
                 await removeFromCart(bracelet._id, null);
-                toast.info(t('productsDetail.removedFromCart', { defaultValue: `${bracelet.name} removed from cart` }));
+                toast.info(t('productsDetail.removedFromCart', { defaultValue: `Removed from cart` }));
             } else {
                 await addToCart(bracelet._id, quantity, null);
-                toast.success(t('productsDetail.addedToCart', { defaultValue: `${bracelet.name} added to cart!` }));
+                toast.success(t('productsDetail.addedToCart', { defaultValue: `Added to cart!` }));
             }
         } catch (error) {
             console.error("productsDetail.jsx handleCartToggle error:", error.message);

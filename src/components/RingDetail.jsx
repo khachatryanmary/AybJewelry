@@ -259,7 +259,7 @@ const RingDetail = () => {
                 setSelectedSize("");
             } else {
                 await addToCart(ring._id, quantity, selectedSize);
-                toast.success(t('productsDetail.addedToCart', { defaultValue: `${ring.name} added to cart!` }));
+                toast.success(t('productsDetail.addedToCart', { defaultValue: `Added to cart!` }));
                 setShowSizeModal(false);
                 setSelectedSize("");
             }

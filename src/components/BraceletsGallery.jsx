@@ -178,7 +178,7 @@ const BraceletGallery = () => {
             } else {
                 await addToCart(product._id, 1, null);
                 setAddedToCart(prev => ({ ...prev, [product._id]: true }));
-                toast.success(t('productsGallery.addedToCart', { defaultValue: `${product.name} added to cart!` }));
+                toast.success(t('productsGallery.addedToCart', { defaultValue: `Added to cart!` }));
             }
         } catch (error) {
             console.error("BraceletGallery.jsx handleCartToggle error:", error.message);

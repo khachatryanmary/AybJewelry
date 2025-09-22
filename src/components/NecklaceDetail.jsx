@@ -168,10 +168,10 @@ const NecklaceDetail = () => {
       setCartLoading(true);
       if (isCartItem(necklace._id)) {
         await removeFromCart(necklace._id);
-        toast.info(t('productsDetail.removedFromCart', { defaultValue: `${necklace.name} removed from cart` }));
+        toast.info(t('productsDetail.removedFromCart', { defaultValue: `Removed from cart` }));
       } else {
         await addToCart(necklace._id, quantity);
-        toast.success(t('productsDetail.addedToCart', { defaultValue: `${necklace.name} added to cart!` }));
+        toast.success(t('productsDetail.addedToCart', { defaultValue: `Added to cart!` }));
       }
     } catch (error) {
       console.error("NecklaceDetail.jsx handleCartToggle error:", error.message);

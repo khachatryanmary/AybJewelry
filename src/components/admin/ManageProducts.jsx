@@ -313,6 +313,9 @@ const ManageProducts = () => {
                 setProducts(products.map(p => (p._id === editingId ? response.data : p)));
                 setEditingId(null);
                 alert(t('admin.products.updateSuccess', { defaultValue: 'Product updated successfully!' }));
+                if (form.productCollection && !collections.includes(form.productCollection)) {
+                    setCollections(prev => [...prev, form.productCollection]);
+                }
             } else {
                 const response = await axios.post(`${API_URL}/api/products`, productData, {
                     headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
@@ -336,7 +339,7 @@ const ManageProducts = () => {
             price: '',
             category: '',
             image: '',
-            productCollection: collections[0] || '',
+            productCollection: '',
             images: [],
             alt: '',
             description: '',
@@ -513,16 +516,22 @@ const ManageProducts = () => {
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Collection
                             </label>
-                            <select
+                            <input
+                                type="text"
                                 value={form.productCollection}
                                 onChange={e => setForm({ ...form, productCollection: e.target.value })}
+                                placeholder="Enter collection name or select existing"
+                                list="collections-list"
                                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            >
-                                <option value="">Select Collection</option>
+                            />
+                            <datalist id="collections-list">
                                 {collections.map(collection => (
-                                    <option key={collection} value={collection}>{collection}</option>
+                                    <option key={collection} value={collection} />
                                 ))}
-                            </select>
+                            </datalist>
+                            <p className="text-xs text-gray-500 mt-1">
+                                Type a custom collection name or select from existing ones
+                            </p>
                         </div>
 
                         <div>

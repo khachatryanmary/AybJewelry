@@ -174,11 +174,11 @@ const EarringGallery = () => {
             if (isCartItem(product._id)) {
                 await removeFromCart(product._id, null);
                 setAddedToCart(prev => ({ ...prev, [product._id]: false }));
-                toast.info(t('productsGallery.removedFromCart', { defaultValue: `${product.name} removed from cart` }));
+                toast.info(t('productsGallery.removedFromCart', { defaultValue: `Removed from cart` }));
             } else {
                 await addToCart(product._id, 1, null);
                 setAddedToCart(prev => ({ ...prev, [product._id]: true }));
-                toast.success(t('productsGallery.addedToCart', { defaultValue: `${product.name} added to cart!` }));
+                toast.success(t('productsGallery.addedToCart', { defaultValue: `Added to cart!` }));
             }
         } catch (error) {
             console.error("EarringGallery.jsx handleCartToggle error:", error.message);
