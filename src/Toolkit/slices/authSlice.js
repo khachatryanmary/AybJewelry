@@ -1,3 +1,5 @@
+// src/Toolkit/slices/authSlice.js
+
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
@@ -59,6 +61,25 @@ export const forgotPassword = createAsyncThunk(
     }
 );
 
+// Reset Password (NEW - This was missing!)
+export const resetPassword = createAsyncThunk(
+    "auth/resetPassword",
+    async ({ token, password }, thunkAPI) => {
+        try {
+            const { data } = await axios.post(
+                `${API_URL}/api/auth/reset-password/${token}`,
+                { password }
+            );
+            return data;
+        } catch (err) {
+            const message =
+                err.response?.data?.message ||
+                "Failed to reset password. Link may be invalid or expired.";
+            return thunkAPI.rejectWithValue(message);
+        }
+    }
+);
+
 const authSlice = createSlice({
     name: "auth",
     initialState: {
@@ -76,21 +97,26 @@ const authSlice = createSlice({
             state.user = action.payload;
             localStorage.setItem("loggedInUser", JSON.stringify(action.payload));
         },
+        clearError: (state) => {
+            state.error = null;
+        },
     },
     extraReducers: (builder) => {
         builder
+            // Register
             .addCase(registerUser.pending, (state) => {
                 state.loading = true;
                 state.error = null;
             })
             .addCase(registerUser.fulfilled, (state) => {
                 state.loading = false;
-                state.error = null;
             })
             .addCase(registerUser.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
             })
+
+            // Login
             .addCase(loginUser.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -98,26 +124,40 @@ const authSlice = createSlice({
             .addCase(loginUser.fulfilled, (state, action) => {
                 state.loading = false;
                 state.user = action.payload;
-                state.error = null;
             })
             .addCase(loginUser.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
             })
+
+            // Forgot Password
             .addCase(forgotPassword.pending, (state) => {
                 state.loading = true;
                 state.error = null;
             })
             .addCase(forgotPassword.fulfilled, (state) => {
                 state.loading = false;
-                state.error = null;
             })
             .addCase(forgotPassword.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+
+            // Reset Password (NEW!)
+            .addCase(resetPassword.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(resetPassword.fulfilled, (state) => {
+                state.loading = false;
+                state.error = null;
+            })
+            .addCase(resetPassword.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
             });
     },
 });
 
-export const { logout, setUser } = authSlice.actions;
+export const { logout, setUser, clearError } = authSlice.actions;
 export default authSlice.reducer;

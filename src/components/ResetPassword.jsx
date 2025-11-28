@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
-import axios from "axios";
+import { useSelector, useDispatch } from "react-redux";
 
 const toastStyles = `
   @media (max-width: 639px) {
@@ -53,23 +53,23 @@ const ResetPassword = () => {
     const { token, lng } = useParams();
     const { t } = useTranslation();
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+
     const [password, setPassword] = useState("");
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
+    const { loading, error } = useSelector((state) => state.auth);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true);
-        try {
-            const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/reset-password/${token}`, { password });
-            toast.success(t("resetPassword.success") || "Password reset successful!");
-            navigate(`/${lng}/login`);
-        } catch (err) {
-            setError(err.response?.data?.message || t("resetPassword.error") || "Failed to reset password.");
-            toast.error(err.response?.data?.message || t("resetPassword.error") || "Failed to reset password.");
-        } finally {
-            setLoading(false);
-        }
+
+        dispatch(resetPassword({ token, password })).then((res) => {
+            if (res.meta.requestStatus === "fulfilled") {
+                toast.success(t("resetPassword.success") || "Password reset successful!");
+                navigate(`/${lng}/login`);
+            } else {
+                const msg = res.payload || t("resetPassword.error") || "Failed to reset password.";
+                toast.error(msg);
+            }
+        });
     };
 
     return (

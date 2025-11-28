@@ -20,6 +20,20 @@ const AdminOverview = () => {
 
     const API_URL = import.meta.env.VITE_API_URL;
 
+    const lng = React.useMemo(() => {
+        const pathSegments = location.pathname.split('/').filter(Boolean);
+        const detectedLng = pathSegments[0];
+
+        console.log('🌐 Path segments:', pathSegments);
+        console.log('🌐 Detected language:', detectedLng);
+
+        // Validate if it's a supported language
+        if (['am', 'ru', 'en'].includes(detectedLng)) {
+            return detectedLng;
+        }
+        return 'en'; // fallback
+    }, [location.pathname]);
+
     useEffect(() => {
         fetchDashboardData();
     }, []);
@@ -258,19 +272,19 @@ const AdminOverview = () => {
                         <h3 className="text-lg font-semibold">Quick Actions</h3>
                     </div>
                     <div className="p-6 space-y-4 flex flex-col">
-                        <Link to="/admin/products"
+                        <Link to={`/${lng}/admin/products`}
                             className="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition-colors">
                             Add New Product
                         </Link>
-                        <Link to="/admin/collections"
+                        <Link to={`/${lng}/admin/collections`}
                             className="w-full bg-green-600 text-white p-3 rounded-lg hover:bg-green-700 transition-colors">
                             Create Collection
                         </Link>
-                        <Link to="/admin/orders"
+                        <Link to={`/${lng}/admin/orders`}
                             className="w-full bg-purple-600 text-white p-3 rounded-lg hover:bg-purple-700 transition-colors">
                             View All Orders
                         </Link>
-                        <Link to="/admin/categories"
+                        <Link to={`/${lng}/admin/categories`}
                             className="w-full bg-yellow-600 text-white p-3 rounded-lg hover:bg-yellow-700 transition-colors">
                             Manage Categories
                         </Link>
